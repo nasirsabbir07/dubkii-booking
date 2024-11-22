@@ -10,7 +10,6 @@ $wpdb->query("DROP TABLE IF EXISTS $table_name_courses");
 $sql_courses = "CREATE TABLE $table_name_courses (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     course_name varchar(100) NOT NULL,
-    price float NOT NULL,
     PRIMARY KEY (id)
 ) $charset_collate;";
 
@@ -59,10 +58,21 @@ $sql = "CREATE TABLE $table_name (
     FOREIGN KEY (course_id) REFERENCES $table_name_courses(id) ON DELETE CASCADE
 ) $charset_collate;";
 
+$table_name_prices = $wpdb->prefix . 'dubkii_courses_prices';
+$sql_prices = "CREATE TABLE $table_name_prices (
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    course_id mediumint(9) NOT NULL,
+    duration_weeks int NOT NULL, 
+    price float NOT NULL,
+    PRIMARY KEY(id),
+    FOREIGN KEY (course_id) REFERENCES $table_name_courses(id) ON DELETE CASCADE
+) $charset_collate;";
+
 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 // Run the SQL queries to create the tables
 dbDelta($sql_courses);
 dbDelta($sql_durations);
 dbDelta($sql_start_dates);
 dbDelta($sql);
+dbDelta($sql_prices);
 ?>
