@@ -14,7 +14,7 @@ function create_payment_intent($amount, $email) {
 
         $retrieved_intent = \Stripe\PaymentIntent::retrieve($payment_intent->id);
         if($retrieved_intent->status === 'succeeded'){
-            return retrieved_intent;
+            return $retrieved_intent;
         }
         return $payment_intent;
     } catch (\Stripe\Exception\ApiErrorException $e) {
