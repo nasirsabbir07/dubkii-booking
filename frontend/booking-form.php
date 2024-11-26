@@ -43,6 +43,7 @@
                 <input type="text" id="name" name="name" required>
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
+                <div id="email-message" style="margin-top: 5px; color: green; display: none;"></div>
                 <label for="dob">Date of birth:</label>
                 <input type="date" id="dob" name="dob" required>
                 <label for="address">Address:</label>
