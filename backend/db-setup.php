@@ -50,22 +50,25 @@ $sql = "CREATE TABLE $table_name (
     nationality varchar(50) NOT NULL,
     country varchar(50) NOT NULL,
     start_date date NOT NULL,
-    duration varchar(10) NOT NULL,
+    duration INT NOT NULL,
     english_level varchar(50) NOT NULL,
     has_transport tinyint(1) NOT NULL DEFAULT 0,
     transport_cost decimal(10, 2) DEFAULT 0.00,
+    total_amount decimal(10, 2) NOT NULL DEFAULT 0.00,
     PRIMARY KEY (id),
     FOREIGN KEY (course_id) REFERENCES $table_name_courses(id) ON DELETE CASCADE
 ) $charset_collate;";
 
 $table_name_prices = $wpdb->prefix . 'dubkii_courses_prices';
+
 $sql_prices = "CREATE TABLE $table_name_prices (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     course_id mediumint(9) NOT NULL,
-    duration_weeks int NOT NULL, 
+    duration_id mediumint(9) NOT NULL,
     price float NOT NULL,
     PRIMARY KEY(id),
-    FOREIGN KEY (course_id) REFERENCES $table_name_courses(id) ON DELETE CASCADE
+    FOREIGN KEY (course_id) REFERENCES $table_name_courses(id) ON DELETE CASCADE,
+    FOREIGN KEY (duration_id) REFERENCES $table_name_durations(id) ON DELETE CASCADE
 ) $charset_collate;";
 
 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
