@@ -106,8 +106,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     items.forEach((item) => {
       const option = document.createElement("option");
-      option.value = item.id || item;
-      option.textContent = item.name || item;
+      if (item.id && item.name) {
+        option.value = item.id;
+        option.textContent = item.name;
+      } else if (item.id && item.duration_weeks) {
+        option.value = item.id;
+        option.textContent = item.duration_weeks ? `${item.duration_weeks} Weeks` : item.name;
+        option.setAttribute("data-duration-weeks", item.duration_weeks);
+      } else {
+        option.value = item; // For start dates or other plain values
+        option.textContent = item;
+      }
       selectElement.appendChild(option);
     });
   }
@@ -121,15 +130,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const selectedCourse = allCourses.find((course) => course.id === selectedCourseId);
       if (selectedCourse) {
         document.getElementById("selected-course").textContent = selectedCourse.name;
-        selectedCourseCost = parseFloat(selectedCourse.price);
-        if (!isNaN(selectedCourseCost)) {
-          document.getElementById("course-price").textContent = selectedCourseCost.toFixed(2);
-        } else {
-          console.error("Course price is not a valid number:", selectedCourse.price);
-          document.getElementById("course-price").textContent = "0.00";
-        }
       }
       resetAccommodationFee();
+      await updatePriceOnSelection();
     } else {
       clearDropdown(startDateSelect); // Clear start date and duration dropdowns if no course is selected
       clearDropdown(durationSelect);
@@ -139,7 +142,51 @@ document.addEventListener("DOMContentLoaded", function () {
       selectedCourseCost = 0;
       resetAccommodationFee();
     }
-    updateTotalCost();
+    // updateTotalCost();
+  }
+
+  // Function to fetch price from the server and update the sidebar
+  async function updatePriceOnSelection() {
+    const selectedCourseId = courseSelect.value;
+    const selectedDurationId = durationSelect.value;
+
+    if (!selectedCourseId || !selectedDurationId) {
+      // Clear the price if no valid selection is made
+      document.getElementById("course-price").textContent = "0.00";
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("action", "get_course_price");
+      formData.append("course_id", selectedCourseId);
+      formData.append("duration_id", selectedDurationId);
+
+      const response = await fetch(bookingData.ajaxurl, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.success) {
+        const price = parseFloat(data.data.price);
+        document.getElementById("course-price").textContent = price.toFixed(2); // Update the price
+        updateTotalCost();
+      } else {
+        console.error("Error fetching price:", data.message);
+        document.getElementById("course-price").textContent = "0.00"; // Fallback if error
+        updateTotalCost();
+      }
+    } catch (error) {
+      console.error("Error fetching price:", error);
+      document.getElementById("course-price").textContent = "0.00"; // Fallback if error
+      updateTotalCost();
+    }
   }
 
   // Function to clear dropdown
@@ -149,6 +196,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Add event listener for course selection change
   courseSelect.addEventListener("change", handleCourseSelection);
+
+  // Event listener for duration selection change (if applicable)
+  durationSelect.addEventListener("change", updatePriceOnSelection);
 
   // Call the fetchOptions function to populate dropdowns
   fetchCourses();
@@ -223,6 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Registration fee
   const emailField = document.getElementById("email");
+  const emailMessage = document.getElementById("email-message"); // Element for showing messages
 
   function debounce(func, delay) {
     let timer;
@@ -253,10 +304,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const jsonData = await response.json();
         console.log(jsonData);
         if (jsonData.success) {
-          updateSidebarWithFee(jsonData.data.registrationFee);
+          const registrationFee = jsonData.data.registrationFee;
+          updateSidebarWithFee(registrationFee); // Update sidebar fee
+          updateEmailMessage(registrationFee); // Show/hide email message based on fee
         }
       } catch (error) {
         console.error("Email check failed:", error);
+        // Reset sidebar and hide message in case of an error
+        updateSidebarWithFee(0);
+        updateEmailMessage(null);
       }
     }
   }
@@ -265,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const debouncedCheckEmail = debounce(function () {
     const email = emailField.value.trim();
     checkEmail(email);
-  }, 2000); // Delay of 500ms (adjust as needed)
+  }, 1000); // Delay of 500ms (adjust as needed)
 
   // Add event listener to email input field
   emailField.addEventListener("input", debouncedCheckEmail);
@@ -278,9 +334,21 @@ document.addEventListener("DOMContentLoaded", function () {
     updateTotalCost();
   }
 
+  // Function to handle the email message
+  function updateEmailMessage(fee) {
+    const numericFee = parseFloat(fee);
+    if (numericFee === 0) {
+      emailMessage.style.display = "block";
+      emailMessage.textContent = "As a returning student, your registration fee has been waived!";
+    } else {
+      emailMessage.style.display = "none"; // Hide the message if fee isn't waived
+    }
+  }
+
   // Accommodation Fee
-  function calculateAccommodationFee(duration) {
-    return duration * accommodationFee;
+  function calculateAccommodationFee(durationWeeks) {
+    console.log(durationWeeks);
+    return durationWeeks * accommodationFee;
   }
 
   function updateSidebarWithAccommodationFee(duration) {
@@ -302,17 +370,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Trigger accommodation fee update on duration change
   durationSelect.addEventListener("change", function () {
-    const duration = parseFloat(this.value, 10) || 0; // Get duration value (in weeks)
-    updateSidebarWithAccommodationFee(duration);
+    const selectedOption = this.options[this.selectedIndex];
+    const durationWeeks = parseInt(selectedOption.getAttribute("data-duration-weeks"), 10);
+    updateSidebarWithAccommodationFee(durationWeeks);
   });
 
   function updateTotalCost() {
     const registrationFeeElem = document.querySelector("#registration-fee");
+    const coursePrice = parseFloat(document.querySelector("#course-price").textContent) || 0;
+    console.log(coursePrice);
     const accommodationFee =
       parseFloat(document.querySelector("#accommodation-fee").textContent) || 0;
     const transportCost = parseFloat(transportCostElement.textContent) || 0;
-    const fee = parseFloat(registrationFeeElem.textContent) || 0.0;
-    const totalCost = selectedCourseCost + transportCost + fee + accommodationFee;
+    const registrationFee = parseFloat(registrationFeeElem.textContent) || 0.0;
+    const totalCost = coursePrice + transportCost + registrationFee + accommodationFee;
     totalCostElem.textContent = totalCost.toFixed(2);
   }
 
@@ -355,10 +426,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const accommodationFeeElem = document.querySelector("#accommodation-fee");
     const accommodationFee = parseFloat(accommodationFeeElem.textContent) || 0;
+    const coursePriceElem = document.querySelector("#course-price");
+    const coursePrice = parseFloat(coursePriceElem.textContent) || 0;
     const totalAmount = parseFloat(totalCostElem.textContent) * 100;
     const formData = new FormData(form);
     formData.append("action", "handle_booking_submission"); // Ensure action is set
     formData.append("accommodationFee", accommodationFee);
+    formData.append("coursePrice", coursePrice);
     formData.append("totalAmount", totalAmount);
 
     try {
