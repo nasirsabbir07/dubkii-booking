@@ -31,7 +31,7 @@ function handle_booking_submission() {
     $country = sanitize_text_field($_POST['country']);
     $course_id = intval($_POST['course']);
     $start_date = sanitize_text_field($_POST['start_date']); // Ensure date format is correct (YYYY-MM-DD)
-    $duration = sanitize_text_field($_POST['duration']);
+    $duration_id = intval($_POST['duration']);
     $english_level = sanitize_text_field($_POST['english_level']);
     // Transport data
     $transport_option = sanitize_text_field($_POST['transport']);
@@ -42,20 +42,29 @@ function handle_booking_submission() {
     $has_transport = ($transport_option === 'yes') ? 1 : 0;
     $transport_cost = $has_transport ? 50.00 : 0.00; 
 
-    $course_exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}dubkii_courses WHERE id = %d", $course_id));
-    if ($course_exists == 0) {
-        wp_send_json_error(array('message' => 'Invalid course selected.'));
+    // Calculate total amount
+    // Validate duration ID
+    $duration_weeks = $wpdb->get_var($wpdb->prepare(
+        "SELECT duration_weeks FROM {$wpdb->prefix}dubkii_course_durations WHERE id = %d",$duration_id
+    ));
+
+    if ($duration_weeks == null) {
+        wp_send_json_error(['message' => 'Invalid duration selected.']);
         return;
     }
-
-    // Calculate total amount
-    $course_price = $wpdb->get_var($wpdb->prepare("SELECT price FROM {$wpdb->prefix}dubkii_courses WHERE id = %d", $course_id));
-
-    $course_name = $wpdb->get_var($wpdb->prepare("SELECT course_name FROM {$wpdb->prefix}dubkii_courses WHERE id = %d", $course_id));
+    $course_price = $wpdb->get_var($wpdb->prepare("SELECT price FROM {$wpdb->prefix}dubkii_courses_prices WHERE course_id = %d AND duration_id = %d", $course_id, $duration_id));
 
     if ($course_price === null) {
         wp_send_json_error(['message' => 'Error retrieving course price.']);
+        return;
     }
+
+    $course_name = $wpdb->get_var($wpdb->prepare("SELECT course_name FROM {$wpdb->prefix}dubkii_courses WHERE id = %d", $course_id));
+    if($course_name === null){
+        wp_send_json_error(array('message' => 'Invalid course selected.'));
+        return;
+    }
+    
     
     
     // Recalculate registration fee
@@ -85,10 +94,11 @@ function handle_booking_submission() {
         'country' => $country,
         'course_id' => $course_id,
         'start_date' => $start_date,
-        'duration' => $duration,
+        'duration' => $duration_weeks,
         'english_level' => $english_level,
         'has_transport' => $has_transport,
         'transport_cost' => $transport_cost,
+        'total_amount' => $total_amount,
     ]);
 
     
@@ -127,8 +137,7 @@ function handle_booking_submission() {
         wp_send_json_error(['message' => 'Failed to send confirmation email, but booking was successful.']);
         return;
     }
-    // Success response
-    // wp_send_json_success(['message' => 'Booking submitted successfully!']);
+
     exit;
 }
 
