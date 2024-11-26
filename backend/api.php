@@ -6,7 +6,7 @@ function get_course_data() {
 	$table_name_courses = $wpdb->prefix . 'dubkii_courses';
 
 	//Fetching all courses
-	$courses_results = $wpdb->get_results("SELECT id, course_name, price FROM $table_name_courses", ARRAY_A);
+	$courses_results = $wpdb->get_results("SELECT id, course_name FROM $table_name_courses", ARRAY_A);
     
     // Prepare arrays for dropdown options
 	$courses = [];
@@ -16,7 +16,6 @@ function get_course_data() {
         $courses[] = [
             'id' => $course['id'],
             'name' => $course['course_name'],
-            'price' => (float) $course['price'],
         ];
     }
 
@@ -41,7 +40,7 @@ function get_course_details(){
 
     // Fetch durations for the selected course
     $durations_results = $wpdb->get_results(
-        $wpdb->prepare("SELECT duration_weeks FROM $table_name_durations WHERE course_id = %d", $course_id),
+        $wpdb->prepare("SELECT id, duration_weeks FROM $table_name_durations WHERE course_id = %d", $course_id),
         ARRAY_A
     );
 
@@ -55,7 +54,10 @@ function get_course_details(){
 
     // Extracting durations
     foreach ($durations_results as $row) {
-        $durations[] = $row['duration_weeks'];
+        $durations[] = [
+            'id' => $row['id'],
+            'duration_weeks' => $row['duration_weeks'] 
+        ];
     }
 
 	// Send a JSON response back to the frontend
@@ -93,5 +95,39 @@ function check_email_exists() {
         'registrationFee' => number_format($registration_fee, 2),
     ));
 }
+
+add_action('wp_ajax_get_course_price', 'get_course_price');
+add_action('wp_ajax_nopriv_get_course_price', 'get_course_price');
+
+function get_course_price() {
+    // Check nonce for security
+    // if (!isset($_POST['nonce']) || !check_ajax_referer('custom_booking_form', 'nonce', false)) {
+    //     wp_send_json_error(['message' => 'Nonce verification failed.']);
+    // }
+
+    global $wpdb;
+
+    // Validate inputs
+    $course_id = intval($_POST['course_id']);
+    $duration_id = intval($_POST['duration_id']);
+
+    if (!$course_id || !$duration_id) {
+        wp_send_json_error(['message' => 'Invalid course or duration ID.']);
+    }
+
+    // Fetch price from the database
+    $price = $wpdb->get_var($wpdb->prepare(
+        "SELECT price FROM {$wpdb->prefix}dubkii_courses_prices WHERE course_id = %d AND duration_id = %d",
+        $course_id,
+        $duration_id
+    ));
+
+    if ($price === null) {
+        wp_send_json_error(['message' => 'Price not found for the selected course and duration.']);
+    }
+
+    wp_send_json_success(['price' => $price]);
+}
+
 
 ?>
