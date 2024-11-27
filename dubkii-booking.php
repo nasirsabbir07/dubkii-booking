@@ -45,6 +45,16 @@ function enqueue_booking_assets() {
 }
 add_action('wp_enqueue_scripts', 'enqueue_booking_assets');
 
+function enqueue_dubkii_admin_assets($hook){
+    // Enqueue admin-specific styles
+    if ($hook !== 'toplevel_page_dubkii-booking') {
+        return; // Bail out if not on the desired page
+    }
+    wp_enqueue_style('booking-admin-styles', plugins_url('frontend/assets/css/admin-styles.css', __FILE__),array(),
+    filemtime(plugin_dir_path(__FILE__) . 'frontend/assets/css/admin-styles.css') );
+}
+
+add_action('admin_enqueue_scripts','enqueue_dubkii_admin_assets');
 // Shortcode for booking form
 function booking_form_shortcode() {
     ob_start();
