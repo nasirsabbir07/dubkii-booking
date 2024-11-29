@@ -4,7 +4,6 @@ $charset_collate = $wpdb->get_charset_collate();
 
 $table_name_courses = $wpdb->prefix . 'dubkii_courses';
 // Drop the existing table if it exists
-$wpdb->query("DROP TABLE IF EXISTS $table_name_courses");
 
 // 1. Create Courses Table
 $sql_courses = "CREATE TABLE $table_name_courses (
@@ -71,6 +70,16 @@ $sql_prices = "CREATE TABLE $table_name_prices (
     FOREIGN KEY (duration_id) REFERENCES $table_name_durations(id) ON DELETE CASCADE
 ) $charset_collate;";
 
+$table_name_transportation_accommodation_fees = $wpdb->prefix . 'dubkii_transportation_accommodation_fees';
+$sql_transportation_accommodation_fees = "CREATE TABLE $table_name_transportation_accommodation_fees (
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    administration_fee float NOT NULL,
+    transportation_cost float NOT NULL,
+    accommodation_cost float NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(id)
+) $charset_collate;";
+
 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 // Run the SQL queries to create the tables
 dbDelta($sql_courses);
@@ -78,4 +87,5 @@ dbDelta($sql_durations);
 dbDelta($sql_start_dates);
 dbDelta($sql);
 dbDelta($sql_prices);
+dbDelta($sql_transportation_accommodation_fees);
 ?>
