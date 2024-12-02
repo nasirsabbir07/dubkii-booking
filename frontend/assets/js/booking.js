@@ -8,11 +8,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const coursePriceElem = document.getElementById("course-price");
   const totalCostElem = document.getElementById("total-cost");
   const submitPaymentButton = document.getElementById("pay-now-button");
+  const storedFees = JSON.parse(localStorage.getItem("fees"));
 
   let allCourses = [];
   let selectedCourseCost = 0;
   let stripe, elements, clientSecret;
-  const accommodationFee = 100.0;
   // Function to show the current step
   function showStep(step) {
     steps.forEach((stepElement, index) => {
@@ -67,6 +67,31 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Fetch Transport, accommodation and administration fee
+  async function fetchTransportCost() {
+    try {
+      const response = await fetch(`${bookingData.ajaxurl}?action=get_fees`, {
+        method: "GET",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        allFees = data.data.fees;
+        localStorage.setItem("fees", JSON.stringify(allFees));
+        console.log(localStorage.getItem("fees"));
+      } else {
+        console.error("Failed to retrieve fees.");
+      }
+    } catch (error) {
+      console.error("Error fetching fee:", error);
+    }
+  }
+
+  fetchTransportCost();
+
   // Function to handle course selection and fetch corresponding start dates and durations
   async function fetchCourseDetails(courseId) {
     try {
@@ -94,6 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Error fetching course details:", error);
     }
   }
+
   // Function to populate a dropdown
   function populateDropdown(selectElement, items, placeholder) {
     clearDropdown(selectElement);
@@ -245,15 +271,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const transportRadios = document.querySelectorAll('input[name="transport"]');
   const transportCostElement = document.getElementById("transport-cost");
+  const transportCostDisplay = document.getElementById("transport-cost-display");
+
+  if (storedFees && storedFees.transportation_cost) {
+    // Update the transport cost display
+    const transportCost = parseFloat(storedFees.transportation_cost).toFixed(2);
+    transportCostDisplay.textContent = `$${transportCost}`;
+  }
 
   // Function to update transport cost in the sidebar
   function updateTransportCost() {
     let transportCost = 0;
     const selectedTransport = document.querySelector('input[name="transport"]:checked');
     if (selectedTransport) {
-      if (selectedTransport.dataset.cost) {
-        transportCost = parseFloat(selectedTransport.dataset.cost);
-      }
+      transportCost = storedFees ? parseFloat(storedFees.transportation_cost) : 0;
     } else {
       console.warn("No transport option selected");
     }
@@ -305,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log(jsonData);
         if (jsonData.success) {
           const registrationFee = jsonData.data.registrationFee;
-          updateSidebarWithFee(registrationFee); // Update sidebar fee
+          updateSidebarWithRegistrationFee(registrationFee); // Update sidebar fee
           updateEmailMessage(registrationFee); // Show/hide email message based on fee
         }
       } catch (error) {
@@ -326,7 +357,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Add event listener to email input field
   emailField.addEventListener("input", debouncedCheckEmail);
 
-  function updateSidebarWithFee(fee) {
+  function updateSidebarWithRegistrationFee(fee) {
     const sidebar = document.querySelector(".sidebar");
     const feeElem = sidebar.querySelector("#registration-fee");
     const formattedFee = parseFloat(fee).toFixed(2);
@@ -348,7 +379,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Accommodation Fee
   function calculateAccommodationFee(durationWeeks) {
     console.log(durationWeeks);
-    return durationWeeks * accommodationFee;
+    const accommodationCost = storedFees ? parseFloat(storedFees.accommodation_cost) : 0;
+    return durationWeeks * accommodationCost;
   }
 
   function updateSidebarWithAccommodationFee(duration) {
@@ -371,8 +403,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Trigger accommodation fee update on duration change
   durationSelect.addEventListener("change", function () {
     const selectedOption = this.options[this.selectedIndex];
-    const durationWeeks = parseInt(selectedOption.getAttribute("data-duration-weeks"), 10);
-    updateSidebarWithAccommodationFee(durationWeeks);
+    // Check if a valid option is selected
+    if (selectedOption && selectedOption.hasAttribute("data-duration-weeks")) {
+      const durationWeeks = parseInt(selectedOption.getAttribute("data-duration-weeks"), 10);
+      updateSidebarWithAccommodationFee(durationWeeks);
+    } else {
+      resetAccommodationFee(); // Reset fee to 0.00 if no valid duration is selected
+    }
   });
 
   function updateTotalCost() {

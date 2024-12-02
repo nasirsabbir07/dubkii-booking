@@ -4,6 +4,7 @@ add_action('wp_ajax_nopriv_handle_booking_submission', 'handle_booking_submissio
 function handle_booking_submission() {
     require_once plugin_dir_path(__FILE__) . 'payment-intent.php';
     require_once plugin_dir_path(__FILE__) . 'booking-success-email.php';
+    // require_once plugin_dir_path(__FILE__) . 'helpers.php';
     // Check nonce for security
     if ( ! isset($_POST['nonce']) || ! check_ajax_referer('custom_booking_form', 'nonce', false) ) {
         wp_send_json_error(['message' => 'Nonce verification failed.']);
@@ -11,14 +12,13 @@ function handle_booking_submission() {
     error_log(print_r($_POST, true)); 
     global $wpdb;
     $personal_details = $wpdb->prefix . 'dubkii_personal_details';
+    $fees_table =  $wpdb->prefix . 'dubkii_transportation_accommodation_fees';
 
     // Check if required fields are set
     if (!isset($_POST['name'], $_POST['email'], $_POST['contact_no'], $_POST['dob'], $_POST['address'], $_POST['city'], $_POST['post_code'], $_POST['nationality'], $_POST['country'], $_POST['course'], $_POST['start_date'], $_POST['duration'], $_POST['english_level'], $_POST['transport'])) {
         wp_send_json_error(array('message' => 'Missing required fields.'));
         return;
     }
-
-    
 
     $name = sanitize_text_field($_POST['name']);
     $email = sanitize_email($_POST['email']);
@@ -33,14 +33,24 @@ function handle_booking_submission() {
     $start_date = sanitize_text_field($_POST['start_date']); // Ensure date format is correct (YYYY-MM-DD)
     $duration_id = intval($_POST['duration']);
     $english_level = sanitize_text_field($_POST['english_level']);
-    // Transport data
     $transport_option = sanitize_text_field($_POST['transport']);
+    $accommodation_fee = isset($_POST['accommodationFee']) ? floatval($_POST['accommodationFee']) : 0.00;
+    $frontend_total = isset($_POST['totalAmount']) ? floatval($_POST['totalAmount']) : 0;
+
+    // Validate
     if ($transport_option !== 'yes' && $transport_option !== 'no') {
         wp_send_json_error(array('message' => 'Invalid transport option.'));
         return;
     }
     $has_transport = ($transport_option === 'yes') ? 1 : 0;
-    $transport_cost = $has_transport ? 50.00 : 0.00; 
+    // Retrieve dynamic fees
+    $fees = $wpdb->get_row("SELECT * FROM $fees_table LIMIT 1");
+    if (!$fees) {
+        wp_send_json_error(['message' => 'Error retrieving fees data.']);
+        return;
+    }
+    $transport_cost = $has_transport ? floatval($fees->transportation_cost) : 0;
+    $registration_fee = floatval($fees->administration_fee);
 
     // Calculate total amount
     // Validate duration ID
@@ -66,14 +76,24 @@ function handle_booking_submission() {
     }
     
     
-    
     // Recalculate registration fee
     $existing_user = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}dubkii_personal_details WHERE email = %s", $email));
-    $registration_fee = $existing_user ? 0.00 : 50.00; // Fee is 0 for existing users, $50 for new users
+    $registration_fee = $existing_user ? 0.00 : $registration_fee; 
 
-    $accommodation_fee = isset($_POST['accommodationFee']) ? floatval($_POST['accommodationFee']) : 0;
 
     $total_amount = ($course_price + $transport_cost + $registration_fee + $accommodation_fee) * 100; // Convert to cents
+
+    // Compare frontend and backend totals
+    if (abs($frontend_total - $total_amount ) > 0.01) { // Allow small float precision differences
+        wp_send_json_error([
+            'message' => 'Total amount mismatch. Please refresh the page and try again.',
+            'details' => [
+                'frontend_total' => $frontend_total,
+                'backend_total' => $total_amount,
+            ],
+        ]);
+        return;
+    }
 
     // Validate dates
     if (!DateTime::createFromFormat('Y-m-d', $dob) || !DateTime::createFromFormat('Y-m-d', $start_date)) {

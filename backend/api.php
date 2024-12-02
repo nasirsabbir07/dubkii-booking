@@ -1,4 +1,6 @@
 <?php
+
+
 function get_course_data() {
     global $wpdb;
 
@@ -81,13 +83,15 @@ function check_email_exists() {
 
     $email = sanitize_email($_POST['email']);
     $personal_details_table = $wpdb->prefix . 'dubkii_personal_details';
+    $transportation_accommodation_fees = $wpdb->prefix .'dubkii_transportation_accommodation_fees';
     // Query the database to check if the email exists
     $user = $wpdb->get_row($wpdb->prepare("SELECT * FROM $personal_details_table WHERE email = %s", $email));
 
     if ($user) {
         $registration_fee = 0.00;
     } else {
-        $registration_fee = 50.00;
+        $result = $wpdb->get_row("SELECT administration_fee FROM $transportation_accommodation_fees ORDER BY id DESC LIMIT 1", ARRAY_A);
+        $registration_fee = $result ? (float)$result['administration_fee'] : 0.00;
        
     }
 
@@ -129,5 +133,25 @@ function get_course_price() {
     wp_send_json_success(['price' => $price]);
 }
 
+
+add_action('wp_ajax_get_fees', 'get_fees');
+add_action('wp_ajax_nopriv_get_fees', 'get_fees');
+
+function get_fees(){
+    
+    global $wpdb;
+    $transportation_accommodation_fees = $wpdb->prefix . 'dubkii_transportation_accommodation_fees';
+
+    $fees = $wpdb->get_row("SELECT transportation_cost, accommodation_cost, administration_fee FROM $transportation_accommodation_fees ORDER BY id DESC LIMIT 1", ARRAY_A);
+
+    if ($fees === null) {
+        // Log error for debugging purposes
+        error_log("Failed to retrieve fees from table: $transportation_accommodation_fees");
+        wp_send_json_error(['message' => "Failed to retrieve fees."]);
+    }
+
+    // Respond with the retrieved data
+    wp_send_json_success(['fees' => $fees]);
+}
 
 ?>

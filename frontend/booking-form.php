@@ -95,10 +95,10 @@
             <div class="form-step step-3" style="display: none;">
                 <h3>Transport Options</h3>
                 <label>
-                    <input type="radio" name="transport" value="yes" data-cost="50" required> I want transport ($50)
+                    <input type="radio" name="transport" value="yes" required> I want transport (<span id="transport-cost-display">$0</span>)
                 </label><br>
                 <label>
-                    <input type="radio" name="transport" value="no" data-cost="0" required> I don't want transport
+                    <input type="radio" name="transport" value="no" required> I don't want transport
                 </label>
                 <div>
                     <button type="button" class="prev-button" data-prev-step="2">Back</button>
