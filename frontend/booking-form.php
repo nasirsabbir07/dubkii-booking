@@ -10,8 +10,8 @@
     <div class="form-container">
         <form id="booking-form" method="post" action="">
             <!-- Add nonce field here -->
-            <?php wp_nonce_field('custom_booking_form', 'nonce'); ?>
-        <!-- Step 1: Select Course -->
+            
+            <!-- Step 1: Select Course -->
             <div class="form-step step-1">
                 <div class=course-detail-selection>
                     <label for="course">Select Course:</label>
@@ -121,7 +121,7 @@
                 <button type="button" onclick="window.location.reload();">Back to Home</button> -->
             </div>
         </form>
-     <!-- Sidebar Section -->
+        <!-- Sidebar Section -->
         <div class="sidebar">
             <h3>Course Details</h3>
             <p><strong>Selected Course:</strong> <span id="selected-course">None</span></p>

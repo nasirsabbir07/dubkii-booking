@@ -47,19 +47,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  //Function to populate dropdown with data from backend
+  // Function to populate dropdown with data from backend
   async function fetchCourses() {
     try {
-      const response = await fetch(`${bookingData.ajaxurl}?action=get_course_data`, {
+      const response = await fetch(`${bookingData.restApiUrl}courses`, {
         method: "GET",
         headers: {
-          "X-Requested-With": "XMLHttpRequest",
+          "Content-type": "application/json",
         },
       });
       const data = await response.json();
-
+      console.log(data);
       if (data.success) {
-        allCourses = data.data.courses;
+        allCourses = data.courses;
         populateDropdown(courseSelect, allCourses, "Select a course");
       }
     } catch (error) {
@@ -67,51 +67,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Fetch Transport, accommodation and administration fee
-  async function fetchTransportCost() {
-    try {
-      const response = await fetch(`${bookingData.ajaxurl}?action=get_fees`, {
-        method: "GET",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        allFees = data.data.fees;
-        localStorage.setItem("fees", JSON.stringify(allFees));
-        console.log(localStorage.getItem("fees"));
-      } else {
-        console.error("Failed to retrieve fees.");
-      }
-    } catch (error) {
-      console.error("Error fetching fee:", error);
-    }
-  }
-
-  fetchTransportCost();
+  // Call the fetchOptions function to populate dropdowns
+  fetchCourses();
 
   // Function to handle course selection and fetch corresponding start dates and durations
   async function fetchCourseDetails(courseId) {
     try {
-      const formData = new FormData();
-      formData.append("action", "get_course_details"); // Action for the second AJAX handler
-      formData.append("course_id", courseId); // Send the selected course ID
-
-      const response = await fetch(bookingData.ajaxurl, {
-        method: "POST",
-        body: formData,
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      });
+      const response = await fetch(
+        `${bookingData.restApiUrl}course-details/?course_id=${courseId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await response.json();
 
       if (data.success) {
-        populateDropdown(startDateSelect, data.data.start_dates, "Select a start date");
-        populateDropdown(durationSelect, data.data.durations, "Select duration (weeks)");
+        populateDropdown(startDateSelect, data.start_dates, "Select a start date");
+        populateDropdown(durationSelect, data.durations, "Select duration (weeks)");
       } else {
         console.error("Error fetching course details:", data.message);
       }
@@ -183,24 +159,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("action", "get_course_price");
-      formData.append("course_id", selectedCourseId);
-      formData.append("duration_id", selectedDurationId);
-
-      const response = await fetch(bookingData.ajaxurl, {
-        method: "POST",
-        body: formData,
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      });
+      const response = await fetch(
+        `${bookingData.restApiUrl}get-course-price?course_id=${selectedCourseId}&duration_id=${selectedDurationId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            // Include the nonce for authentication
+          },
+        }
+      );
 
       const data = await response.json();
       console.log(data);
 
       if (data.success) {
-        const price = parseFloat(data.data.price);
+        const price = parseFloat(data.price);
         document.getElementById("course-price").textContent = price.toFixed(2); // Update the price
         updateTotalCost();
       } else {
@@ -225,9 +199,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Event listener for duration selection change (if applicable)
   durationSelect.addEventListener("change", updatePriceOnSelection);
-
-  // Call the fetchOptions function to populate dropdowns
-  fetchCourses();
 
   const countrySelect = document.getElementById("country");
   const nationalitySelect = document.getElementById("nationality");
@@ -273,6 +244,33 @@ document.addEventListener("DOMContentLoaded", function () {
   const transportCostElement = document.getElementById("transport-cost");
   const transportCostDisplay = document.getElementById("transport-cost-display");
 
+  // Fetch Transport, accommodation and administration fee
+  async function fetchTransportCost() {
+    try {
+      const response = await fetch(`${bookingData.restApiUrl}fees`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // Include nonce for authentication
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        allFees = data.fees;
+        localStorage.setItem("fees", JSON.stringify(allFees)); // Store fees in localStorage
+        console.log("Fees stored in localStorage:", localStorage.getItem("fees"));
+      } else {
+        console.error("Failed to retrieve fees:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching fees:", error);
+    }
+  }
+
+  fetchTransportCost();
+
   if (storedFees && storedFees.transportation_cost) {
     // Update the transport cost display
     const transportCost = parseFloat(storedFees.transportation_cost).toFixed(2);
@@ -314,35 +312,41 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
+  // Check Email api call
   async function checkEmail(email) {
     console.log(email);
+
     if (email) {
       try {
-        const formData = new FormData();
-        formData.append("action", "check_email_exists");
-        formData.append("email", email);
-        const response = await fetch(bookingData.ajaxurl, {
-          method: "POST",
-          body: formData,
+        const response = await fetch(`${bookingData.restApiUrl}check-email`, {
+          method: "POST", // Using GET method for simplicity
           headers: {
-            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({ email: email }), // Sending email as JSON in the body
         });
+
         if (!response.ok) {
           const errorData = await response.text(); // Get the response body as text
           throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorData}`);
         }
+
         const jsonData = await response.json();
         console.log(jsonData);
+
         if (jsonData.success) {
-          const registrationFee = jsonData.data.registrationFee;
+          const registrationFee = jsonData.registrationFee;
           updateSidebarWithRegistrationFee(registrationFee); // Update sidebar fee
           updateEmailMessage(registrationFee); // Show/hide email message based on fee
+        } else {
+          console.error("Email check failed:", jsonData.message);
+          updateSidebarWithRegistrationFee(0);
+          updateEmailMessage(null);
         }
       } catch (error) {
-        console.error("Email check failed:", error);
+        console.error("Error during email check:", error);
         // Reset sidebar and hide message in case of an error
-        updateSidebarWithFee(0);
+        updateSidebarWithRegistrationFee(0);
         updateEmailMessage(null);
       }
     }
@@ -461,37 +465,70 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const accommodationFeeElem = document.querySelector("#accommodation-fee");
-    const accommodationFee = parseFloat(accommodationFeeElem.textContent) || 0;
-    const coursePriceElem = document.querySelector("#course-price");
-    const coursePrice = parseFloat(coursePriceElem.textContent) || 0;
-    const totalAmount = parseFloat(totalCostElem.textContent) * 100;
-    const formData = new FormData(form);
-    formData.append("action", "handle_booking_submission"); // Ensure action is set
-    formData.append("accommodationFee", accommodationFee);
-    formData.append("coursePrice", coursePrice);
-    formData.append("totalAmount", totalAmount);
+    // Validate form data before proceeding
+    const requiredFields = ["name", "email", "course", "start_date", "duration"];
+    for (const field of requiredFields) {
+      if (!form[field].value) {
+        console.log(`Please fill in the ${field} field.`);
+        return;
+      }
+    }
+
+    // Get nonce securely
+    // const nonce = form.elements.namedItem("nonce").value;
+    // console.log(nonce);
+    // Get fee details and calculate the total amount
+    const accommodationFee =
+      parseFloat(document.querySelector("#accommodation-fee").textContent) || 0;
+    const coursePrice = parseFloat(document.querySelector("#course-price").textContent) || 0;
+    const totalAmount = parseFloat(document.querySelector("#total-cost").textContent) * 100 || 0; // Convert to cents
+
+    // const formData = new FormData(form);
+    // formData.append("action", "handle_booking_submission"); // Ensure action is set
+    // formData.append("accommodationFee", accommodationFee);
+    // formData.append("coursePrice", coursePrice);
+    // formData.append("totalAmount", totalAmount);
+
+    const params = {
+      name: form["name"].value,
+      email: form["email"].value,
+      contact_no: form["contact_no"].value,
+      dob: form["dob"].value,
+      address: form["address"].value,
+      city: form["city"].value,
+      post_code: form["post_code"].value,
+      nationality: form["nationality"].value,
+      country: form["country"].value,
+      course: form["course"].value,
+      start_date: form["start_date"].value,
+      duration: form["duration"].value,
+      english_level: form["english_level"].value,
+      transport: form["transport"].value,
+      accommodationFee: accommodationFee,
+      totalAmount: totalAmount,
+      // Include the nonce
+    };
 
     try {
-      // Send the request using async/await
-      const response = await fetch(bookingData.ajaxurl, {
+      // Send the request to the updated REST API endpoint
+      const response = await fetch(`${bookingData.restApiUrl}submit-booking`, {
         method: "POST",
-        body: formData,
         headers: {
-          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/json", // Set content type to JSON
         },
+        body: JSON.stringify(params),
       });
 
       if (!response.ok) {
-        // If the response is not OK, throw an error with status
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const jsonData = await response.json(); // Parse the response as JSON
       console.log(jsonData);
+
       if (jsonData.success) {
-        clientSecret = jsonData.data.clientSecret;
-        bookingDetails = jsonData.data.bookingDetails;
+        clientSecret = jsonData.clientSecret;
+        bookingDetails = jsonData.bookingDetails;
         showStep(4);
         initializeStripePayment(clientSecret, bookingDetails);
       } else {
@@ -507,7 +544,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize payment in step 4
     function initializeStripePayment(clientSecret) {
-      elements = stripe.elements({ clientSecret });
+      const elements = stripe.elements({ clientSecret });
       const paymentElement = elements.create("payment");
 
       paymentElement.mount("#payment-element");
@@ -515,6 +552,7 @@ document.addEventListener("DOMContentLoaded", function () {
       submitPaymentButton.addEventListener("click", async function () {
         try {
           await elements.submit();
+
           const { error } = await stripe.confirmPayment({
             elements,
             clientSecret: clientSecret,

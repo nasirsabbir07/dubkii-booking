@@ -40,7 +40,7 @@ function enqueue_booking_assets() {
 
     // Localize the script with the AJAX URL
     // wp_localize_script('booking-js', 'ajaxurl', admin_url('admin-ajax.php'));
-    wp_localize_script('booking-js', 'bookingData', array('ajaxurl' => admin_url('admin-ajax.php'), 
+    wp_localize_script('booking-js', 'bookingData', array('restApiUrl' => esc_url_raw(rest_url('dubkii/v1/')), 
     'stripePublicKey' => 'pk_test_51QMaBbEOc0eb0uqdtZ011f4JtRjGcKgAbxNluCv4o1gNu2PgF4txq5qjtZ75jIDbdFazo2EHZmKtlIxPN5NtXOt500Snas7qC3'));
     
 }
