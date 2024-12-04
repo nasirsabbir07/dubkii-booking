@@ -5,7 +5,6 @@ Description: A plugin to manage course bookings.
 Version: 1.0
 Author: Barytech
 */
-
 global $dubkii_booking_db_version;
 $dubkii_booking_db_version = '1.0';
 
