@@ -25,6 +25,27 @@ function dubkii_booking_install() {
 }
 register_activation_hook(__FILE__, 'dubkii_booking_install');
 
+// Add custom field to WooCommerce product edit page
+function add_plugin_course_id_field() {
+    woocommerce_wp_text_input([
+        'id' => 'plugin_course_id',
+        'label' => __('Plugin Course ID', 'woocommerce'),
+        'description' => __('Enter the course ID from the plugin database.', 'woocommerce'),
+        'type' => 'number',
+        'desc_tip' => true,
+    ]);
+}
+add_action('woocommerce_product_options_general_product_data', 'add_plugin_course_id_field');
+
+// Save custom field value
+function save_plugin_course_id_field($post_id) {
+    $plugin_course_id = isset($_POST['plugin_course_id']) ? sanitize_text_field($_POST['plugin_course_id']) : '';
+    if (!empty($plugin_course_id)) {
+        update_post_meta($post_id, 'plugin_course_id', $plugin_course_id);
+    }
+}
+add_action('woocommerce_process_product_meta', 'save_plugin_course_id_field');
+
 // Enqueue frontend assets
 function enqueue_booking_assets() {
     // Enqueue Stripe Javascript SDK
@@ -38,10 +59,23 @@ function enqueue_booking_assets() {
     wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery','stripe-js', 'countries-script'), null, true);
     wp_enqueue_script('booking-js'); // Enqueue booking.js script
 
-    // Localize the script with the AJAX URL
-    // wp_localize_script('booking-js', 'ajaxurl', admin_url('admin-ajax.php'));
-    wp_localize_script('booking-js', 'bookingData', array('restApiUrl' => esc_url_raw(rest_url('dubkii/v1/')), 
-    'stripePublicKey' => 'pk_test_51QMaBbEOc0eb0uqdtZ011f4JtRjGcKgAbxNluCv4o1gNu2PgF4txq5qjtZ75jIDbdFazo2EHZmKtlIxPN5NtXOt500Snas7qC3'));
+    // Default localized data
+    $localized_data = [
+        'restApiUrl' => esc_url_raw(rest_url('dubkii/v1/')),
+        'stripePublicKey' => 'pk_test_51QMaBbEOc0eb0uqdtZ011f4JtRjGcKgAbxNluCv4o1gNu2PgF4txq5qjtZ75jIDbdFazo2EHZmKtlIxPN5NtXOt500Snas7qC3',
+    ];
+
+    // Inject `plugin_course_id` if on a WooCommerce product page
+    if (is_product()) {
+        global $post;
+        $plugin_course_id = get_post_meta($post->ID, 'plugin_course_id', true);
+        if ($plugin_course_id) {
+            $localized_data['currentCourseId'] = $plugin_course_id; // Include plugin course ID
+        }
+    }
+
+    // Localize the script
+    wp_localize_script('booking-js', 'bookingData', $localized_data);
     
 }
 add_action('wp_enqueue_scripts', 'enqueue_booking_assets');

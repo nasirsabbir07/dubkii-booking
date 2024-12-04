@@ -13,6 +13,12 @@ document.addEventListener("DOMContentLoaded", function () {
   let allCourses = [];
   let selectedCourseCost = 0;
   let stripe, elements, clientSecret;
+
+  // Check if pluginCourseId is defined and fetch the specific course
+  if (typeof bookingData.currentCourseId !== "undefined") {
+    fetchCourses(bookingData.currentCourseId);
+  }
+
   // Function to show the current step
   function showStep(step) {
     steps.forEach((stepElement, index) => {
@@ -48,9 +54,9 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Function to populate dropdown with data from backend
-  async function fetchCourses() {
+  async function fetchCourses(courseId) {
     try {
-      const response = await fetch(`${bookingData.restApiUrl}courses`, {
+      const response = await fetch(`${bookingData.restApiUrl}courses/?course_id=${courseId}`, {
         method: "GET",
         headers: {
           "Content-type": "application/json",
@@ -59,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = await response.json();
       console.log(data);
       if (data.success) {
-        allCourses = data.courses;
+        allCourses = [data.course];
         populateDropdown(courseSelect, allCourses, "Select a course");
       }
     } catch (error) {
@@ -68,7 +74,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Call the fetchOptions function to populate dropdowns
-  fetchCourses();
 
   // Function to handle course selection and fetch corresponding start dates and durations
   async function fetchCourseDetails(courseId) {
