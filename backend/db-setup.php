@@ -80,6 +80,23 @@ $sql_transportation_accommodation_fees = "CREATE TABLE $table_name_transportatio
     PRIMARY KEY(id)
 ) $charset_collate;";
 
+$table_name_coupons = $wpdb->prefix . 'dubkii_coupons';
+$sql_coupons = "CREATE TABLE $table_name_coupons(
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    code varchar(50) NOT NULL UNIQUE,
+    discount_type enum('percentage', 'fixed') NOT NULL,
+    discount_value decimal(10,2) NOT NULL,
+    max_redemptions int NOT NULL, 
+    current_redemptions int DEFAULT 0,
+    expiry_date datetime NOT NULL,
+    is_active tinyint(1) DEFAULT 1,
+    PRIMARY KEY (id),
+    UNIQUE KEY idx_code (code),
+    INDEX idx_is_active (is_active),
+    INDEX idx_expiry_date (expiry_date),
+    INDEX idx_active_non_expired (is_active, expiry_date)
+) $charset_collate;";
+
 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 // Run the SQL queries to create the tables
 dbDelta($sql_courses);
@@ -87,5 +104,7 @@ dbDelta($sql_durations);
 dbDelta($sql_start_dates);
 dbDelta($sql);
 dbDelta($sql_prices);
-dbDelta($sql_transportation_accommodation_fees);
+$result=dbDelta($sql_transportation_accommodation_fees);
+dbDelta($sql_coupons);
+error_log(print_r($result, true));
 ?>

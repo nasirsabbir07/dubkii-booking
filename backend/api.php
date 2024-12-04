@@ -1,6 +1,5 @@
 <?php
 // ** api created using rest api **//
-
 add_action('rest_api_init', function(){
     // Route: Fetch Courses
     register_rest_route('dubkii/v1', '/courses',[
