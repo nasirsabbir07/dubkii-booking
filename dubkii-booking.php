@@ -10,7 +10,7 @@ $dubkii_booking_db_version = '1.0';
 
 // Include necessary files
 include_once plugin_dir_path(__FILE__) . 'backend/db-setup.php';
-include_once plugin_dir_path(__FILE__) . 'backend/admin-dashboard.php';
+include_once plugin_dir_path(__FILE__) . 'backend/admin/admin-dashboard.php';
 require_once plugin_dir_path(__FILE__) . 'backend/form-handler.php';
 require_once plugin_dir_path(__FILE__) . 'backend/api.php';
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
