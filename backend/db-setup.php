@@ -85,10 +85,14 @@ $sql_coupons = "CREATE TABLE $table_name_coupons(
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     code varchar(50) NOT NULL UNIQUE,
     discount_type enum('percentage', 'fixed') NOT NULL,
-    discount_value decimal(10,2) NOT NULL,
+    discount_value decimal(10,2) DEFAULT NULL,
+    max_price_range decimal(10,2) DEFAULT NULL,
+    min_price_range decimal(10,2) DEFAULT NULL,
+    max_discount_percentage decimal(5,2) DEFAULT NULL,
+    min_discount_percentage decimal (5,2) DEFAULT NULL,
     max_redemptions int NOT NULL, 
     current_redemptions int DEFAULT 0,
-    expiry_date datetime NOT NULL,
+    expiry_date DATETIME NOT NULL,
     is_active tinyint(1) DEFAULT 1,
     PRIMARY KEY (id),
     UNIQUE KEY idx_code (code),
@@ -104,7 +108,6 @@ dbDelta($sql_durations);
 dbDelta($sql_start_dates);
 dbDelta($sql);
 dbDelta($sql_prices);
-$result=dbDelta($sql_transportation_accommodation_fees);
+$result = dbDelta($sql_transportation_accommodation_fees);
 dbDelta($sql_coupons);
 error_log(print_r($result, true));
-?>

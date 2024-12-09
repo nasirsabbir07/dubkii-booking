@@ -93,6 +93,8 @@ function enqueue_dubkii_admin_assets($hook)
         array(),
         filemtime(plugin_dir_path(__FILE__) . 'frontend/assets/css/admin-styles.css')
     );
+    wp_enqueue_script('dubkii-admin-js', plugin_dir_url(__FILE__) . 'backend/assets/js/admin.js', ['jquery'], null, true);
+    wp_localize_script('dubkii-admin-js', 'ajaxurl', admin_url('admin-ajax.php'));  // Ensure the AJAX URL is passed
 }
 
 add_action('admin_enqueue_scripts', 'enqueue_dubkii_admin_assets');

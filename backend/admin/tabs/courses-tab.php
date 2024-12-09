@@ -175,7 +175,7 @@ $total_pages = ceil($total_courses / $courses_per_page);
                         <td><?php echo implode(', ', explode(',', $course->durations)); ?></td>
                         <td><?php echo implode(', ', explode(',', $course->prices)); ?></td>
                         <td>
-                            <a href="<?php echo admin_url('admin.php?page=dubkii-booking&delete_course=' . $course->id . '&active_tab=courses'); ?>" class="button">Delete</a>
+                            <a href="" class="button delete-course" data-course-id="<?php echo $course->id; ?>">Delete</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -236,21 +236,53 @@ $total_pages = ceil($total_courses / $courses_per_page);
     }
 </script>
 <?php
-// Handle course deletion
-function dubkii_handle_delete_course()
+function dubkii_handle_delete_course_ajax()
 {
-    if (isset($_GET['delete_course'])) {
+    if (isset($_POST['course_id'])) {
         global $wpdb;
-        $course_id = intval($_GET['delete_course']);
 
-        // Delete from all related tables
-        $wpdb->delete($wpdb->prefix . 'dubkii_courses', array('id' => $course_id));
-        $wpdb->delete($wpdb->prefix . 'dubkii_course_durations', array('course_id' => $course_id));
-        $wpdb->delete($wpdb->prefix . 'dubkii_course_start_dates', array('course_id' => $course_id));
+        $course_id = intval($_POST['course_id']);
 
-        wp_redirect(admin_url('admin.php?page=dubkii-booking'));
-        exit;
+        if ($course_id > 0) {
+            // Define tables
+            $courses_table = $wpdb->prefix . 'dubkii_courses';
+            $durations_table = $wpdb->prefix . 'dubkii_course_durations';
+            $start_dates_table = $wpdb->prefix . 'dubkii_course_start_dates';
+            $course_prices_table = $wpdb->prefix . 'dubkii_courses_prices';
+
+            // Begin transaction
+            $wpdb->query('START TRANSACTION');
+
+            try {
+                // Delete from related tables
+                $wpdb->delete($durations_table, ['course_id' => $course_id]);
+                $wpdb->delete($start_dates_table, ['course_id' => $course_id]);
+                $wpdb->delete($course_prices_table, ['course_id' => $course_id]);
+
+                // Delete the course
+                $deleted = $wpdb->delete($courses_table, ['id' => $course_id]);
+
+                if (!$deleted) {
+                    throw new Exception('Failed to delete course');
+                }
+
+                // Commit transaction
+                $wpdb->query('COMMIT');
+
+                wp_send_json_success(['message' => 'Course deleted successfully!']);
+            } catch (Exception $e) {
+                // Rollback transaction on failure
+                $wpdb->query('ROLLBACK');
+                wp_send_json_error(['message' => 'Error: ' . $e->getMessage()]);
+            }
+        } else {
+            wp_send_json_error(['message' => 'Invalid course ID.']);
+        }
+    } else {
+        wp_send_json_error(['message' => 'No course ID provided.']);
     }
 }
-add_action('admin_init', 'dubkii_handle_delete_course');
+
+// Hook the function to admin-ajax action
+add_action('wp_ajax_delete_course', 'dubkii_handle_delete_course_ajax');
 ?>
