@@ -51,8 +51,14 @@ add_action('woocommerce_process_product_meta', 'save_plugin_course_id_field');
 // Enqueue frontend assets
 function enqueue_booking_assets()
 {
-    // Enqueue Stripe Javascript SDK
-    wp_enqueue_script('stripe-js', 'https://js.stripe.com/v3/', [], null, true);
+    // Enqueue Razorpay Javascript SDK
+    wp_enqueue_script(
+        'razorpay-checkout',
+        'https://checkout.razorpay.com/v1/checkout.js',
+        [],
+        null,
+        true
+    );
     // Register scripts and styles
     wp_register_script('countries-script', plugins_url('frontend/assets/js/countries.js', __FILE__), array(), null, true);
     wp_enqueue_script('countries-script'); // Make sure the countries script is enqueued

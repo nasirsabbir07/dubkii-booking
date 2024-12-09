@@ -1,2 +1,5 @@
 {
+    "require": {
+        "razorpay/razorpay": "^2.9"
+    }
 }

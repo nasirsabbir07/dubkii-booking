@@ -48,6 +48,10 @@ function dubkii_booking_admin_page()
                 class="nav-tab <?php echo ($active_tab === 'coupons') ? 'nav-tab-active' : ''; ?>">
                 Coupons
             </a>
+            <a href="<?php echo add_query_arg(array('page' => 'dubkii-booking', 'active_tab' => 'razorpay-settings'), $base_url); ?>"
+                class="nav-tab <?php echo ($active_tab === 'razorpay-settings') ? 'nav-tab-active' : ''; ?>">
+                Razorpay Settings
+            </a>
         </h2>
 
         <!-- Tabs Content -->
@@ -66,6 +70,9 @@ function dubkii_booking_admin_page()
                     break;
                 case 'coupons':
                     include_once plugin_dir_path(__FILE__) . 'tabs/coupons-tab.php';
+                    break;
+                case 'razorpay-settings':
+                    include_once plugin_dir_path(__FILE__) . 'tabs/razorpay-settings-tab.php';
                     break;
                 default:
                     include_once plugin_dir_path(__FILE__) . 'tabs/courses-tab.php';
