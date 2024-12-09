@@ -19,13 +19,15 @@ require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
 
 // Hook for plugin activation to set up database tables
-function dubkii_booking_install() {
+function dubkii_booking_install()
+{
     require_once plugin_dir_path(__FILE__) . 'backend/db-setup.php';
 }
 register_activation_hook(__FILE__, 'dubkii_booking_install');
 
 // Add custom field to WooCommerce product edit page
-function add_plugin_course_id_field() {
+function add_plugin_course_id_field()
+{
     woocommerce_wp_text_input([
         'id' => 'plugin_course_id',
         'label' => __('Plugin Course ID', 'woocommerce'),
@@ -37,7 +39,8 @@ function add_plugin_course_id_field() {
 add_action('woocommerce_product_options_general_product_data', 'add_plugin_course_id_field');
 
 // Save custom field value
-function save_plugin_course_id_field($post_id) {
+function save_plugin_course_id_field($post_id)
+{
     $plugin_course_id = isset($_POST['plugin_course_id']) ? sanitize_text_field($_POST['plugin_course_id']) : '';
     if (!empty($plugin_course_id)) {
         update_post_meta($post_id, 'plugin_course_id', $plugin_course_id);
@@ -46,7 +49,8 @@ function save_plugin_course_id_field($post_id) {
 add_action('woocommerce_process_product_meta', 'save_plugin_course_id_field');
 
 // Enqueue frontend assets
-function enqueue_booking_assets() {
+function enqueue_booking_assets()
+{
     // Enqueue Stripe Javascript SDK
     wp_enqueue_script('stripe-js', 'https://js.stripe.com/v3/', [], null, true);
     // Register scripts and styles
@@ -55,7 +59,7 @@ function enqueue_booking_assets() {
 
     wp_enqueue_style('booking-styles', plugins_url('frontend/assets/css/styles.css', __FILE__)); // Enqueue CSS
 
-    wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery','stripe-js', 'countries-script'), null, true);
+    wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery', 'stripe-js', 'countries-script'), null, true);
     wp_enqueue_script('booking-js'); // Enqueue booking.js script
 
     // Default localized data
@@ -75,25 +79,31 @@ function enqueue_booking_assets() {
 
     // Localize the script
     wp_localize_script('booking-js', 'bookingData', $localized_data);
-    
 }
 add_action('wp_enqueue_scripts', 'enqueue_booking_assets');
 
-function enqueue_dubkii_admin_assets($hook){
+function enqueue_dubkii_admin_assets($hook)
+{
     // Enqueue admin-specific styles
     if ($hook !== 'toplevel_page_dubkii-booking') {
         return; // Bail out if not on the desired page
     }
-    wp_enqueue_style('booking-admin-styles', plugins_url('frontend/assets/css/admin-styles.css', __FILE__),array(),
-    filemtime(plugin_dir_path(__FILE__) . 'frontend/assets/css/admin-styles.css') );
+    wp_enqueue_style(
+        'booking-admin-styles',
+        plugins_url('frontend/assets/css/admin-styles.css', __FILE__),
+        array(),
+        filemtime(plugin_dir_path(__FILE__) . 'frontend/assets/css/admin-styles.css')
+    );
+    wp_enqueue_script('dubkii-admin-js', plugin_dir_url(__FILE__) . 'backend/assets/js/admin.js', ['jquery'], null, true);
+    wp_localize_script('dubkii-admin-js', 'ajaxurl', admin_url('admin-ajax.php'));  // Ensure the AJAX URL is passed
 }
 
-add_action('admin_enqueue_scripts','enqueue_dubkii_admin_assets');
+add_action('admin_enqueue_scripts', 'enqueue_dubkii_admin_assets');
 // Shortcode for booking form
-function booking_form_shortcode() {
+function booking_form_shortcode()
+{
     ob_start();
     include plugin_dir_path(__FILE__) . 'frontend/booking-form.php';
     return ob_get_clean();
 }
 add_shortcode('dubkii_booking_form', 'booking_form_shortcode');
-?>

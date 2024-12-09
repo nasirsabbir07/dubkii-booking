@@ -68,6 +68,10 @@
   margin: 10px 0;
 }
 
+.modal-content input[type="checkbox"] {
+  width: 1rem;
+}
+
 /* Buttons */
 button {
   padding: 10px 15px;
