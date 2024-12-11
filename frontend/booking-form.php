@@ -3,14 +3,14 @@
         <li class="tab active" data-step="1">Select Course</li>
         <li class="tab" data-step="2">Personal Details</li>
         <li class="tab" data-step="3">Transport</li>
-        <li class="tab" data-step="4">Payment</li>
-        <li class="tab" data-step="5">Done</li>
+        <!-- <li class="tab" data-step="4">Payment</li> -->
+        <li class="tab" data-step="4">Done</li>
     </ul>
 
     <div class="form-container">
         <form id="booking-form" method="post" action="">
             <!-- Add nonce field here -->
-            
+
             <!-- Step 1: Select Course -->
             <div class="form-step step-1">
                 <div class=course-detail-selection>
@@ -30,10 +30,10 @@
                 <div class=course-detail-selection>
                     <label for="duration">Duration</label>
                     <select name="duration" id="duration-wrapper" required>
-                        <option value="">Select duration</option> 
+                        <option value="">Select duration</option>
                     </select>
                 </div>
-                
+
                 <button type="button" class="next-button" data-next-step="2">Next</button>
             </div>
 
@@ -87,7 +87,7 @@
                         </label>
                     </div>
                 </div> -->
-                
+
                 <button type="button" class="prev-button" data-prev-step="1">Back</button>
                 <button type="button" class="next-button" data-next-step="3">Next</button>
             </div>
@@ -102,19 +102,19 @@
                 </label>
                 <div>
                     <button type="button" class="prev-button" data-prev-step="2">Back</button>
-                    <button type="submit" >Submit & Pay</button>
-                     <!-- <button type="submit">Submit</button> -->
+                    <button type="submit">Submit & Pay</button>
+                    <!-- <button type="submit">Submit</button> -->
                 </div>
             </div>
             <!-- Step 4: Payment -->
-            <div class="form-step step-4" style="display: none;">
+            <!-- <div class="form-step step-4" style="display: none;">
                 <h3>Payment Details</h3>
-                <div id="payment-element" class="StripeElement"></div> <!-- Stripe Payment Element -->
+                <div id="payment-element" class="StripeElement"></div> 
                 <div id="payment-errors" role="alert" style="color: red; margin-top: 10px;"></div>
                 <button type="button" class="prev-button" data-prev-step="3">Back</button>
                 <button type="button" id='pay-now-button'>Pay Now</button>
-            </div>
-            <div class="form-step step-5" style="display: none;">
+            </div> -->
+            <div class="form-step step-4" style="display: none;">
                 <!-- <h3>Payment Successful!</h3>
                 <p>Thank you for your booking. Your payment was processed successfully.</p>
                 <div id="booking-details"></div>
@@ -133,5 +133,5 @@
             <!-- Add any other details you'd like to display here -->
         </div>
     </div>
-    
+
 </div>

@@ -9,11 +9,13 @@ global $dubkii_booking_db_version;
 $dubkii_booking_db_version = '1.0';
 
 // Include necessary files
+require_once plugin_dir_path(__FILE__) . 'vendor/razorpay/razorpay/Razorpay.php';
+// require_once plugin_dir_path(__FILE__) . 'class-alias.php';
 include_once plugin_dir_path(__FILE__) . 'backend/db-setup.php';
 include_once plugin_dir_path(__FILE__) . 'backend/admin/admin-dashboard.php';
 require_once plugin_dir_path(__FILE__) . 'backend/form-handler.php';
 require_once plugin_dir_path(__FILE__) . 'backend/api.php';
-require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
+
 
 // require_once plugin_dir_path(__FILE__) . 'backend/booking-success-email.php';
 
@@ -65,11 +67,19 @@ function enqueue_booking_assets()
 
     wp_enqueue_style('booking-styles', plugins_url('frontend/assets/css/styles.css', __FILE__)); // Enqueue CSS
 
-    wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery', 'stripe-js', 'countries-script'), null, true);
+    wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery', 'razorpay-checkout', 'countries-script'), null, true);
     wp_enqueue_script('booking-js'); // Enqueue booking.js script
+
+
+
+    // Get the saved Razorpay API keys from your settings
+    $razorpay_key_id = get_option('razorpay_key_id');
+    $razorpay_key_secret = get_option('razorpay_key_secret');
 
     // Default localized data
     $localized_data = [
+        'razorpayKey' => $razorpay_key_id,
+        'razorpaySecret' => $razorpay_key_secret,
         'restApiUrl' => esc_url_raw(rest_url('dubkii/v1/')),
     ];
 

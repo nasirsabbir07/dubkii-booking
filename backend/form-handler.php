@@ -8,7 +8,8 @@ add_action('rest_api_init', function () {
     ]);
 });
 
-function handle_booking_submission_rest(WP_REST_Request $request) {
+function handle_booking_submission_rest(WP_REST_Request $request)
+{
     require_once plugin_dir_path(__FILE__) . 'payment-intent.php';
     require_once plugin_dir_path(__FILE__) . 'booking-success-email.php';
 
@@ -29,8 +30,20 @@ function handle_booking_submission_rest(WP_REST_Request $request) {
 
     // Check required fields
     $required_fields = [
-        'name', 'email', 'contact_no', 'dob', 'address', 'city', 'post_code',
-        'nationality', 'country', 'course', 'start_date', 'duration', 'english_level', 'transport'
+        'name',
+        'email',
+        'contact_no',
+        'dob',
+        'address',
+        'city',
+        'post_code',
+        'nationality',
+        'country',
+        'course',
+        'start_date',
+        'duration',
+        'english_level',
+        'transport'
     ];
 
     foreach ($required_fields as $field) {
@@ -75,7 +88,8 @@ function handle_booking_submission_rest(WP_REST_Request $request) {
 
     // Validate duration ID
     $duration_weeks = $wpdb->get_var($wpdb->prepare(
-        "SELECT duration_weeks FROM {$wpdb->prefix}dubkii_course_durations WHERE id = %d", $duration_id
+        "SELECT duration_weeks FROM {$wpdb->prefix}dubkii_course_durations WHERE id = %d",
+        $duration_id
     ));
 
     if ($duration_weeks === null) {
@@ -95,7 +109,8 @@ function handle_booking_submission_rest(WP_REST_Request $request) {
 
     // Validate course name
     $course_name = $wpdb->get_var($wpdb->prepare(
-        "SELECT course_name FROM {$wpdb->prefix}dubkii_courses WHERE id = %d", $course_id
+        "SELECT course_name FROM {$wpdb->prefix}dubkii_courses WHERE id = %d",
+        $course_id
     ));
 
     if ($course_name === null) {
@@ -104,7 +119,8 @@ function handle_booking_submission_rest(WP_REST_Request $request) {
 
     // Adjust registration fee for existing users
     $existing_user = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM {$wpdb->prefix}dubkii_personal_details WHERE email = %s", $email
+        "SELECT COUNT(*) FROM {$wpdb->prefix}dubkii_personal_details WHERE email = %s",
+        $email
     ));
 
     $registration_fee = $existing_user ? 0.00 : $registration_fee;
@@ -169,7 +185,7 @@ function handle_booking_submission_rest(WP_REST_Request $request) {
     return new WP_REST_Response([
         'success' => 'true',
         'message' => 'Booking submitted successfully!',
-        'clientSecret' => $payment_intent->client_secret,
+        // 'clientSecret' => $payment_intent->client_secret,
         'bookingDetails' => [
             'courseName' => $course_name,
             'registrationFee' => $registration_fee,
@@ -180,5 +196,3 @@ function handle_booking_submission_rest(WP_REST_Request $request) {
         ],
     ], 200);
 }
-
-?>

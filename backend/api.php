@@ -1,14 +1,14 @@
 <?php
 // ** api created using rest api **//
-add_action('rest_api_init', function(){
+add_action('rest_api_init', function () {
     // Route: Fetch Courses
-    register_rest_route('dubkii/v1', '/courses',[
+    register_rest_route('dubkii/v1', '/courses', [
         'methods' => 'GET',
         'callback' => 'rest_get_course_data',
         'args' => [
             'course_id' => [
                 'required' => true,
-                'validate_callback' => function($param, $request, $key) {
+                'validate_callback' => function ($param, $request, $key) {
                     return is_numeric($param); // Validate that course_id is numeric
                 },
             ],
@@ -42,9 +42,20 @@ add_action('rest_api_init', function(){
         'callback' => 'rest_get_fees',
         'permission_callback' => '__return_true',
     ]);
+    register_rest_route('dubkii/v1', '/create-order', [
+        'methods' => 'POST',
+        'callback' => 'handle_create_order',
+        'permission_callback' => '__return_true',
+    ]);
+    register_rest_route('dubkii/v1', '/verify-payment', [
+        'methods' => 'POST',
+        'callback' => 'handle_payment_verification',
+        'permission_callback' => '__return_true',
+    ]);
 });
 
-function rest_get_course_data(WP_REST_Request $request) {
+function rest_get_course_data(WP_REST_Request $request)
+{
     global $wpdb;
     $table_name_courses = $wpdb->prefix . 'dubkii_courses';
 
@@ -79,7 +90,8 @@ function rest_get_course_data(WP_REST_Request $request) {
 }
 
 
-function rest_get_course_details(WP_REST_Request $request) {
+function rest_get_course_details(WP_REST_Request $request)
+{
     global $wpdb;
     $course_id = intval($request->get_param('course_id'));
 
@@ -97,7 +109,8 @@ function rest_get_course_details(WP_REST_Request $request) {
     return rest_ensure_response(['success' => true, 'start_dates' => $start_dates, 'durations' => $durations]);
 }
 
-function rest_check_email_exists(WP_REST_Request $request) {
+function rest_check_email_exists(WP_REST_Request $request)
+{
     global $wpdb;
     $email = sanitize_email($request->get_param('email'));
 
@@ -120,7 +133,8 @@ function rest_check_email_exists(WP_REST_Request $request) {
     return rest_ensure_response(['success' => true, 'registrationFee' => number_format($registration_fee, 2)]);
 }
 
-function rest_get_course_price(WP_REST_Request $request) {
+function rest_get_course_price(WP_REST_Request $request)
+{
     global $wpdb;
     $course_id = intval($request->get_param('course_id'));
     $duration_id = intval($request->get_param('duration_id'));
@@ -142,7 +156,8 @@ function rest_get_course_price(WP_REST_Request $request) {
     return rest_ensure_response(['success' => true, 'price' => $price]);
 }
 
-function rest_get_fees() {
+function rest_get_fees()
+{
     global $wpdb;
     $transportation_accommodation_fees = $wpdb->prefix . 'dubkii_transportation_accommodation_fees';
 
@@ -154,5 +169,152 @@ function rest_get_fees() {
 
     return rest_ensure_response(['success' => true, 'fees' => $fees]);
 }
+function handle_create_order(WP_REST_Request $request)
+{
+    global $wpdb;
 
-?>
+    $params = $request->get_json_params();
+    $totalAmount = isset($params['totalAmount']) ? intval($params['totalAmount']) : 0;
+
+    if ($totalAmount <= 0) {
+        return new WP_REST_Response(['message' => 'Invalid amount.'], 400);
+    }
+
+    // Razorpay API credentials
+    $key_id = get_option('razorpay_key_id');
+    $key_secret = get_option('razorpay_key_secret');
+    if (!$key_id || !$key_secret) {
+        error_log("Razorpay API credentials missing.");
+    }
+
+    try {
+        $api = new Razorpay\Api\Api($key_id, $key_secret);
+        error_log("Razorpay API initialized successfully.");
+    } catch (Exception $e) {
+        error_log("Error initializing Razorpay API: " . $e->getMessage());
+        return new WP_REST_Response(['message' => 'Failed to initialize Razorpay API.'], 500);
+    }
+
+    // Save form data temporarily
+    $temp_table = $wpdb->prefix . 'dubkii_temp_bookings';
+
+    if ($wpdb->get_var("SHOW TABLES LIKE '$temp_table'") != $temp_table) {
+        error_log("Temporary table `$temp_table` does not exist.");
+        return new WP_REST_Response(['message' => 'Temporary bookings table is missing.'], 500);
+    }
+
+    $form_data = json_encode($params);
+    $result = $wpdb->insert($temp_table, [
+        'form_data' => $form_data,
+        'created_at' => current_time('mysql'),
+    ]);
+
+    if ($result === false) {
+        error_log("Database Insert Error: " . $wpdb->last_error);
+        return new WP_REST_Response(['message' => 'Failed to save temporary data.'], 500);
+    }
+
+    $temp_id = $wpdb->insert_id;
+    error_log("Temporary data saved with ID: $temp_id.");
+
+    try {
+        // Create Razorpay order
+        $order = $api->order->create([
+            'amount' => $totalAmount, // Amount in paise
+            'currency' => 'INR',
+            'receipt' => 'rcpt_' . $temp_id,
+        ]);
+        error_log("Razorpay order created: " . json_encode($order));
+        return new WP_REST_Response([
+            'success' => true,
+            'orderId' => $order['id'],
+            'tempId' => $temp_id, // Link temporary data
+        ], 200);
+    } catch (Exception $e) {
+        error_log("Unexpected Error: " . $e->getMessage());
+        return new WP_REST_Response(['message' => $e->getMessage()], 500);
+    }
+}
+function handle_payment_verification(WP_REST_Request $request)
+{
+    global $wpdb;
+
+    $params = $request->get_json_params();
+    $razorpayPaymentId = sanitize_text_field($params['razorpayPaymentId']);
+    $razorpayOrderId = sanitize_text_field($params['razorpayOrderId']);
+    $razorpaySignature = sanitize_text_field($params['razorpaySignature']);
+    $tempId = intval($params['tempId']);
+
+    // Razorpay API credentials
+    $key_secret = get_option('razorpay_key_secret');
+
+    // Verify Razorpay signature
+    $generatedSignature = hash_hmac('sha256', $razorpayOrderId . "|" . $razorpayPaymentId, $key_secret);
+
+    if ($generatedSignature !== $razorpaySignature) {
+        return new WP_REST_Response(['message' => 'Payment verification failed.'], 400);
+    }
+
+    // Retrieve temporary data
+    $temp_table = $wpdb->prefix . 'dubkii_temp_bookings';
+    $temp_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $temp_table WHERE id = %d", $tempId));
+
+    if (!$temp_data) {
+        return new WP_REST_Response(['message' => 'Temporary booking data not found.'], 404);
+    }
+
+    // Decode form data
+    $form_data = json_decode($temp_data->form_data, true);
+
+    // Populate booking details for response
+    $course_name =
+        $wpdb->get_var($wpdb->prepare(
+            "SELECT course_name FROM {$wpdb->prefix}dubkii_courses WHERE id = %d",
+            $form_data['course']
+        )); // Fetch actual course name from the database if needed
+    $registration_fee = floatval($form_data['registrationFee'] ?? 0);
+    $accommodation_fee = floatval($form_data['accommodationFee'] ?? 0);
+    $total_amount = floatval($form_data['totalAmount'] ?? 0);
+    $email = sanitize_email($form_data['email']);
+
+    // Save data permanently
+    $personal_details = $wpdb->prefix . 'dubkii_personal_details';
+    $inserted = $wpdb->insert($personal_details, [
+        'name' => sanitize_text_field($form_data['name']),
+        'email' => sanitize_email($form_data['email']),
+        'contact_no' => sanitize_text_field($form_data['contact_no']),
+        'dob' => sanitize_text_field($form_data['dob']),
+        'address' => sanitize_text_field($form_data['address']),
+        'city' => sanitize_text_field($form_data['city']),
+        'post_code' => sanitize_text_field($form_data['post_code']),
+        'nationality' => sanitize_text_field($form_data['nationality']),
+        'country' => sanitize_text_field($form_data['country']),
+        'course_id' => intval($form_data['course']),
+        'start_date' => sanitize_text_field($form_data['start_date']),
+        'duration' => intval($form_data['duration']),
+        'english_level' => sanitize_text_field($form_data['english_level']),
+        'has_transport' => sanitize_text_field($form_data['transport']) === 'yes' ? 1 : 0,
+        'transport_cost' => floatval($form_data['transportationFee']),
+        'total_amount' => floatval($form_data['totalAmount']),
+    ]);
+
+    if (!$inserted) {
+        return new WP_REST_Response(['message' => 'Failed to save booking.'], 500);
+    }
+
+    // Delete temporary data
+    $wpdb->delete($temp_table, ['id' => $tempId]);
+
+    return new WP_REST_Response([
+        'success' => true,
+        'message' => 'Payment verified and booking saved successfully!',
+        'bookingDetails' => [
+            'courseName' => $course_name,
+            'registrationFee' => $registration_fee,
+            'accommodationFee' => $accommodation_fee,
+            'amount' => $total_amount / 100, // Convert cents to dollars
+            'email' => $email,
+            'bookingId' => $wpdb->insert_id,
+        ],
+    ], 200);
+}

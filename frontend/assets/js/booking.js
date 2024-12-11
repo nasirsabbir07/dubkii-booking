@@ -441,15 +441,15 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function displayBookingDetails(bookingDetails) {
-    const successConstainer = document.querySelector(".step-5");
+    const successConstainer = document.querySelector(".step-4");
     if (successConstainer) {
       successConstainer.innerHTML = `
       <h3>Payment Successful!</h3>
       <p>Thank you for your booking.</p>
       <p><strong>Course:</strong> ${bookingDetails.courseName}</p>
-      <p><strong>Registration Fee:</strong> $${bookingDetails.registrationFee}</p>
-      <p><strong>Accommodation Fee:</strong> $${bookingDetails.accommodationFee}</p>
-      <p><strong>Total Paid:</strong> $${bookingDetails.amount}</p>
+      <p><strong>Registration Fee:</strong> $${bookingDetails.registrationFee.toFixed(2)}</p>
+      <p><strong>Accommodation Fee:</strong> $${bookingDetails.accommodationFee.toFixed(2)}</p>
+      <p><strong>Total Paid:</strong> $${bookingDetails.amount.toFixed(2)}</p>
       <p><strong>Email:</strong> ${bookingDetails.email}</p>
       <p>Your booking ID is <strong>${bookingDetails.bookingId}</strong>.</p>
       <button onclick="window.location.reload()">Back to Home</button>
@@ -458,13 +458,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Check if Stripe is loaded
-  if (typeof Stripe === "undefined") {
-    console.error("Stripe not loaded");
+  if (typeof Razorpay === "undefined") {
+    console.error("Razorpay not loaded");
     return;
   }
 
   // Initialize Stripe with the publishable key from localized data
-  stripe = Stripe(bookingData.stripePublicKey);
+  const razorpayKey = bookingData.razorpayKey;
 
   // Form submission handling
   form.addEventListener("submit", async function (e) {
@@ -487,6 +487,8 @@ document.addEventListener("DOMContentLoaded", function () {
       parseFloat(document.querySelector("#accommodation-fee").textContent) || 0;
     const coursePrice = parseFloat(document.querySelector("#course-price").textContent) || 0;
     const totalAmount = parseFloat(document.querySelector("#total-cost").textContent) * 100 || 0; // Convert to cents
+    const transportationFee =
+      parseFloat(document.querySelector("#transport-cost").textContent) || 0;
 
     // const formData = new FormData(form);
     // formData.append("action", "handle_booking_submission"); // Ensure action is set
@@ -510,75 +512,61 @@ document.addEventListener("DOMContentLoaded", function () {
       english_level: form["english_level"].value,
       transport: form["transport"].value,
       accommodationFee: accommodationFee,
+      transportationFee: transportationFee,
       totalAmount: totalAmount,
       // Include the nonce
     };
 
     try {
-      // Send the request to the updated REST API endpoint
-      const response = await fetch(`${bookingData.restApiUrl}submit-booking`, {
+      // Step 1: Create Razorpay order
+      const orderResponse = await fetch(`${bookingData.restApiUrl}create-order`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json", // Set content type to JSON
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(params),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      const orderData = await orderResponse.json();
+      if (!orderData.orderId) {
+        console.error("No order ID returned from backend");
+        return;
       }
+      const razorpayOrderId = orderData.orderId;
+      const tempId = orderData.tempId;
 
-      const jsonData = await response.json(); // Parse the response as JSON
-      console.log(jsonData);
-
-      if (jsonData.success) {
-        clientSecret = jsonData.clientSecret;
-        bookingDetails = jsonData.bookingDetails;
-        showStep(4);
-        initializeStripePayment(clientSecret, bookingDetails);
-      } else {
-        // Handle error response from the server
-        console.log("There was an error: " + (jsonData.message || "Unknown error"));
-        console.log(jsonData);
-      }
-    } catch (error) {
-      // Handle network or other errors
-      console.error("Fetch error:", error);
-      console.log("There was an error: " + error.message);
-    }
-
-    // Initialize payment in step 4
-    function initializeStripePayment(clientSecret) {
-      const elements = stripe.elements({ clientSecret });
-      const paymentElement = elements.create("payment");
-
-      paymentElement.mount("#payment-element");
-
-      submitPaymentButton.addEventListener("click", async function () {
-        try {
-          await elements.submit();
-
-          const { error } = await stripe.confirmPayment({
-            elements,
-            clientSecret: clientSecret,
-            confirmParams: {},
-            redirect: "if_required",
+      // Step 2: Razorpay Checkout
+      const razorpayOptions = {
+        key: bookingData.razorpayKey,
+        amount: params.totalAmount,
+        currency: "INR",
+        order_id: razorpayOrderId,
+        handler: async function (response) {
+          // Step 3: Verify Payment
+          const verifyResponse = await fetch(`${bookingData.restApiUrl}verify-payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpaySignature: response.razorpay_signature,
+              tempId: tempId,
+            }),
           });
 
-          if (error) {
-            console.log("Payment failed: " + error.message);
-          } else {
-            console.log("Payment successful!");
+          const verifyData = await verifyResponse.json();
+          if (verifyData.success) {
+            showStep(4);
             removeSidebar();
-            displayBookingDetails(bookingDetails);
-            showStep(5);
-            form.reset();
+            displayBookingDetails(verifyData.bookingDetails);
+          } else {
+            alert("Payment verification failed.");
           }
-        } catch (err) {
-          console.error("Error submitting payment form:", err.message);
-          console.log("Error: " + err.message);
-        }
-      });
+        },
+      };
+
+      const rzp = new Razorpay(razorpayOptions);
+      rzp.open();
+    } catch (error) {
+      console.error("Error:", error.message);
     }
   });
 });

@@ -1,5 +1,10 @@
 {
-    "require": {
-        "razorpay/razorpay": "^2.9"
-    }
+  "require": {
+    "razorpay/razorpay": "^2.9"
+  },
+  "autoload": {
+    "exclude-from-classmap": [
+      "vendor/rmccue/requests/src/"
+    ]
+  }
 }
