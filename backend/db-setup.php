@@ -101,6 +101,13 @@ $sql_coupons = "CREATE TABLE $table_name_coupons(
     INDEX idx_active_non_expired (is_active, expiry_date)
 ) $charset_collate;";
 
+$table_name_temp_booking = $wpdb->prefix . 'dubkii_temp_bookings';
+$sql_temp_booking = "CREATE TABLE IF NOT EXISTS $table_name_temp_booking (
+    id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    form_data LONGTEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) $charset_collate;";
+
 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 // Run the SQL queries to create the tables
 dbDelta($sql_courses);
@@ -108,6 +115,6 @@ dbDelta($sql_durations);
 dbDelta($sql_start_dates);
 dbDelta($sql);
 dbDelta($sql_prices);
-$result = dbDelta($sql_transportation_accommodation_fees);
+dbDelta($sql_transportation_accommodation_fees);
 dbDelta($sql_coupons);
-error_log(print_r($result, true));
+dbDelta($sql_temp_booking);

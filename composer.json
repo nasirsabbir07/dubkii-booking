@@ -1,5 +1,10 @@
 {
-    "require": {
-        "stripe/stripe-php": "^16.2"
-    }
+  "require": {
+    "razorpay/razorpay": "^2.9"
+  },
+  "autoload": {
+    "exclude-from-classmap": [
+      "vendor/rmccue/requests/src/"
+    ]
+  }
 }
