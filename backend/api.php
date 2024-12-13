@@ -52,6 +52,11 @@ add_action('rest_api_init', function () {
         'callback' => 'handle_payment_verification',
         'permission_callback' => '__return_true',
     ]);
+    register_rest_route('dubkii/v1', '/active-coupons', [
+        'methods' => 'GET', // Allow GET requests
+        'callback' => 'fetch_active_coupons_rest',
+        'permission_callback' => '__return_true', // Public access; adjust as needed
+    ]);
 });
 
 function rest_get_course_data(WP_REST_Request $request)
@@ -265,6 +270,24 @@ function handle_payment_verification(WP_REST_Request $request)
 
     // Decode form data
     $form_data = json_decode($temp_data->form_data, true);
+    $coupon_code = isset($form_data['couponCode']) ? sanitize_text_field($form_data['couponCode']) : null;
+
+    if ($coupon_code) {
+        $coupons_table = $wpdb->prefix . 'dubkii_coupons';
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE $coupons_table 
+                 SET current_redemptions = current_redemptions + 1, 
+                     is_active = CASE WHEN current_redemptions + 1 >= max_redemptions THEN 0 ELSE is_active END 
+                 WHERE code = %s AND is_active = 1",
+                $coupon_code
+            )
+        );
+        if ($wpdb->rows_affected === 0) {
+            // Handle case where coupon is inactive or max redemptions reached
+            error_log("Coupon code `$coupon_code` was not updated. It might already be inactive.");
+        }
+    }
 
     // Populate booking details for response
     $course_name =
@@ -317,4 +340,29 @@ function handle_payment_verification(WP_REST_Request $request)
             'bookingId' => $wpdb->insert_id,
         ],
     ], 200);
+}
+function fetch_active_coupons_rest(WP_REST_Request $request)
+{
+    global $wpdb;
+    $table_name_coupons = $wpdb->prefix . 'dubkii_coupons';
+
+    $current_date = current_time('Y-m-d H:i:s');
+    $coupons = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT *
+             FROM $table_name_coupons 
+             WHERE is_active = 1 AND expiry_date >= %s",
+            $current_date
+        ),
+        ARRAY_A
+    );
+
+    if (!empty($coupons)) {
+        return new WP_REST_Response([
+            'success' => true,
+            'data' => $coupons
+        ]);
+    } else {
+        return new WP_REST_Response(['message' => 'No active coupons found.'], 404);
+    }
 }
