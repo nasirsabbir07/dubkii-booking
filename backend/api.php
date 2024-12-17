@@ -226,7 +226,7 @@ function handle_create_order(WP_REST_Request $request)
         // Create Razorpay order
         $order = $api->order->create([
             'amount' => $totalAmount, // Amount in paise
-            'currency' => 'INR',
+            'currency' => 'USD',
             'receipt' => 'rcpt_' . $temp_id,
         ]);
         error_log("Razorpay order created: " . json_encode($order));
@@ -251,6 +251,7 @@ function handle_payment_verification(WP_REST_Request $request)
     $tempId = intval($params['tempId']);
 
     // Razorpay API credentials
+    $key_id = get_option('razorpay_key_id');
     $key_secret = get_option('razorpay_key_secret');
 
     // Verify Razorpay signature
@@ -325,6 +326,35 @@ function handle_payment_verification(WP_REST_Request $request)
         return new WP_REST_Response(['message' => 'Failed to save booking.'], 500);
     }
 
+    try {
+        $api = new Razorpay\Api\Api($key_id, $key_secret);
+
+        $invoice = $api->invoice->create([
+            'type' => 'link',
+            'description' => 'Course Booking Invoice',
+            'customer' => [
+                'name' => $form_data['name'],
+                'email' => $form_data['email'],
+                'contact' => $form_data['contact_no'],
+            ],
+            'line_items' => [
+                [
+                    'name' => $course_name,
+                    'amount' => intval($total_amount * 100), // Amount in paise
+                    'currency' => 'INR',
+                    'quantity' => 1,
+                ]
+            ],
+            'sms_notify' => 1,
+            'email_notify' => 1,
+            'receipt' => 'rcpt_' . $tempId,
+        ]);
+
+        error_log("Invoice created successfully: " . json_encode($invoice));
+    } catch (Exception $e) {
+        error_log("Failed to create Razorpay invoice: " . $e->getMessage());
+    }
+
     // Delete temporary data
     $wpdb->delete($temp_table, ['id' => $tempId]);
 
@@ -338,6 +368,7 @@ function handle_payment_verification(WP_REST_Request $request)
             'amount' => $total_amount / 100, // Convert cents to dollars
             'email' => $email,
             'bookingId' => $wpdb->insert_id,
+            'invoiceUrl' => isset($invoice['short_url']) ? $invoice['short_url'] : null
         ],
     ], 200);
 }
