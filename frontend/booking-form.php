@@ -46,6 +46,12 @@
                 <div id="email-message" style="margin-top: 5px; color: green; display: none;"></div>
                 <label for="dob">Date of birth:</label>
                 <input type="date" id="dob" name="dob" required>
+                <div class="coupon-section">
+                    <label for="coupon_code">Have a Coupon Code?</label>
+                    <input type="text" id="coupon_code" name="coupon_code" placeholder="Enter your coupon code">
+                    <button type="button" id="show-coupons">View Available Coupons</button>
+                    <div id="coupon-message" style="margin-top: 5px; color: green; display: none;"></div>
+                </div>
                 <label for="address">Address:</label>
                 <input type="text" id="address" name="address" required>
                 <label for="city">City:</label>
@@ -125,12 +131,21 @@
         <div class="sidebar">
             <h3>Course Details</h3>
             <p><strong>Selected Course:</strong> <span id="selected-course">None</span></p>
-            <p><strong>Price:</strong> $<span id="course-price">0.00</span></p>
+            <p><strong>Price:</strong> $<span id="course-price" data-original-price="0.00">0.00</span></p>
             <p><strong>Registration Fee:</strong> $<span id="registration-fee">0.00</span></p>
             <p><strong>Accommodation Fee:</strong> $<span id="accommodation-fee">0.00</span></p>
             <p><strong>Transport Cost:</strong> $<span id="transport-cost">0</span></p>
             <p><strong>Total:</strong> $<span id="total-cost">0</span></p>
             <!-- Add any other details you'd like to display here -->
+        </div>
+    </div>
+    <div id="coupon-modal" class="coupon-modal" style="display: none;">
+        <div class="coupon-modal-content">
+            <span class="coupon-close-modal" style="cursor: pointer;">&times;</span>
+            <h2>Available Coupons</h2>
+            <ul id="coupon-list">
+                <!-- Active coupons will be dynamically loaded here -->
+            </ul>
         </div>
     </div>
 
