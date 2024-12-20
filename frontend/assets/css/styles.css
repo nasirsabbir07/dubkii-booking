@@ -9,21 +9,7 @@
 
 .booking-form form {
   flex: 2;
-  padding-right: 20px;
 }
-
-/* .booking-form .sidebar {
-  flex: 1;
-  padding: 20px;
-  border-left: 1px solid #ddd;
-  background-color: #3b3b3b;
-  color: #fff;
-  height: max-content;
-}
-
-.sidebar .sidebar-title {
-  color: #fff;
-} */
 
 .sidebar {
   padding: 20px;
@@ -72,28 +58,6 @@
   font-weight: bold;
   color: #000;
 }
-
-/* .tab-list {
-  display: flex;
-  list-style: none;
-  padding: 0;
-  margin: 0 0 20px !important;
-  border-bottom: 2px solid #ddd;
-}
-
-.tab {
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-}
-
-.tab.active {
-  font-weight: bold;
-  background-color: #ffc107;
-  color: #000;
-} */
 
 .tab-list {
   display: flex;
@@ -287,7 +251,7 @@ button {
 }
 
 #review-course-details span {
-  margin-right: 10px; /* Optional: add spacing between the two items */
+  margin-right: 2px; /* Optional: add spacing between the two items */
 }
 
 /* Make the total cost bold or larger */

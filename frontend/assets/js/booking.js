@@ -743,6 +743,11 @@ document.addEventListener("DOMContentLoaded", function () {
         ${document.querySelector("#country").value}`;
 
     // Populate booking cost breakdown
+    // Fetch the selected duration's data-duration-weeks value
+    const selectedOption = durationSelect.options[durationSelect.selectedIndex];
+    const durationWeeks = selectedOption
+      ? selectedOption.getAttribute("data-duration-weeks")
+      : null;
     document.querySelector("#review-selected-course span").textContent =
       document.querySelector("#selected-course").textContent;
     document.querySelector("#review-course-price span").textContent =
@@ -758,7 +763,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Populate start date and duration
     document.querySelector("#review-course-start-date span").textContent = startDateSelect.value;
-    // document.querySelector("#review-course-duration span").textContent = durationSelect.value;
+    document.querySelector("#review-course-duration span").textContent = durationWeeks
+      ? `${durationWeeks} Weeks`
+      : "Not selected";
   }
 
   function removeSidebar() {
