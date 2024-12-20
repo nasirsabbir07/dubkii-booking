@@ -12,7 +12,9 @@
             <!-- Add nonce field here -->
 
             <!-- Step 1: Select Course -->
+
             <div class="form-step step-1">
+                <h3>Course Selection</h3>
                 <div class=course-detail-selection>
                     <label for="course">Select Course:</label>
                     <select name="course" id="course" required>
@@ -21,14 +23,14 @@
                 </div>
 
                 <div class="course-detail-selection">
-                    <label for="start_date">Select Start Date</label>
+                    <label for="start_date">Select Start Date:</label>
                     <select name="start_date" id="start-date-wrapper" required>
                         <option value="">Select a start date</option>
                     </select>
                 </div>
 
                 <div class=course-detail-selection>
-                    <label for="duration">Duration</label>
+                    <label for="duration">Duration:</label>
                     <select name="duration" id="duration-wrapper" required>
                         <option value="">Select duration</option>
                     </select>
@@ -41,6 +43,7 @@
 
             <!-- Step 2: Personal Details -->
             <div class="form-step step-2" style="display: none;">
+                <h3>Personal Details</h3>
                 <label for="name">Full Name:</label>
                 <input type="text" id="name" name="name" required>
                 <label for="email">Email:</label>
