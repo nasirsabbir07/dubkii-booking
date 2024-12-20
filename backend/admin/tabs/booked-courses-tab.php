@@ -149,7 +149,7 @@ $total_booked_pages = ceil($total_booked_courses / $booked_courses_per_page);
                 <a href="<?php echo admin_url('admin.php?page=dubkii-booking&active_tab=' . esc_attr($_GET['active_tab'])); ?>" class="button button-secondary">Reset Filters</a>
             </form>
         </div>
-        <div class="booked-courses-table" style="width: 75%; padding: 10px;">
+        <div class="booked-courses-table" style="width: 75%; padding:0px 10px;">
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>

@@ -9,6 +9,10 @@
   margin-bottom: 15px;
 }
 
+.sidebar-filters {
+  max-height: fit-content;
+}
+
 .sidebar-filters label {
   display: block;
   margin-bottom: 5px;
