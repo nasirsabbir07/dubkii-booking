@@ -104,9 +104,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (nextStep === 4) {
           populateReviewTab();
         }
-        // Scroll to the top of the form
-        if (form) {
-          form.scrollIntoView({ behavior: "smooth" }); // Smooth scrolling to the top
+        // Scroll to the tabs at the top of the form
+        const bookingFormContainer = document.querySelector(".booking-form"); // Replace with the correct tabs container selector
+        if (bookingFormContainer) {
+          bookingFormContainer.scrollIntoView({ behavior: "smooth" }); // Smooth scrolling to the tabs
         }
       } else {
         alert("Please fill in all required fields before proceeding.");
@@ -119,6 +120,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const prevStep = parseInt(this.getAttribute("data-prev-step"));
       showStep(prevStep);
       updateSidebar(prevStep);
+      // Scroll to the tabs at the top of the form
+      const bookingFormContainer = document.querySelector(".booking-form"); // Replace with the correct tabs container selector
+      if (bookingFormContainer) {
+        bookingFormContainer.scrollIntoView({ behavior: "smooth" }); // Smooth scrolling to the tabs
+      }
     });
   });
 
@@ -226,8 +232,9 @@ document.addEventListener("DOMContentLoaded", function () {
       resetAccommodationFee();
       await updatePriceOnSelection();
     } else {
-      clearDropdown(startDateSelect); // Clear start date and duration dropdowns if no course is selected
-      clearDropdown(durationSelect);
+      // Clear and reset dependent dropdowns with placeholders
+      clearDropdown(startDateSelect, "Select a start date");
+      clearDropdown(durationSelect, "Select duration (weeks)");
       // Optionally clear sidebar as well
       document.getElementById("selected-course").textContent = "None";
       document.getElementById("course-price").textContent = "$0.00";
@@ -291,8 +298,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Function to clear dropdown
-  function clearDropdown(selectElement) {
-    selectElement.innerHTML = "";
+  function clearDropdown(selectElement, placeholder) {
+    while (selectElement.firstChild) {
+      selectElement.removeChild(selectElement.firstChild);
+    }
+    if (placeholder) {
+      const placeholderOption = document.createElement("option");
+      placeholderOption.textContent = placeholder;
+      placeholderOption.value = "";
+      selectElement.appendChild(placeholderOption);
+    }
   }
 
   // Add event listener for course selection change
