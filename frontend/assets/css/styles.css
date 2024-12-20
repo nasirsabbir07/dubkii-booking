@@ -2,37 +2,112 @@
   display: flex;
 }
 
-.booking-form form {
-  flex: 2;
-  padding-right: 20px;
+.form-container {
+  flex-direction: column-reverse;
+  gap: 20px;
 }
 
-.booking-form .sidebar {
-  flex: 1;
+.booking-form form {
+  flex: 2;
+}
+
+.sidebar {
   padding: 20px;
-  border-left: 1px solid #ddd;
-  background-color: #f9f9f9;
+  background-color: #f9f9f9; /* Background color for the sidebar */
+  border: 1px solid #ddd; /* Optional: Border around the sidebar */
+  border-radius: 8px; /* Optional: Rounded corners */
+  width: 100%; /* Adjust based on your layout */
+  margin: auto; /* Center the sidebar if needed */
+}
+
+.sidebar-title {
+  font-size: 1.5em;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.booking-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between rows */
+}
+
+.booking-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee; /* Optional: Divider between rows */
+}
+
+.booking-label {
+  font-weight: bold;
+  color: #555;
+  flex: 1; /* Left column takes up space */
+  text-align: left;
+}
+
+.booking-value {
+  color: #000;
+  flex: 1; /* Right column takes up space */
+  text-align: right;
+}
+
+.total .booking-label,
+.total .booking-value {
+  font-weight: bold;
+  color: #000;
 }
 
 .tab-list {
   display: flex;
   list-style: none;
   padding: 0;
-  margin: 0 0 20px;
-  border-bottom: 2px solid #ddd;
+  margin: 0 0 20px !important;
+  position: relative;
 }
 
 .tab {
   flex: 1;
   text-align: center;
-  padding: 10px;
+  padding: 15px 20px; /* Adjust padding for better spacing */
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  background-color: #c9cdcf;
+  color: #000;
+  font-weight: 500;
+  position: relative;
+  clip-path: polygon(
+    0 0,
+    /* Top-left */ calc(100% - 15px) 0,
+    /* Almost at the top-right */ 100% 50%,
+    /* Right middle (point of arrow) */ calc(100% - 15px) 100%,
+    /* Almost at the bottom-right */ 0 100%,
+    /* Bottom-left */ 15px 50% /* Left middle (recessed shape) */
+  );
+  transition: background-color 0.3s, color 0.3s;
 }
 
+/* Active tab styles */
 .tab.active {
-  border-bottom: 2px solid #0073aa;
+  background-color: #ffc107;
   font-weight: bold;
+  color: #000;
+}
+
+/* Completed Tab */
+.tab.completed {
+  background-color: #28a745; /* Green background for completed steps */
+  color: #fff; /* White text for contrast */
+}
+
+/* First tab: Remove left recess */
+.tab:first-child {
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+}
+
+/* Last tab: Remove right arrow */
+.tab:last-child {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 15px 50%);
 }
 
 .form-step {
@@ -84,4 +159,137 @@ button {
 .coupon-close-modal {
   float: right;
   font-size: 1.5em;
+}
+
+.coupons {
+  display: flex;
+  justify-content: space-between;
+}
+
+#show-coupons {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-inline: 10px;
+}
+
+#coupon-list li {
+  list-style: none;
+  padding: 8px;
+}
+
+.apply-coupon-btn {
+  padding: 5px 10px 5px 10px !important;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between; /* Aligns buttons to the right */
+  gap: 10px; /* Adds spacing between buttons */
+  margin-top: 20px; /* Adds some spacing above the buttons */
+}
+
+.right-btn {
+  justify-content: flex-end;
+}
+
+/* User Details Section */
+.user-details-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.user-details-left,
+.user-details-right {
+  width: 50%; /* Create two columns */
+}
+
+.user-details-left div,
+.user-details-right div {
+  margin-bottom: 0;
+}
+
+/* Booking Details Section */
+.booking-details-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.course-info {
+  width: 60%; /* The course details will take more space */
+}
+
+.course-price {
+  width: 20%; /* The price will take up a smaller space */
+}
+
+.course-info div {
+  margin-bottom: 5px;
+}
+
+/* Flexbox for coupon section and total cost */
+.coupon-and-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+#review-selected-course {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+#review-course-details {
+  font-size: 0.9em; /* Smaller font size */
+  color: #555; /* Optional: add a slightly lighter color */
+}
+
+#review-course-start-date,
+#review-course-duration {
+  display: inline; /* Make both elements inline to display side by side */
+}
+
+#review-course-details span {
+  margin-right: 2px; /* Optional: add spacing between the two items */
+}
+
+/* Make the total cost bold or larger */
+#review-total-cost {
+  font-weight: bold;
+  font-size: 1.4em; /* You can adjust this size to your preference */
+  color: #474d50;
+}
+
+/* Style the additional details with smaller font and display under the total */
+.details-under-total {
+  font-size: 0.9em; /* Smaller font for the details */
+  color: #555; /* Optional: add a lighter color */
+  margin-top: 10px; /* Adds some space between the total and the details */
+}
+
+.details-under-total div {
+  margin-bottom: 5px; /* Adds space between each detail */
+}
+
+#step-review p {
+  font-weight: 600;
+}
+
+.coupon-section {
+  width: 60%;
+}
+
+.review-user-details {
+  background-color: #fff;
+  padding: 5px 10px 20px 10px;
+}
+
+.user-details-row,
+.booking-details-row {
+  color: #474d50;
+}
+
+.review-booking-details {
+  padding: 5px 10px 20px 10px;
 }

@@ -230,7 +230,6 @@ if (isset($_POST['delete_coupon']) && isset($_POST['coupon_id'])) {
 $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry_date ASC", ARRAY_A);
 ?>
 <div id="coupons" class="tab-content" style="display: <?php echo ($active_tab === 'coupons') ? 'block' : 'none'; ?>;">
-    <h1>Coupons Management</h1>
     <form method="POST" id="coupon_form" style="margin-bottom: 30px;">
         <h2>Add New Coupon</h2>
         <table class="form-table">

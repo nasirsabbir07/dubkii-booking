@@ -49,11 +49,18 @@ $sql = "CREATE TABLE $table_name (
     nationality varchar(50) NOT NULL,
     country varchar(50) NOT NULL,
     start_date date NOT NULL,
+    em_contact_type varchar(100) NOT NULL,
+    em_contact_name varchar(100) NOT NULL,
+    em_contact_no varchar(15) NOT NULL,
+    em_contact_email varchar(100) NOT NULL,
     duration INT NOT NULL,
     english_level varchar(50) NOT NULL,
     has_transport tinyint(1) NOT NULL DEFAULT 0,
     transport_cost decimal(10, 2) DEFAULT 0.00,
     total_amount decimal(10, 2) NOT NULL DEFAULT 0.00,
+    payment_id varchar(235) NOT NULL,
+    order_id varchar(235) NOT NULL,
+    
     PRIMARY KEY (id),
     FOREIGN KEY (course_id) REFERENCES $table_name_courses(id) ON DELETE CASCADE
 ) $charset_collate;";
