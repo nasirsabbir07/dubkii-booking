@@ -836,6 +836,11 @@ document.addEventListener("DOMContentLoaded", function () {
       parseFloat(document.querySelector("#registration-fee").textContent.replace("$", "")) || 0.0;
     const couponCode = document.querySelector("#coupon_code").value.trim();
 
+    const selectedDurationOption = form["duration"].options[form["duration"].selectedIndex];
+    const durationWeeks = selectedDurationOption
+      ? parseInt(selectedDurationOption.getAttribute("data-duration-weeks"), 10)
+      : null;
+
     const params = {
       name: form["name"].value,
       email: form["email"].value,
@@ -848,7 +853,7 @@ document.addEventListener("DOMContentLoaded", function () {
       country: form["country"].value,
       course: form["course"].value,
       start_date: form["start_date"].value,
-      duration: form["duration"].value,
+      duration: durationWeeks,
       english_level: form["english_level"].value,
       transport: form["transport"].value,
       accommodationFee: accommodationFee,
