@@ -96,3 +96,35 @@ button.button-secondary {
 .modal-content {
   animation: modalFadeIn 0.3s ease-out;
 }
+
+.form-table th {
+  padding: 5px 10px 5px 0;
+}
+
+.form-table td {
+  padding: 5px 10px;
+}
+
+button {
+  padding: 5px 10px;
+  font-weight: 500;
+  background-color: #afe1af;
+  border: none;
+  border-radius: 2px;
+}
+
+/* Remove spinners in WebKit browsers (Chrome, Safari, Edge) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove spinners for Firefox */
+input[type="number"] {
+  -moz-appearance: textfield; /* For Firefox */
+}
+
+#course_name {
+  width: 400px;
+}

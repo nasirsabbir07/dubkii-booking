@@ -12,10 +12,17 @@ $dubkii_booking_db_version = '1.0';
 require_once plugin_dir_path(__FILE__) . 'vendor/razorpay/razorpay/Razorpay.php';
 // require_once plugin_dir_path(__FILE__) . 'class-alias.php';
 include_once plugin_dir_path(__FILE__) . 'backend/db-setup.php';
-include_once plugin_dir_path(__FILE__) . 'backend/admin/admin-dashboard.php';
+// include_once plugin_dir_path(__FILE__) . 'backend/admin/admin-dashboard.php';
 require_once plugin_dir_path(__FILE__) . 'backend/form-handler.php';
 require_once plugin_dir_path(__FILE__) . 'backend/api.php';
+$admin_tabs_dir = plugin_dir_path(__FILE__) . 'backend/admin/admin-tabs/';
 
+if (is_admin()) {
+    include_once plugin_dir_path(__FILE__) . 'backend/admin/admin-dashboard.php';
+    foreach (glob($admin_tabs_dir . '*.php') as $file) {
+        require_once $file;
+    }
+}
 
 // require_once plugin_dir_path(__FILE__) . 'backend/booking-success-email.php';
 
@@ -110,7 +117,10 @@ function enqueue_dubkii_admin_assets($hook)
         filemtime(plugin_dir_path(__FILE__) . 'frontend/assets/css/admin-styles.css')
     );
     wp_enqueue_script('dubkii-admin-js', plugin_dir_url(__FILE__) . 'backend/assets/js/admin.js', ['jquery'], null, true);
-    wp_localize_script('dubkii-admin-js', 'ajaxurl', admin_url('admin-ajax.php'));  // Ensure the AJAX URL is passed
+    // Correct localization of ajaxurl
+    wp_localize_script('dubkii-admin-js', 'dubkii_ajax_obj', array(
+        'ajaxurl' => admin_url('admin-ajax.php') // Pass the AJAX URL to JavaScript
+    ));
 }
 
 add_action('admin_enqueue_scripts', 'enqueue_dubkii_admin_assets');

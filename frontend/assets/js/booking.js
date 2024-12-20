@@ -13,10 +13,20 @@ document.addEventListener("DOMContentLoaded", function () {
   let allCourses = [];
   let appliedCouponCode = [];
   let originalCoursePrice = 0.0;
-
+  // Sidebar rows mapped to their respective steps
+  const stepRows = {
+    1: ["booking-selected-course-row", "booking-accommodation-fee-row"],
+    2: ["booking-registration-fee-row"],
+    3: ["booking-transport-cost-row"],
+  };
   // Check if pluginCourseId is defined and fetch the specific course
   if (typeof bookingData.currentCourseId !== "undefined") {
     fetchCourses(bookingData.currentCourseId);
+  }
+
+  function markCompleted(step) {
+    const tab = tabs[step - 1]; // Get the tab corresponding to the step
+    tab.classList.add("completed");
   }
 
   // Function to show the current step
@@ -27,15 +37,80 @@ document.addEventListener("DOMContentLoaded", function () {
 
     tabs.forEach((tab) => tab.classList.remove("active"));
     tabs[step - 1].classList.add("active");
+    if (step === 4) {
+      removeSidebar();
+    }
   }
 
-  showStep(1);
+  // Function to update the visibility of sidebar rows
+  function updateSidebar(step) {
+    // Iterate through all rows and toggle visibility based on the step
+    document.querySelectorAll(".booking-row").forEach((row) => {
+      row.style.display = "none"; // Initially hide all rows
+    });
+
+    // Loop through all steps up to the current step
+    for (let currentStep = 1; currentStep <= step; currentStep++) {
+      if (stepRows[currentStep]) {
+        stepRows[currentStep].forEach((rowId) => {
+          const row = document.querySelector(`#${rowId}`);
+          if (row) row.style.display = "flex"; // Show rows from this step
+        });
+      }
+    }
+
+    // Always keep the total row visible
+    const totalRow = document.querySelector("#booking-total-row");
+    if (totalRow) totalRow.style.display = "flex";
+  }
+
+  // Function to validate all required fields in the current step
+  function validateStep(step) {
+    const currentStep = document.querySelector(`.step-${step}`);
+    const requiredFields = currentStep.querySelectorAll("[required");
+    let isValid = true;
+
+    requiredFields.forEach((field) => {
+      if (field.type === "radio") {
+        // Special handling for radio buttons: Ensure one is selected
+        const radioGroup = currentStep.querySelectorAll(`input[name="${field.name}"]`);
+        const isChecked = Array.from(radioGroup).some((radio) => radio.checked);
+        if (!isChecked) {
+          isValid = false;
+          currentStep.querySelector(`#${field.name}-error`)?.classList.add("visible");
+        } else {
+          currentStep.querySelector(`#${field.name}-error`)?.classList.remove("visible");
+        }
+      } else if (!field.value.trim()) {
+        isValid = false;
+        field.style.borderColor = "red"; // Highlight empty fields
+      } else {
+        field.style.borderColor = ""; // Reset if valid
+      }
+    });
+    return isValid;
+  }
 
   // Next and Previous button handling
   document.querySelectorAll(".next-button").forEach((button) => {
     button.addEventListener("click", function () {
-      const nextStep = parseInt(this.getAttribute("data-next-step"));
-      showStep(nextStep);
+      const currentStep = parseInt(this.getAttribute("data-next-step")) - 1;
+
+      if (validateStep(currentStep)) {
+        const nextStep = parseInt(this.getAttribute("data-next-step"));
+        showStep(nextStep);
+        markCompleted(currentStep);
+        updateSidebar(nextStep);
+        if (nextStep === 4) {
+          populateReviewTab();
+        }
+        // Scroll to the top of the form
+        if (form) {
+          form.scrollIntoView({ behavior: "smooth" }); // Smooth scrolling to the top
+        }
+      } else {
+        alert("Please fill in all required fields before proceeding.");
+      }
     });
   });
 
@@ -43,15 +118,28 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener("click", function () {
       const prevStep = parseInt(this.getAttribute("data-prev-step"));
       showStep(prevStep);
+      updateSidebar(prevStep);
     });
   });
 
   // Tab handling
   tabs.forEach((tab, index) => {
     tab.addEventListener("click", function () {
-      showStep(index + 1);
+      const targetStep = index + 1;
+
+      // Validate the current step before allowing tab switch
+      const currentStep = Array.from(tabs).findIndex((t) => t.classList.contains("active")) + 1;
+      if (targetStep > currentStep && !validateStep(currentStep)) {
+        alert("Please fill in all required fields before switching tabs.");
+        return;
+      }
+      showStep(targetStep);
+      updateSidebar(targetStep);
     });
   });
+
+  showStep(1);
+  updateSidebar(1);
 
   // Function to populate dropdown with data from backend
   async function fetchCourses(courseId) {
@@ -63,7 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
         },
       });
       const data = await response.json();
-      console.log(data);
       if (data.success) {
         allCourses = [data.course];
         populateDropdown(courseSelect, allCourses, "Select a course");
@@ -72,8 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Error fetching course data:", error);
     }
   }
-
-  // Call the fetchOptions function to populate dropdowns
 
   // Function to handle course selection and fetch corresponding start dates and durations
   async function fetchCourseDetails(courseId) {
@@ -145,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
       clearDropdown(durationSelect);
       // Optionally clear sidebar as well
       document.getElementById("selected-course").textContent = "None";
-      document.getElementById("course-price").textContent = "0";
+      document.getElementById("course-price").textContent = "$0.00";
       // selectedCourseCost = 0;
       resetAccommodationFee();
     }
@@ -159,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!selectedCourseId || !selectedDurationId) {
       // Clear the price if no valid selection is made
-      document.getElementById("course-price").textContent = "0.00";
+      document.getElementById("course-price").textContent = "$0.00";
       return;
     }
 
@@ -176,7 +261,6 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       const data = await response.json();
-      console.log(data);
 
       if (data.success) {
         const price = parseFloat(data.price);
@@ -198,7 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Helper function to update the course price in the sidebar
   function setCoursePrice(price) {
     const coursePriceElem = document.getElementById("course-price");
-    coursePriceElem.textContent = price.toFixed(2);
+    coursePriceElem.textContent = `$${price.toFixed(2)}`;
 
     // Save the original price as a data attribute for further calculations
     if (!originalCoursePrice) {
@@ -229,33 +313,29 @@ document.addEventListener("DOMContentLoaded", function () {
         countryOption.value = item.name;
         countryOption.textContent = item.name;
         countrySelect.appendChild(countryOption);
-
-        // Add nationalities to the nationality dropdown
-        const nationalityOption = document.createElement("option");
       });
     } else {
       console.error("Countries list not found or not loaded correctly");
     }
   }
 
-  function setNationalityBasedOnCountry(selectedCountry) {
-    nationalitySelect.innerHTML = '<option value="">Select nationality</option>';
-
-    const country = window.countriesList.find((item) => item.name === selectedCountry);
-    if (country) {
-      const nationalityOption = document.createElement("option");
-      nationalityOption.value = country.nationality;
-      nationalityOption.textContent = country.nationality;
-      nationalitySelect.appendChild(nationalityOption);
+  // Function to populate the nationality dropdown
+  function populateNationalityDropdown() {
+    if (window.countriesList && Array.isArray(window.countriesList)) {
+      window.countriesList.forEach((item) => {
+        // Add nationalities to the nationality dropdown
+        const nationalityOption = document.createElement("option");
+        nationalityOption.value = item.nationality;
+        nationalityOption.textContent = item.nationality;
+        nationalitySelect.appendChild(nationalityOption);
+      });
+    } else {
+      console.error("Countries list not found or not loaded correctly");
     }
   }
 
   populateCountryDropdown();
-
-  countrySelect.addEventListener("change", function () {
-    const selectedCountry = this.value;
-    setNationalityBasedOnCountry(selectedCountry);
-  });
+  populateNationalityDropdown();
 
   const transportRadios = document.querySelectorAll('input[name="transport"]');
   const transportCostElement = document.getElementById("transport-cost");
@@ -277,7 +357,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.success) {
         allFees = data.fees;
         localStorage.setItem("fees", JSON.stringify(allFees)); // Store fees in localStorage
-        console.log("Fees stored in localStorage:", localStorage.getItem("fees"));
+        // console.log("Fees stored in localStorage:", localStorage.getItem("fees"));
       } else {
         console.error("Failed to retrieve fees:", data.message);
       }
@@ -304,7 +384,7 @@ document.addEventListener("DOMContentLoaded", function () {
       console.warn("No transport option selected");
     }
     if (transportCostElement) {
-      transportCostElement.textContent = transportCost.toFixed(2);
+      transportCostElement.textContent = `$${transportCost.toFixed(2)}`;
     }
     updateTotalCost();
   }
@@ -331,8 +411,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Check Email api call
   async function checkEmail(email) {
-    console.log(email);
-
     if (email) {
       try {
         const response = await fetch(`${bookingData.restApiUrl}check-email`, {
@@ -349,7 +427,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const jsonData = await response.json();
-        console.log(jsonData);
 
         if (jsonData.success) {
           const registrationFee = jsonData.registrationFee;
@@ -382,7 +459,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.querySelector(".sidebar");
     const feeElem = sidebar.querySelector("#registration-fee");
     const formattedFee = parseFloat(fee).toFixed(2);
-    feeElem.textContent = `${formattedFee}`;
+    feeElem.textContent = `$${formattedFee}`;
     updateTotalCost();
   }
 
@@ -399,7 +476,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Accommodation Fee
   function calculateAccommodationFee(durationWeeks) {
-    console.log(durationWeeks);
     const accommodationCost = storedFees ? parseFloat(storedFees.accommodation_cost) : 0;
     return durationWeeks * accommodationCost;
   }
@@ -409,7 +485,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const feeElem = sidebar.querySelector("#accommodation-fee");
     const fee = calculateAccommodationFee(duration);
     const formattedFee = parseFloat(fee).toFixed(2);
-    feeElem.textContent = `${formattedFee}`;
+    feeElem.textContent = `$${formattedFee}`;
 
     updateTotalCost();
   }
@@ -417,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function resetAccommodationFee() {
     const accommodationFeeElem = document.querySelector("#accommodation-fee");
 
-    accommodationFeeElem.textContent = "0.00";
+    accommodationFeeElem.textContent = "$0.00";
     updateTotalCost(); // Recalculate total cost to reflect the reset
   }
 
@@ -435,14 +511,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function updateTotalCost() {
     const registrationFeeElem = document.querySelector("#registration-fee");
-    const coursePrice = parseFloat(document.querySelector("#course-price").textContent) || 0;
-    console.log(coursePrice);
+    const coursePrice =
+      parseFloat(document.querySelector("#course-price").textContent.replace("$", "")) || 0;
     const accommodationFee =
-      parseFloat(document.querySelector("#accommodation-fee").textContent) || 0;
-    const transportCost = parseFloat(transportCostElement.textContent) || 0;
-    const registrationFee = parseFloat(registrationFeeElem.textContent) || 0.0;
+      parseFloat(document.querySelector("#accommodation-fee").textContent.replace("$", "")) || 0;
+    const transportCost = parseFloat(transportCostElement.textContent.replace("$", "")) || 0;
+    const registrationFee = parseFloat(registrationFeeElem.textContent.replace("$", "")) || 0.0;
     const totalCost = coursePrice + transportCost + registrationFee + accommodationFee;
-    totalCostElem.textContent = totalCost.toFixed(2);
+    totalCostElem.textContent = `$${totalCost.toFixed(2)}`;
+    populateReviewTab();
   }
 
   // Event listener to show coupons
@@ -530,7 +607,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const originalPrice = getOriginalCoursePrice();
-    console.log("original course price: ", originalPrice);
     let discountedPrice = originalPrice;
 
     // Calculate discounted price
@@ -561,11 +637,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (applyButton) {
       const applyButton = document.querySelector(`.apply-coupon-btn[data-code="${couponCode}"]`);
-      console.log("Button to remove:", applyButton, "Coupon Code:", couponCode);
-
       if (applyButton) {
         applyButton.remove();
-        console.log("Button removed successfully.");
       } else {
         console.warn(`Button for coupon code "${couponCode}" not found.`);
       }
@@ -641,6 +714,38 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("coupon-modal").style.display = "none";
   });
 
+  function populateReviewTab() {
+    // Populate user details
+    document.querySelector("#review-name span").textContent = document.querySelector("#name").value;
+    document.querySelector("#review-contact span").textContent =
+      document.querySelector("#contact_no").value;
+    document.querySelector("#review-email span").textContent =
+      document.querySelector("#email").value;
+    document.querySelector("#review-address span").textContent = `${
+      document.querySelector("#address").value
+    }, 
+        ${document.querySelector("#city").value}, ${document.querySelector("#post_code").value}, 
+        ${document.querySelector("#country").value}`;
+
+    // Populate booking cost breakdown
+    document.querySelector("#review-selected-course span").textContent =
+      document.querySelector("#selected-course").textContent;
+    document.querySelector("#review-course-price span").textContent =
+      document.querySelector("#course-price").textContent;
+    document.querySelector("#review-registration-fee span").textContent =
+      document.querySelector("#registration-fee").textContent;
+    // document.querySelector("#review-accommodation-fee span").textContent =
+    //   document.querySelector("#accommodation-fee").textContent;
+    // document.querySelector("#review-transport-cost span").textContent =
+    //   document.querySelector("#transport-cost").textContent;
+    document.querySelector("#review-total-cost span").textContent =
+      document.querySelector("#total-cost").textContent;
+
+    // Populate start date and duration
+    document.querySelector("#review-course-start-date span").textContent = startDateSelect.value;
+    // document.querySelector("#review-course-duration span").textContent = durationSelect.value;
+  }
+
   function removeSidebar() {
     const sidebar = document.querySelector(".sidebar");
     if (sidebar) {
@@ -649,7 +754,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function displayBookingDetails(bookingDetails) {
-    const successConstainer = document.querySelector(".step-4");
+    const successConstainer = document.querySelector(".step-5");
     if (successConstainer) {
       successConstainer.innerHTML = `
       <h3>Payment Successful!</h3>
@@ -660,7 +765,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <p><strong>Total Paid:</strong> $${bookingDetails.amount.toFixed(2)}</p>
       <p><strong>Email:</strong> ${bookingDetails.email}</p>
       <p>Your booking ID is <strong>${bookingDetails.bookingId}</strong>.</p>
-      <button onclick="window.location.reload()">Back to Home</button>
+      <div class="button-container"><button onclick="window.location.reload()">Back to Home</button></div>
     `;
     }
   }
@@ -682,9 +787,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const requiredFields = ["name", "email", "course", "start_date", "duration"];
     for (const field of requiredFields) {
       if (!form[field].value) {
-        console.log(`Please fill in the ${field} field.`);
         return;
       }
+    }
+
+    // Validate transport selection
+    const transportOptions = document.querySelectorAll('input[name="transport"]');
+    const isTransportSelected = Array.from(transportOptions).some((option) => option.checked);
+
+    if (!isTransportSelected) {
+      alert("Please select a transport option before submitting.");
+      return;
     }
 
     // Get nonce securely
@@ -692,12 +805,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // console.log(nonce);
     // Get fee details and calculate the total amount
     const accommodationFee =
-      parseFloat(document.querySelector("#accommodation-fee").textContent) || 0;
-    const totalAmount = parseFloat(document.querySelector("#total-cost").textContent) * 100 || 0; // Convert to cents
+      parseFloat(document.querySelector("#accommodation-fee").textContent.replace("$", "")) || 0.0;
+    const totalAmount =
+      parseFloat(document.querySelector("#total-cost").textContent.replace("$", "")) * 100 || 0.0; // Convert to cents
     const transportationFee =
-      parseFloat(document.querySelector("#transport-cost").textContent) || 0;
+      parseFloat(document.querySelector("#transport-cost").textContent.replace("$", "")) || 0.0;
     const registrationFee =
-      parseFloat(document.querySelector("#registration-fee").textContent) || 0.0;
+      parseFloat(document.querySelector("#registration-fee").textContent.replace("$", "")) || 0.0;
+    const couponCode = document.querySelector("#coupon_code").value.trim();
 
     const params = {
       name: form["name"].value,
@@ -718,7 +833,11 @@ document.addEventListener("DOMContentLoaded", function () {
       transportationFee: transportationFee,
       totalAmount: totalAmount,
       registrationFee: registrationFee,
-      couponCode: form["coupon_code"].value,
+      couponCode: couponCode || null,
+      contact_type: form["contact_type"].value, // Correctly map emergency contact type
+      emergency_name: form["emergency_name"].value, // Correctly map emergency contact name
+      emergency_email: form["emergency_email"].value, // Correctly map emergency contact email
+      emergency_contact_no: form["emergency_contact_no"].value, // Correctly map emergency contact phone
       // Include the nonce
     };
 
@@ -742,7 +861,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const razorpayOptions = {
         key: bookingData.razorpayKey,
         amount: params.totalAmount,
-        currency: "INR",
+        currency: "USD",
         order_id: razorpayOrderId,
         handler: async function (response) {
           // Step 3: Verify Payment
@@ -759,7 +878,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
           const verifyData = await verifyResponse.json();
           if (verifyData.success) {
-            showStep(4);
+            markCompleted(4);
+            showStep(5);
             removeSidebar();
             displayBookingDetails(verifyData.bookingDetails);
           } else {

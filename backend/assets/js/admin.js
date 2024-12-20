@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const deleteButtons = document.querySelectorAll(".delete-course");
-  console.log(ajaxurl);
+  console.log(dubkii_ajax_obj.ajaxurl);
   deleteButtons.forEach((button) => {
     button.addEventListener("click", function (e) {
       e.preventDefault();
@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (confirm("Are you sure you want to delete this course?")) {
         // Send AJAX request to delete course
         jQuery.ajax({
-          url: ajaxurl, // This is automatically defined in WordPress
+          url: dubkii_ajax_obj.ajaxurl, // This is automatically defined in WordPress
           type: "POST",
           data: {
             action: "delete_course", // This matches the action in PHP

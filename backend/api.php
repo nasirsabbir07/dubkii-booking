@@ -320,6 +320,12 @@ function handle_payment_verification(WP_REST_Request $request)
         'has_transport' => sanitize_text_field($form_data['transport']) === 'yes' ? 1 : 0,
         'transport_cost' => floatval($form_data['transportationFee']),
         'total_amount' => floatval($form_data['totalAmount']),
+        'em_contact_type' => sanitize_text_field($form_data['contact_type']),
+        'em_contact_name' => sanitize_text_field($form_data['emergency_name']),
+        'em_contact_email' => sanitize_text_field($form_data['emergency_email']),
+        'em_contact_no' => sanitize_text_field($form_data['emergency_contact_no']),
+        'payment_id' => $razorpayPaymentId,
+        'order_id' => $razorpayOrderId,
     ]);
 
     if (!$inserted) {

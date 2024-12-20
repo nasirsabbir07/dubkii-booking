@@ -3,8 +3,8 @@
         <li class="tab active" data-step="1">Select Course</li>
         <li class="tab" data-step="2">Personal Details</li>
         <li class="tab" data-step="3">Transport</li>
-        <!-- <li class="tab" data-step="4">Payment</li> -->
-        <li class="tab" data-step="4">Done</li>
+        <li class="tab" data-step="4">Review</li>
+        <li class="tab" data-step="5">Done</li>
     </ul>
 
     <div class="form-container">
@@ -33,8 +33,10 @@
                         <option value="">Select duration</option>
                     </select>
                 </div>
+                <div class="button-container right-btn">
+                    <button type="button" class="next-button" data-next-step="2">Next</button>
+                </div>
 
-                <button type="button" class="next-button" data-next-step="2">Next</button>
             </div>
 
             <!-- Step 2: Personal Details -->
@@ -46,12 +48,6 @@
                 <div id="email-message" style="margin-top: 5px; color: green; display: none;"></div>
                 <label for="dob">Date of birth:</label>
                 <input type="date" id="dob" name="dob" required>
-                <div class="coupon-section">
-                    <label for="coupon_code">Have a Coupon Code?</label>
-                    <input type="text" id="coupon_code" name="coupon_code" placeholder="Enter your coupon code">
-                    <button type="button" id="show-coupons">View Available Coupons</button>
-                    <div id="coupon-message" style="margin-top: 5px; color: green; display: none;"></div>
-                </div>
                 <label for="address">Address:</label>
                 <input type="text" id="address" name="address" required>
                 <label for="city">City:</label>
@@ -69,7 +65,7 @@
                 <div class="nationality-selection">
                     <label for="nationality">Nationality:</label>
                     <select id="nationality" name="nationality" required>
-                        <!-- <option value="">Select a nationality</option> -->
+                        <option value="">Select a nationality</option>
                     </select>
                 </div>
                 <div class="english-level-selection">
@@ -82,61 +78,147 @@
                         <option value="Advance">Advance</option>
                     </select>
                 </div>
-                <!-- <div>
-                    <label>Are you a new student?</label>
-                    <div>
-                        <label>
-                            <input type="radio" name="existing_user" value="no"> Yes, I am a new student.
-                        </label><br>
-                        <label>
-                            <input type="radio" name="existing_user" value="yes"> No, I am an existing student.
-                        </label>
+                <div class="emergency-contact" style="margin-bottom: 10px;">
+                    <h3>Emergency Contact Details</h3>
+                    <div class="contact-type-selection">
+                        <label for="contact_type">Contact Type</label>
+                        <select name="contact_type" id="contact_type" required>
+                            <option value="parent">Parent</option>
+                            <option value="guardian">Guardian</option>
+                            <option value="sibling">Sibling</option>
+                            <option value="agent">Agent</option>
+                            <option value="other">Other</option>
+                        </select>
                     </div>
-                </div> -->
+                    <label for="emergency_name">Full Name:</label>
+                    <input type="text" id="emergency_name" name="emergency_name" required>
+                    <label for="emergency_email">Email:</label>
+                    <input type="email" id="emergency_email" name="emergency_email" required>
+                    <label for="emergency_contact_no">Phone:</label>
+                    <input type="text" id="emergency_contact_no" name="emergency_contact_no" required>
+                </div>
+                <div class="button-container">
+                    <button type="button" class="prev-button" data-prev-step="1">Back</button>
+                    <button type="button" class="next-button" data-next-step="3">Next</button>
+                </div>
 
-                <button type="button" class="prev-button" data-prev-step="1">Back</button>
-                <button type="button" class="next-button" data-next-step="3">Next</button>
             </div>
             <!-- Step 3: Transport Selection -->
             <div class="form-step step-3" style="display: none;">
                 <h3>Transport Options</h3>
+                <p>We can arrange for you to be met at your arrival airport and taken to your accommodation</p>
                 <label>
                     <input type="radio" name="transport" value="yes" required> I want transport (<span id="transport-cost-display">$0</span>)
                 </label><br>
                 <label>
                     <input type="radio" name="transport" value="no" required> I don't want transport
                 </label>
-                <div>
+                <div id="transport-error" class="error-message" style="color: red; display: none;">
+                    Please select a transport option.
+                </div>
+                <div class="button-container">
                     <button type="button" class="prev-button" data-prev-step="2">Back</button>
-                    <button type="submit">Submit & Pay</button>
+                    <button type="button" class="next-button" data-next-step="4">Next</button>
                     <!-- <button type="submit">Submit</button> -->
                 </div>
             </div>
-            <!-- Step 4: Payment -->
-            <!-- <div class="form-step step-4" style="display: none;">
-                <h3>Payment Details</h3>
-                <div id="payment-element" class="StripeElement"></div> 
-                <div id="payment-errors" role="alert" style="color: red; margin-top: 10px;"></div>
-                <button type="button" class="prev-button" data-prev-step="3">Back</button>
-                <button type="button" id='pay-now-button'>Pay Now</button>
-            </div> -->
-            <div class="form-step step-4" style="display: none;">
-                <!-- <h3>Payment Successful!</h3>
-                <p>Thank you for your booking. Your payment was processed successfully.</p>
-                <div id="booking-details"></div>
-                <button type="button" onclick="window.location.reload();">Back to Home</button> -->
+            <div id="step-review" class="form-step step-4" style="display: none;">
+                <p>Please review your booking and move on to payment. Thank you.</p>
+                <!-- User Details Section -->
+                <div class="review-user-details">
+                    <h3>Your Details</h3>
+                    <div class="user-details-row">
+                        <div class="user-details-left">
+                            <div id="review-name">Name: <span></span></div>
+                            <div id="review-email">Email: <span></span></div>
+                        </div>
+                        <div class="user-details-right">
+                            <div id="review-contact">Contact: <span></span></div>
+                            <div id="review-address">Address: <span></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Cost Breakdown Section -->
+                <div class="review-booking-details">
+                    <h3>Selected Course</h3>
+                    <div class="booking-details-row">
+                        <div class="course-info">
+                            <div id="review-selected-course">Course: <span></span></div>
+                            <div id="review-course-details">
+                                <span id="review-course-start-date">Start Date: <span></span></span>,
+                                <span id="review-course-duration">Duration: <span></span></span>
+                            </div>
+                        </div>
+                        <div class="course-price">
+                            <div id="review-course-price">Course Price: <span>$0.00</span></div>
+                        </div>
+                    </div>
+                    <div class="booking-details-row coupon-total">
+                        <!-- Apply Coupon Section -->
+                        <div class="coupon-section">
+                            <label for="coupon_code">See available coupons</label>
+                            <div class="coupons">
+                                <input type="text" id="coupon_code" name="coupon_code" placeholder="Select an available coupon">
+                                <button type="button" id="show-coupons">View Coupons</button>
+                            </div>
+
+
+                            <div id="coupon-message" style="margin-top: 5px; color: green; display: none;"></div>
+                        </div>
+                        <!-- Total Cost Section -->
+                        <div class="total-cost-section">
+                            <div id="review-total-cost">TOTAL PRICE <span>$0.00</span></div>
+                            <div class="details-under-total">
+                                <div id="review-registration-fee">Registration Fee: <span>$0.00</span></div>
+                                <!-- <div id="review-accommodation-fee">Accommodation Fee: <span>$0.00</span></div>
+                                <div id="review-transport-cost">Transport Cost: <span>$0.00</span></div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="button-container">
+                    <button type="button" class="prev-button" data-prev-step="3">Back</button>
+                    <button type="submit">Submit & Pay</button>
+                </div>
+
+            </div>
+
+            <div class="form-step step-5" style="display: none;">
             </div>
         </form>
         <!-- Sidebar Section -->
         <div class="sidebar">
-            <h3>Course Details</h3>
-            <p><strong>Selected Course:</strong> <span id="selected-course">None</span></p>
-            <p><strong>Price:</strong> $<span id="course-price" data-original-price="0.00">0.00</span></p>
-            <p><strong>Registration Fee:</strong> $<span id="registration-fee">0.00</span></p>
-            <p><strong>Accommodation Fee:</strong> $<span id="accommodation-fee">0.00</span></p>
-            <p><strong>Transport Cost:</strong> $<span id="transport-cost">0</span></p>
-            <p><strong>Total:</strong> $<span id="total-cost">0</span></p>
-            <!-- Add any other details you'd like to display here -->
+
+            <div class="booking-details">
+                <div class="booking-row">
+                    <h4 class="sidebar-title booking-label">Booking Details</h4>
+                    <h4 class="booking-value">Amount</h4>
+                </div>
+                <div class="booking-row" id="booking-selected-course-row">
+                    <!-- <span class="booking-label">Selected Course:</span> -->
+                    <span id="selected-course" class="booking-label">Course Not Selected</span>
+                    <span id="course-price" class="booking-value" data-original-price="0.00">$0.00</span>
+                </div>
+                <div class="booking-row" id="booking-registration-fee-row">
+                    <span class="booking-label">Registration Fee:</span>
+                    <span id="registration-fee" class="booking-value">$0.00</span>
+                </div>
+                <div class="booking-row" id="booking-accommodation-fee-row">
+                    <span class="booking-label">Accommodation Fee:</span>
+                    <span id="accommodation-fee" class="booking-value">$0.00</span>
+                </div>
+                <div class="booking-row" id="booking-transport-cost-row">
+                    <span class="booking-label">Transport Cost:</span>
+                    <span id="transport-cost" class="booking-value">$0.00</span>
+                </div>
+                <div class="booking-row total" id="booking-total-row">
+                    <span class="booking-label">Total:</span>
+                    <span id="total-cost" class="booking-value">$0.00</span>
+                </div>
+            </div>
         </div>
     </div>
     <div id="coupon-modal" class="coupon-modal" style="display: none;">
