@@ -32,7 +32,8 @@
   gap: 10px; /* Space between rows */
 }
 
-.booking-row {
+.booking-row,
+.review-booking-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -96,7 +97,7 @@
 
 /* Completed Tab */
 .tab.completed {
-  background-color: #28a745; /* Green background for completed steps */
+  background-color: #104173; /* Green background for completed steps */
   color: #fff; /* White text for contrast */
 }
 
@@ -114,9 +115,9 @@
   display: none;
 }
 
-.form-step.active {
+/* .form-step.active {
   display: block;
-}
+} */
 
 button {
   margin-top: 20px;
@@ -192,10 +193,34 @@ button {
   justify-content: flex-end;
 }
 
+/* Review step */
+.review-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.review-left-column,
+.review-right-column {
+  min-width: 300px; /* Ensure responsiveness */
+}
+
+.review-left-column {
+  display: flex;
+  flex: 3;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.review-right-column {
+  display: flex;
+  flex: 1;
+}
+
 /* User Details Section */
 .user-details-row {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
 }
 
 .user-details-left,
@@ -216,7 +241,7 @@ button {
 }
 
 .course-info {
-  width: 60%; /* The course details will take more space */
+  width: 100%; /* The course details will take more space */
 }
 
 .course-price {
@@ -261,6 +286,10 @@ button {
   color: #474d50;
 }
 
+/* .booking-row.total {
+  background-color: #28a745;
+} */
+
 /* Style the additional details with smaller font and display under the total */
 .details-under-total {
   font-size: 0.9em; /* Smaller font for the details */
@@ -277,12 +306,11 @@ button {
 }
 
 .coupon-section {
-  width: 60%;
+  width: 100%;
 }
 
 .review-user-details {
-  background-color: #fff;
-  padding: 5px 10px 20px 10px;
+  padding: 5px 10px 5px 0px;
 }
 
 .user-details-row,
@@ -291,5 +319,151 @@ button {
 }
 
 .review-booking-details {
-  padding: 5px 10px 20px 10px;
+  padding: 5px 10px 5px 0px;
+}
+
+.course-detail-selection {
+  display: flex;
+  align-items: center;
+}
+
+.course-detail-selection .selection-label,
+.personal-details .personal-details-label {
+  width: 30%;
+  font-size: 16px;
+}
+
+.personal-details {
+  display: flex;
+  align-items: center;
+}
+
+.input-email-msg {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  width: 60%; /* Ensure it matches the width of other input fields */
+}
+
+#email.details-input {
+  margin-bottom: 5px;
+  width: 100%; /* Make input field take the full width of its container */
+}
+
+.input-email-msg #email-message {
+  margin: 0; /* Reset margin to align properly under the input */
+}
+
+.personal-details .details-input {
+  margin-bottom: 10px;
+  width: 60%;
+}
+
+.personal-details .details-selection {
+  width: 60%;
+}
+
+.transport-details {
+  display: flex;
+  gap: 40px;
+}
+
+.transport-details .transport-details-txt {
+  font-size: 16px;
+  color: #000;
+}
+
+.transport-details-input {
+  height: 20px;
+}
+
+.step-3 p {
+  font-weight: 500;
+  color: #000;
+}
+
+.required-asterisk {
+  color: red;
+  margin-left: 5px;
+}
+
+.coupon-total {
+  flex-direction: column-reverse;
+  gap: 10px;
+}
+
+#apply-coupon {
+  padding: 5px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Style the coupon list container*/
+#coupon-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Style each coupon item */
+.coupon-item {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  transition: box-shadow 0.3s ease;
+}
+
+.coupon-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Flex container for the header */
+.coupon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+/* Style the coupon code text */
+.coupon-header strong {
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Style the "Apply" button */
+.apply-coupon-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.apply-coupon-btn:hover {
+  background-color: #45a049;
+}
+
+/* Coupon applied text */
+.coupon-header span {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Style the coupon details */
+.coupon-details {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+  margin-top: 5px;
+}
+
+.total-cost-section {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #fff;
 }
