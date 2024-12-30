@@ -13,12 +13,30 @@ document.addEventListener("DOMContentLoaded", function () {
   let allCourses = [];
   let appliedCouponCode = [];
   let originalCoursePrice = 0.0;
+  let discountAmount = 0;
+  let couponData = [];
+
   // Sidebar rows mapped to their respective steps
   const stepRows = {
     1: ["booking-selected-course-row", "booking-accommodation-fee-row"],
     2: ["booking-registration-fee-row"],
     3: ["booking-transport-cost-row"],
   };
+
+  document.querySelectorAll("label").forEach(function (label) {
+    const associatedId = label.getAttribute("for");
+    if (associatedId) {
+      const element = document.getElementById(associatedId);
+      // Check for 'required' attribute on associated form controls
+      if (element && element.hasAttribute("required")) {
+        const asterisk = document.createElement("span");
+        asterisk.textContent = " *";
+        asterisk.className = "required-asterisk";
+        label.appendChild(asterisk);
+      }
+    }
+  });
+
   // Check if pluginCourseId is defined and fetch the specific course
   if (typeof bookingData.currentCourseId !== "undefined") {
     fetchCourses(bookingData.currentCourseId);
@@ -39,6 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     tabs[step - 1].classList.add("active");
     if (step === 4) {
       removeSidebar();
+      showCoupons();
     }
   }
 
@@ -237,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
       clearDropdown(durationSelect, "Select duration (weeks)");
       // Optionally clear sidebar as well
       document.getElementById("selected-course").textContent = "None";
-      document.getElementById("course-price").textContent = "$0.00";
+      document.getElementById("course-price").textContent = "$ 0.00";
       // selectedCourseCost = 0;
       resetAccommodationFee();
     }
@@ -251,7 +270,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!selectedCourseId || !selectedDurationId) {
       // Clear the price if no valid selection is made
-      document.getElementById("course-price").textContent = "$0.00";
+      document.getElementById("course-price").textContent = "$ 0.00";
       return;
     }
 
@@ -289,7 +308,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Helper function to update the course price in the sidebar
   function setCoursePrice(price) {
     const coursePriceElem = document.getElementById("course-price");
-    coursePriceElem.textContent = `$${price.toFixed(2)}`;
+    coursePriceElem.textContent = `$ ${price.toFixed(2)}`;
 
     // Save the original price as a data attribute for further calculations
     if (!originalCoursePrice) {
@@ -386,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (storedFees && storedFees.transportation_cost) {
     // Update the transport cost display
     const transportCost = parseFloat(storedFees.transportation_cost).toFixed(2);
-    transportCostDisplay.textContent = `$${transportCost}`;
+    transportCostDisplay.textContent = `$ ${transportCost}`;
   }
 
   // Function to update transport cost in the sidebar
@@ -394,12 +413,16 @@ document.addEventListener("DOMContentLoaded", function () {
     let transportCost = 0;
     const selectedTransport = document.querySelector('input[name="transport"]:checked');
     if (selectedTransport) {
-      transportCost = storedFees ? parseFloat(storedFees.transportation_cost) : 0;
+      if (selectedTransport.value === "yes") {
+        transportCost = storedFees ? parseFloat(storedFees.transportation_cost) : 0;
+      } else if (selectedTransport.value === "no") {
+        transportCost = 0;
+      }
     } else {
       console.warn("No transport option selected");
     }
     if (transportCostElement) {
-      transportCostElement.textContent = `$${transportCost.toFixed(2)}`;
+      transportCostElement.textContent = `$ ${transportCost.toFixed(2)}`;
     }
     updateTotalCost();
   }
@@ -474,7 +497,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.querySelector(".sidebar");
     const feeElem = sidebar.querySelector("#registration-fee");
     const formattedFee = parseFloat(fee).toFixed(2);
-    feeElem.textContent = `$${formattedFee}`;
+    feeElem.textContent = `$ ${formattedFee}`;
     updateTotalCost();
   }
 
@@ -500,7 +523,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const feeElem = sidebar.querySelector("#accommodation-fee");
     const fee = calculateAccommodationFee(duration);
     const formattedFee = parseFloat(fee).toFixed(2);
-    feeElem.textContent = `$${formattedFee}`;
+    feeElem.textContent = `$ ${formattedFee}`;
 
     updateTotalCost();
   }
@@ -508,7 +531,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function resetAccommodationFee() {
     const accommodationFeeElem = document.querySelector("#accommodation-fee");
 
-    accommodationFeeElem.textContent = "$0.00";
+    accommodationFeeElem.textContent = "$ 0.00";
     updateTotalCost(); // Recalculate total cost to reflect the reset
   }
 
@@ -533,12 +556,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const transportCost = parseFloat(transportCostElement.textContent.replace("$", "")) || 0;
     const registrationFee = parseFloat(registrationFeeElem.textContent.replace("$", "")) || 0.0;
     const totalCost = coursePrice + transportCost + registrationFee + accommodationFee;
-    totalCostElem.textContent = `$${totalCost.toFixed(2)}`;
+    totalCostElem.textContent = `$ ${totalCost.toFixed(2)}`;
     populateReviewTab();
   }
 
   // Event listener to show coupons
-  document.getElementById("show-coupons").addEventListener("click", async function () {
+  async function showCoupons() {
     try {
       const response = await fetch(`${bookingData.restApiUrl}active-coupons`, {
         method: "GET",
@@ -550,45 +573,58 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = await response.json();
 
       if (data.success) {
-        const couponList = data.data
+        couponData = data.data;
+        const couponList = couponData
           .map((coupon) => {
             // Skip rendering the apply button if coupon is already applied
             const isApplied = appliedCouponCode.includes(coupon.code);
+            // Format the expiry date to dd-mm-yyyy
+            const formattedExpiryDate = formatCouponDate(coupon.expiry_date);
             return `
-              <li>
-                <strong>${coupon.code}</strong>: 
+            <li class="coupon-item">
+              <div class="coupon-header">
+                <strong>${coupon.code}</strong> 
+                <button 
+                  class="apply-coupon-btn ${isApplied ? "coupon-btn-remove" : "coupon-btn-apply"}" 
+                  data-code="${coupon.code}" 
+                  data-type="${coupon.discount_type}" 
+                  data-value="${coupon.discount_value || ""}" 
+                  data-min-price="${coupon.min_price_range || ""}" 
+                  data-max-price="${coupon.max_price_range || ""}" 
+                  data-min-discount="${coupon.min_discount_percentage || ""}" 
+                  data-max-discount="${coupon.max_discount_percentage || ""}"
+                  data-action="${isApplied ? "remove" : "apply"}">
+                  ${isApplied ? "Remove" : "Apply"}
+                </button>
+              </div>
+              <div class="coupon-details">
                 ${
                   coupon.discount_type === "fixed"
                     ? `$${coupon.discount_value} off`
                     : `${coupon.min_discount_percentage}% - ${coupon.max_discount_percentage}% off`
                 }
-                (Expires: ${coupon.expiry_date})
-                ${
-                  !isApplied
-                    ? `
-                  <button 
-                    class="apply-coupon-btn" 
-                    data-code="${coupon.code}" 
-                    data-type="${coupon.discount_type}" 
-                    data-value="${coupon.discount_value || ""}" 
-                    data-min-price="${coupon.min_price_range || ""}" 
-                    data-max-price="${coupon.max_price_range || ""}" 
-                    data-min-discount="${coupon.min_discount_percentage || ""}" 
-                    data-max-discount="${coupon.max_discount_percentage || ""}">
-                    Apply
+                <br><span>Expires: ${formattedExpiryDate}</span>
+                <br><button class="know-more-btn" data-code="${
+                  coupon.code
+                }" style="font-weight: bold; font-size: 14px; background: none; border: none; padding: 0; text-decoration: none; color: inherit; cursor: pointer;">
+                    Know More
                   </button>
-                `
-                    : `
-                  <span>Coupon Applied</span>
-                `
-                }
-              </li>
-            `;
+              </div>
+            </li>
+          `;
           })
           .join("");
 
         document.getElementById("coupon-list").innerHTML = couponList;
-        document.getElementById("coupon-modal").style.display = "block";
+        // Add event listeners for "Know More" buttons
+        const knowMoreButtons = document.querySelectorAll(".know-more-btn");
+        knowMoreButtons.forEach((button) => {
+          button.addEventListener("click", (e) => {
+            e.preventDefault();
+            const couponCode = e.target.getAttribute("data-code");
+            openCouponDetailsModal(couponCode);
+          });
+        });
       } else {
         alert("No active coupons available.");
       }
@@ -596,7 +632,7 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Error fetching coupons:", error);
       alert("Error fetching coupons.");
     }
-  });
+  }
 
   // Function to get the original price from the data attribute
   function getOriginalCoursePrice() {
@@ -622,13 +658,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const originalPrice = getOriginalCoursePrice();
-    let discountedPrice = originalPrice;
+    discountAmount = 0;
 
     // Calculate discounted price
     if (discountType === "fixed") {
-      discountedPrice = Math.max(originalPrice - discountValue, 0); // Ensure non-negative price
+      discountAmount = discountValue; // Ensure non-negative price
     } else if (discountType === "percentage") {
-      discountedPrice = applyPercentageCoupon(
+      discountAmount = applyPercentageCoupon(
         originalPrice,
         minPrice,
         maxPrice,
@@ -636,35 +672,96 @@ document.addEventListener("DOMContentLoaded", function () {
         maxDiscount
       );
     }
+    // Check if discount exceeds course price
+    if (discountAmount > originalPrice) {
+      alert("This coupon cannot be applied as the discount exceeds the course price.");
+      return; // Exit without applying the coupon
+    }
+
+    // Show the discount row in the review tab
+    document.querySelector("#review-discount-amount").textContent = `-$ ${discountAmount.toFixed(
+      2
+    )}`;
+    const discountRow = document.querySelector(".review-discount-row");
+    if (discountRow) {
+      discountRow.style.display = "flex"; // Show discount row in the review tab
+    }
 
     // Update the course price with the discounted price
-    setCoursePrice(discountedPrice);
     updateTotalCost();
     appliedCouponCode = couponCode;
-    removeCouponBtn(couponCode);
+    updateCouponButton(couponCode);
+    updateInputButton("Remove");
     // Notify the user
-    alert(`Coupon applied successfully! New price: $${discountedPrice.toFixed(2)}`);
+    showCouponModal(discountAmount);
   }
 
-  function removeCouponBtn(couponCode) {
-    // Find the button for the applied coupon
-    const applyButton = document.querySelector(`.apply-coupon-btn[data-code="${couponCode}"]`);
-
-    if (applyButton) {
-      const applyButton = document.querySelector(`.apply-coupon-btn[data-code="${couponCode}"]`);
-      if (applyButton) {
-        applyButton.remove();
-      } else {
-        console.warn(`Button for coupon code "${couponCode}" not found.`);
+  // Function to update the coupon button (toggle between "Apply" and "Remove")
+  function updateCouponButton(couponCode) {
+    const button = document.querySelector(`.apply-coupon-btn[data-code="${couponCode}"]`);
+    if (button) {
+      if (button.textContent.trim() === "Apply") {
+        // Change to "Remove" state
+        button.textContent = "Remove";
+        button.setAttribute("data-action", "remove");
+        button.classList.remove("coupon-btn-apply");
+        button.classList.add("coupon-btn-remove");
+      } else if (button.textContent.trim() === "Remove") {
+        // Change back to "Apply" state
+        button.textContent = "Apply";
+        button.setAttribute("data-action", "apply");
+        button.classList.remove("coupon-btn-remove");
+        button.classList.add("coupon-btn-apply");
       }
     }
   }
 
-  // Event listener for coupon modal apply buttons
+  // Function to update the input button (toggle between "Apply Coupon" and "Remove Coupon")
+  function updateInputButton(buttonText) {
+    const applyButton = document.getElementById("apply-coupon");
+    applyButton.textContent = buttonText;
+    applyButton.setAttribute("data-action", buttonText === "Remove" ? "remove" : "apply");
+    if (buttonText === "Remove") {
+      applyButton.style.backgroundColor = "red"; // Set background color to red
+      applyButton.style.color = "white"; // Set text color to white
+    } else {
+      applyButton.style.backgroundColor = ""; // Reset background color
+      applyButton.style.color = ""; // Reset text color
+    }
+  }
+
+  function removeCoupon(couponCode) {
+    appliedCouponCode = null; // Clear applied coupon
+    discountAmount = 0;
+    updateTotalCost(); // Update total cost
+
+    // Reset the button text back to "Apply"
+    const button = document.querySelector(`.apply-coupon-btn[data-code="${couponCode}"]`);
+    if (button) {
+      button.textContent = "Apply"; // Change "Remove" back to "Apply"
+      button.setAttribute("data-action", "apply");
+    }
+    updateInputButton("Apply");
+
+    // Clear the coupon input field
+    const couponInput = document.getElementById("coupon_code");
+    couponInput.value = ""; // Clear the input field
+
+    const discountRow = document.querySelector(".review-discount-row");
+    if (discountRow) {
+      discountRow.style.display = "none"; // Hide the discount row in the review tab
+    }
+
+    document.getElementById("coupon-message").style.display = "none"; // Hide coupon message
+  }
+
+  // Event listener for coupon list apply buttons
   document.addEventListener("click", function (event) {
     if (event.target.classList.contains("apply-coupon-btn")) {
+      event.preventDefault();
       // Fetch data attributes from the clicked button
-      const couponCode = event.target.getAttribute("data-code"); // Fetch coupon code
+      const couponCode =
+        event.target.getAttribute("data-code") || document.getElementById("coupon_code").value; // Fetch coupon code
       const discountType = event.target.getAttribute("data-type"); // Fetch discount type
       const discountValue = parseFloat(event.target.getAttribute("data-value")) || 0.0; // Fetch discount value
       const minPrice = parseFloat(event.target.getAttribute("data-min-price")) || 0.0;
@@ -672,16 +769,27 @@ document.addEventListener("DOMContentLoaded", function () {
       const minDiscount = parseFloat(event.target.getAttribute("data-min-discount")) || 0.0;
       const maxDiscount = parseFloat(event.target.getAttribute("data-max-discount")) || 0.0;
 
-      applyCoupon(
-        couponCode,
-        discountType,
-        discountValue,
-        minPrice,
-        maxPrice,
-        minDiscount,
-        maxDiscount
-      );
-      document.getElementById("coupon-modal").style.display = "none"; // Close the modal
+      if (!couponCode) {
+        alert("Please enter or select a valid coupon code.");
+        return;
+      }
+
+      if (event.target.getAttribute("data-action") === "apply") {
+        applyCoupon(
+          couponCode,
+          discountType,
+          discountValue,
+          minPrice,
+          maxPrice,
+          minDiscount,
+          maxDiscount
+        );
+      } else if (event.target.getAttribute("data-action") === "remove") {
+        // Remove the coupon if it's already applied
+        removeCoupon(couponCode);
+      }
+
+      // document.getElementById("coupon-modal").style.display = "none"; // Close the modal
     }
   });
 
@@ -719,15 +827,9 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     const discountAmount = (selectedPrice * discountPercentage) / 100;
-    const discountedPrice = Math.max(selectedPrice - discountAmount, 0); // Ensure non-negative price
 
-    return discountedPrice;
+    return discountAmount;
   }
-
-  // Close the modal
-  document.querySelector(".coupon-close-modal").addEventListener("click", function () {
-    document.getElementById("coupon-modal").style.display = "none";
-  });
 
   function populateReviewTab() {
     // Populate user details
@@ -742,27 +844,42 @@ document.addEventListener("DOMContentLoaded", function () {
         ${document.querySelector("#city").value}, ${document.querySelector("#post_code").value}, 
         ${document.querySelector("#country").value}`;
 
-    // Populate booking cost breakdown
+    // Booking cost breakdown
+    const coursePrice =
+      parseFloat(document.querySelector("#course-price").textContent.replace("$", "")) || 0;
+    const registrationFee =
+      parseFloat(document.querySelector("#registration-fee").textContent.replace("$", "")) || 0;
+    const accommodationFee =
+      parseFloat(document.querySelector("#accommodation-fee").textContent.replace("$", "")) || 0;
+    const transportCost =
+      parseFloat(document.querySelector("#transport-cost").textContent.replace("$", "")) || 0;
+
+    // Populate cost details
+    document.querySelector("#review-selected-course span").textContent =
+      document.querySelector("#selected-course").textContent;
+    document.querySelector("#review-course-price").textContent = `$ ${coursePrice.toFixed(2)}`;
+    document.querySelector("#review-registration-fee").textContent = `$ ${registrationFee.toFixed(
+      2
+    )}`;
+    document.querySelector("#review-accommodation-fee").textContent = `$ ${accommodationFee.toFixed(
+      2
+    )}`;
+    document.querySelector("#review-transport-cost").textContent = `$ ${transportCost.toFixed(2)}`;
+
+    // Calculate total cost for the review tab
+    const totalCost =
+      coursePrice - discountAmount + transportCost + registrationFee + accommodationFee;
+    document.querySelector("#review-total-cost").textContent = `$ ${totalCost.toFixed(2)}`;
+
     // Fetch the selected duration's data-duration-weeks value
     const selectedOption = durationSelect.options[durationSelect.selectedIndex];
     const durationWeeks = selectedOption
       ? selectedOption.getAttribute("data-duration-weeks")
       : null;
-    document.querySelector("#review-selected-course span").textContent =
-      document.querySelector("#selected-course").textContent;
-    document.querySelector("#review-course-price span").textContent =
-      document.querySelector("#course-price").textContent;
-    document.querySelector("#review-registration-fee span").textContent =
-      document.querySelector("#registration-fee").textContent;
-    // document.querySelector("#review-accommodation-fee span").textContent =
-    //   document.querySelector("#accommodation-fee").textContent;
-    // document.querySelector("#review-transport-cost span").textContent =
-    //   document.querySelector("#transport-cost").textContent;
-    document.querySelector("#review-total-cost span").textContent =
-      document.querySelector("#total-cost").textContent;
 
     // Populate start date and duration
-    document.querySelector("#review-course-start-date span").textContent = startDateSelect.value;
+    const formattedStartDate = formatDate(startDateSelect.value);
+    document.querySelector("#review-course-start-date span").textContent = formattedStartDate;
     document.querySelector("#review-course-duration span").textContent = durationWeeks
       ? `${durationWeeks} Weeks`
       : "Not selected";
@@ -782,9 +899,9 @@ document.addEventListener("DOMContentLoaded", function () {
       <h3>Payment Successful!</h3>
       <p>Thank you for your booking.</p>
       <p><strong>Course:</strong> ${bookingDetails.courseName}</p>
-      <p><strong>Registration Fee:</strong> $${bookingDetails.registrationFee.toFixed(2)}</p>
-      <p><strong>Accommodation Fee:</strong> $${bookingDetails.accommodationFee.toFixed(2)}</p>
-      <p><strong>Total Paid:</strong> $${bookingDetails.amount.toFixed(2)}</p>
+      <p><strong>Registration Fee:</strong> $ ${bookingDetails.registrationFee.toFixed(2)}</p>
+      <p><strong>Accommodation Fee:</strong> $ ${bookingDetails.accommodationFee.toFixed(2)}</p>
+      <p><strong>Total Paid:</strong> $ ${bookingDetails.amount.toFixed(2)}</p>
       <p><strong>Email:</strong> ${bookingDetails.email}</p>
       <p>Your booking ID is <strong>${bookingDetails.bookingId}</strong>.</p>
       <div class="button-container"><button onclick="window.location.reload()">Back to Home</button></div>
@@ -919,6 +1036,97 @@ document.addEventListener("DOMContentLoaded", function () {
       rzp.open();
     } catch (error) {
       console.error("Error:", error.message);
+    }
+  });
+
+  // Helper function to format date to dd-mm-yyyy
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // months are zero-indexed
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  }
+  function formatCouponDate(dateString) {
+    const date = new Date(dateString);
+
+    const day = String(date.getDate()).padStart(2, "0"); // Pad single digit days with leading zero
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based, so add 1
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  }
+
+  // Function to show the modal with the discount message
+  function showCouponModal(discountAmount) {
+    const modal = document.getElementById("coupon-modal");
+    const modalMessage = document.getElementById("coupon-modal-message");
+    const overlay = document.getElementById("modal-overlay");
+
+    // Set the modal message content
+    modalMessage.textContent = `Congrats! You have saved $${discountAmount.toFixed(
+      2
+    )} on this course.`;
+
+    // Show the modal and overlay
+    modal.style.display = "flex";
+    overlay.style.display = "block";
+
+    // Add an event listener to close the modal
+    document.getElementById("close-modal").addEventListener("click", function () {
+      modal.style.display = "none";
+      overlay.style.display = "none";
+    });
+
+    // Close modal when overlay is clicked
+    overlay.addEventListener("click", function () {
+      modal.style.display = "none";
+      overlay.style.display = "none";
+    });
+  }
+
+  function openCouponDetailsModal(couponCode) {
+    // Fetch coupon details from your data (you could use a pre-fetched list or re-fetch from API)
+    const coupon = couponData.find((coupon) => coupon.code === couponCode);
+
+    if (coupon) {
+      // Format the details in the modal
+      const modalContent = `
+      <div class="coupon-details-modal-header-section">
+        <h3 class="coupon-details-modal-header">${coupon.code}</h3>
+        <p class="coupon-details-modal-subheader">${
+          coupon.discount_type === "fixed"
+            ? `<strong>Flat $${coupon.discount_value} off</strong>`
+            : `<strong>Minimum ${coupon.min_discount_percentage}% to maximum ${coupon.max_discount_percentage}% off</strong>`
+        }</p>
+      </div>
+      <div class="coupon-details-key-terms">
+        <span>Key terms and condition</span>
+      <ul>
+        <li><strong>Coupon valid till ${formatCouponDate(coupon.expiry_date)} hrs</strong> </li>
+      </ul>
+      </div>
+      
+    `;
+
+      document.getElementById("coupon-details-content").innerHTML = modalContent;
+      document.getElementById("coupon-details-modal").style.display = "flex";
+    }
+  }
+
+  // Close the modal when the close button is clicked
+  document.getElementById("modal-close").addEventListener("click", () => {
+    document.getElementById("coupon-details-modal").style.display = "none";
+  });
+
+  // Close the modal if the user clicks outside the modal content
+  window.addEventListener("click", (e) => {
+    if (e.target === document.getElementById("coupon-details-modal")) {
+      document.getElementById("coupon-details-modal").style.display = "none";
     }
   });
 });
