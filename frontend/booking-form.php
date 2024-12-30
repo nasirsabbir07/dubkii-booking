@@ -190,7 +190,7 @@
                                 <!-- <label for="coupon_code">Apply a coupon</label> -->
                                 <div class="coupons">
                                     <input type="text" id="coupon_code" name="coupon_code" placeholder="Select an available coupon">
-                                    <button type="button" id="apply-coupon">Apply Coupon</button>
+                                    <button type="button" id="apply-coupon" class="apply-coupon-btn">Apply</button>
                                 </div>
 
 
@@ -223,9 +223,13 @@
                                         <span class="booking-label">Transport: </span>
                                         <span class="booking-value" id="review-transport-cost">$ 0.00</span>
                                     </div>
+                                    <div class="review-booking-row review-discount-row" style="display: none;">
+                                        <span class="booking-label">Discount: </span>
+                                        <span class="booking-value" id="review-discount-amount">-$ 0.00</span>
+                                    </div>
                                 </div>
                                 <div class="review-booking-row">
-                                    <span class="booking-label"> TOTAL PRICE </span><span id="review-total-cost">$ 0.00</span>
+                                    <span class="booking-label review-total-label"> Total price </span><span id="review-total-cost">$ 0.00</span>
                                 </div>
 
                             </div>
@@ -276,14 +280,27 @@
             </div>
         </div>
     </div>
-    <!-- <div id="coupon-modal" class="coupon-modal" style="display: none;">
-        <div class="coupon-modal-content">
-            <span class="coupon-close-modal" style="cursor: pointer;">&times;</span>
-            <h2>Available Coupons</h2>
-            <ul id="coupon-list">
-                
-            </ul>
+    <!-- Modal Structure -->
+    <div id="coupon-modal" class="modal">
+        <div class="modal-content">
+            <h4 class="header">Coupon Applied!</h4>
+            <p id="coupon-modal-message"></p>
         </div>
-    </div> -->
+        <div class="modal-footer">
+            <button id="close-modal" class="btn">Close</button>
+        </div>
+    </div>
+    <!-- Coupon Details Modal -->
+    <div id="coupon-details-modal" style="display: none;">
+        <div class="modal-content">
+            <span id="modal-close" class="close">&times;</span>
+            <div id="coupon-details-content">
+                <!-- Dynamic coupon details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="overlay"></div>
 
 </div>
