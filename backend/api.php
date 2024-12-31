@@ -336,18 +336,18 @@ function handle_payment_verification(WP_REST_Request $request)
         $api = new Razorpay\Api\Api($key_id, $key_secret);
 
         // Ensure the payment ID and order ID are provided
-        if (empty($payment_id) || empty($order_id)) {
+        if (empty($razorpayPaymentId) || empty($razorpayOrderId)) {
             throw new Exception("Payment ID and Order ID are required to create an invoice.");
         }
 
         // Debug log for the payment and order ID
-        error_log("Payment ID: $payment_id");
-        error_log("Order ID: $order_id");
+        error_log("Payment ID: $razorpayPaymentId");
+        error_log("Order ID: $razorpayOrderId");
 
         // Invoice payload
         $invoice_payload = [
             'type' => 'invoice',
-            'description' => 'Course Booking Invoice - Order ID: ' . $order_id, // Include order ID in the description
+            'description' => 'Course Booking Invoice - Order ID: ' . $razorpayOrderId, // Include order ID in the description
             'customer' => [
                 'name' => $form_data['name'],
                 'email' => $form_data['email'],
@@ -362,12 +362,12 @@ function handle_payment_verification(WP_REST_Request $request)
                 ]
             ],
             'sms_notify' => 1,
-            'email_notify' => 1, // Razorpay's email notification disabled
+            'email_notify' => 1,
             'currency' => 'USD',
             'receipt' => 'rcpt_' . $tempId,
-            'payment_id' => $payment_id, // Link the payment ID
+            'payment_id' => $razorpayPaymentId, // Link the payment ID
             'notes' => [
-                'order_id' => $order_id, // Add the order ID as a note
+                'order_id' => $razorpayOrderId, // Add the order ID as a note
             ],
         ];
 
@@ -379,7 +379,7 @@ function handle_payment_verification(WP_REST_Request $request)
         // Retrieve the invoice ID and fetch details
         $invoiceId = $invoice['id'];
         $fetchedInvoice = $api->invoice->fetch($invoiceId);
-
+        error_log("Invoice id is: ", $fetchedInvoice);
         // Get the PDF URL
         $pdf_url = isset($fetchedInvoice['pdf_url']) ? $fetchedInvoice['pdf_url'] : null;
 
@@ -399,7 +399,7 @@ function handle_payment_verification(WP_REST_Request $request)
             $subject = "Your Course Booking Invoice";
             $message = "Hello " . $form_data['name'] . ",\n\n";
             $message .= "Thank you for booking the course. Please find your invoice attached.\n\n";
-            $message .= "Order ID: $order_id\n\n";
+            $message .= "Order ID: $razorpayOrderId\n\n";
             $message .= "Best regards,\nDUBKII INDIA CULTURE CENTER PRIVATE LIMITED";
 
             $headers = ['From: no-reply@dubkii.com'];
