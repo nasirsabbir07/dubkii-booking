@@ -334,9 +334,14 @@ function handle_payment_verification(WP_REST_Request $request)
 
     try {
         $api = new Razorpay\Api\Api($key_id, $key_secret);
-
-        $invoice = $api->invoice->create([
-            'type' => 'link',
+        // Ensure the amount is in cents (subunits)
+        $amount_in_cents = intval($total_amount); // `total_amount` is already in cents
+        if ($amount_in_cents <= 0) {
+            throw new Exception("Invalid amount for invoice: $amount_in_cents");
+        }
+        error_log("Amount in cents: $amount_in_cents"); // Debug log
+        $invoice_payload = [
+            'type' => 'invoice',
             'description' => 'Course Booking Invoice',
             'customer' => [
                 'name' => $form_data['name'],
@@ -346,17 +351,41 @@ function handle_payment_verification(WP_REST_Request $request)
             'line_items' => [
                 [
                     'name' => $course_name,
-                    'amount' => intval($total_amount * 100), // Amount in paise
-                    'currency' => 'INR',
+                    // 'amount' => intval($total_amount * 100), // Amount in paise
+                    'amount' => $amount_in_cents, //Amount in cents
+                    'currency' => 'USD',
                     'quantity' => 1,
                 ]
             ],
             'sms_notify' => 1,
             'email_notify' => 1,
+            'currency' => 'USD',
             'receipt' => 'rcpt_' . $tempId,
-        ]);
+        ];
+        error_log("Invoice payload: " . json_encode($invoice_payload));
 
-        error_log("Invoice created successfully: " . json_encode($invoice));
+        $invoice = $api->invoice->create($invoice_payload);
+        // Retrieve the invoice URL from the response and return it
+        // $invoiceUrl = isset($invoice['short_url']) ? $invoice['short_url'] : null;
+        $invoiceId = $invoice['id']; // Store invoice ID
+        $fetchedInvoice = $api->invoice->fetch($invoiceId); // Fetch details
+        $pdf_url = isset($fetchedInvoice['pdf_url']) ? $fetchedInvoice['pdf_url'] : null;
+
+        // Custom email logic
+        $to = $form_data['email'];
+        $subject = "Your Course Booking Invoice";
+        $message = "Hello " . $form_data['name'] . ",\n\n";
+        $message .= "Thank you for booking the course. You can download your invoice here: $pdf_url\n\n";
+        $message .= "Best regards,\nDUBKII INDIA CULTURE CENTER PRIVATE LIMITED";
+
+        $headers = "From: no-reply@dubkii.com";
+
+        // Send email
+        if (wp_mail($to, $subject, $message, $headers)) {
+            error_log("Invoice email sent successfully to: $to");
+        } else {
+            error_log("Failed to send invoice email to: $to");
+        }
     } catch (Exception $e) {
         error_log("Failed to create Razorpay invoice: " . $e->getMessage());
     }
@@ -374,7 +403,7 @@ function handle_payment_verification(WP_REST_Request $request)
             'amount' => $total_amount / 100, // Convert cents to dollars
             'email' => $email,
             'bookingId' => $wpdb->insert_id,
-            'invoiceUrl' => isset($invoice['short_url']) ? $invoice['short_url'] : null
+            'invoiceUrl' => $pdf_url
         ],
     ], 200);
 }

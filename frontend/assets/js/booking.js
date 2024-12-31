@@ -687,7 +687,7 @@ document.addEventListener("DOMContentLoaded", function () {
       discountRow.style.display = "flex"; // Show discount row in the review tab
     }
 
-    // Update the course price with the discounted price
+    // Update total cost with the discounted price
     updateTotalCost();
     appliedCouponCode = couponCode;
     updateCouponButton(couponCode);
@@ -700,6 +700,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateCouponButton(couponCode) {
     const button = document.querySelector(`.apply-coupon-btn[data-code="${couponCode}"]`);
     if (button) {
+      console.log("Button found:", button); // Debugging log
       if (button.textContent.trim() === "Apply") {
         // Change to "Remove" state
         button.textContent = "Remove";
@@ -713,6 +714,9 @@ document.addEventListener("DOMContentLoaded", function () {
         button.classList.remove("coupon-btn-remove");
         button.classList.add("coupon-btn-apply");
       }
+      console.log("Updated button classes:", button.classList);
+    } else {
+      console.log("Button not found for coupon code:", couponCode);
     }
   }
 
@@ -735,12 +739,7 @@ document.addEventListener("DOMContentLoaded", function () {
     discountAmount = 0;
     updateTotalCost(); // Update total cost
 
-    // Reset the button text back to "Apply"
-    const button = document.querySelector(`.apply-coupon-btn[data-code="${couponCode}"]`);
-    if (button) {
-      button.textContent = "Apply"; // Change "Remove" back to "Apply"
-      button.setAttribute("data-action", "apply");
-    }
+    updateCouponButton(couponCode);
     updateInputButton("Apply");
 
     // Clear the coupon input field
@@ -945,13 +944,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // Get fee details and calculate the total amount
     const accommodationFee =
       parseFloat(document.querySelector("#accommodation-fee").textContent.replace("$", "")) || 0.0;
-    const totalAmount =
-      parseFloat(document.querySelector("#total-cost").textContent.replace("$", "")) * 100 || 0.0; // Convert to cents
     const transportationFee =
       parseFloat(document.querySelector("#transport-cost").textContent.replace("$", "")) || 0.0;
     const registrationFee =
       parseFloat(document.querySelector("#registration-fee").textContent.replace("$", "")) || 0.0;
     const couponCode = document.querySelector("#coupon_code").value.trim();
+    const totalAmount =
+      parseFloat(document.querySelector("#review-total-cost").textContent.replace("$", "")) * 100 ||
+      0.0; // Convert to cents
 
     const selectedDurationOption = form["duration"].options[form["duration"].selectedIndex];
     const durationWeeks = selectedDurationOption
