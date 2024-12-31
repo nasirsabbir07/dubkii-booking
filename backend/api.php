@@ -334,15 +334,20 @@ function handle_payment_verification(WP_REST_Request $request)
 
     try {
         $api = new Razorpay\Api\Api($key_id, $key_secret);
-        // Ensure the amount is in cents (subunits)
-        $amount_in_cents = intval($total_amount); // `total_amount` is already in cents
-        if ($amount_in_cents <= 0) {
-            throw new Exception("Invalid amount for invoice: $amount_in_cents");
+
+        // Ensure the payment ID and order ID are provided
+        if (empty($payment_id) || empty($order_id)) {
+            throw new Exception("Payment ID and Order ID are required to create an invoice.");
         }
-        error_log("Amount in cents: $amount_in_cents"); // Debug log
+
+        // Debug log for the payment and order ID
+        error_log("Payment ID: $payment_id");
+        error_log("Order ID: $order_id");
+
+        // Invoice payload
         $invoice_payload = [
             'type' => 'invoice',
-            'description' => 'Course Booking Invoice',
+            'description' => 'Course Booking Invoice - Order ID: ' . $order_id, // Include order ID in the description
             'customer' => [
                 'name' => $form_data['name'],
                 'email' => $form_data['email'],
@@ -351,40 +356,64 @@ function handle_payment_verification(WP_REST_Request $request)
             'line_items' => [
                 [
                     'name' => $course_name,
-                    // 'amount' => intval($total_amount * 100), // Amount in paise
-                    'amount' => $amount_in_cents, //Amount in cents
+                    'amount' => intval($total_amount), // Amount in cents
                     'currency' => 'USD',
                     'quantity' => 1,
                 ]
             ],
             'sms_notify' => 1,
-            'email_notify' => 1,
+            'email_notify' => 1, // Razorpay's email notification disabled
             'currency' => 'USD',
             'receipt' => 'rcpt_' . $tempId,
+            'payment_id' => $payment_id, // Link the payment ID
+            'notes' => [
+                'order_id' => $order_id, // Add the order ID as a note
+            ],
         ];
+
         error_log("Invoice payload: " . json_encode($invoice_payload));
 
+        // Create the invoice
         $invoice = $api->invoice->create($invoice_payload);
-        // Retrieve the invoice URL from the response and return it
-        // $invoiceUrl = isset($invoice['short_url']) ? $invoice['short_url'] : null;
-        $invoiceId = $invoice['id']; // Store invoice ID
-        $fetchedInvoice = $api->invoice->fetch($invoiceId); // Fetch details
+
+        // Retrieve the invoice ID and fetch details
+        $invoiceId = $invoice['id'];
+        $fetchedInvoice = $api->invoice->fetch($invoiceId);
+
+        // Get the PDF URL
         $pdf_url = isset($fetchedInvoice['pdf_url']) ? $fetchedInvoice['pdf_url'] : null;
 
-        // Custom email logic
-        $to = $form_data['email'];
-        $subject = "Your Course Booking Invoice";
-        $message = "Hello " . $form_data['name'] . ",\n\n";
-        $message .= "Thank you for booking the course. You can download your invoice here: $pdf_url\n\n";
-        $message .= "Best regards,\nDUBKII INDIA CULTURE CENTER PRIVATE LIMITED";
+        if ($pdf_url) {
+            // Download the PDF
+            $pdf_content = file_get_contents($pdf_url);
+            if ($pdf_content === false) {
+                throw new Exception("Failed to download invoice PDF.");
+            }
 
-        $headers = "From: no-reply@dubkii.com";
+            // Save the PDF temporarily
+            $pdf_path = sys_get_temp_dir() . "/invoice_$invoiceId.pdf";
+            file_put_contents($pdf_path, $pdf_content);
 
-        // Send email
-        if (wp_mail($to, $subject, $message, $headers)) {
-            error_log("Invoice email sent successfully to: $to");
+            // Send email with PDF attachment
+            $to = $form_data['email'];
+            $subject = "Your Course Booking Invoice";
+            $message = "Hello " . $form_data['name'] . ",\n\n";
+            $message .= "Thank you for booking the course. Please find your invoice attached.\n\n";
+            $message .= "Order ID: $order_id\n\n";
+            $message .= "Best regards,\nDUBKII INDIA CULTURE CENTER PRIVATE LIMITED";
+
+            $headers = ['From: no-reply@dubkii.com'];
+
+            if (wp_mail($to, $subject, $message, $headers, [$pdf_path])) {
+                error_log("Invoice email sent successfully to: $to");
+            } else {
+                error_log("Failed to send invoice email to: $to");
+            }
+
+            // Clean up the temporary file
+            unlink($pdf_path);
         } else {
-            error_log("Failed to send invoice email to: $to");
+            throw new Exception("PDF URL not found in invoice response.");
         }
     } catch (Exception $e) {
         error_log("Failed to create Razorpay invoice: " . $e->getMessage());
