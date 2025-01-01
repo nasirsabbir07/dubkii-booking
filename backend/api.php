@@ -335,85 +335,54 @@ function handle_payment_verification(WP_REST_Request $request)
     try {
         $api = new Razorpay\Api\Api($key_id, $key_secret);
 
-        // Ensure the payment ID and order ID are provided
-        if (empty($razorpayPaymentId) || empty($razorpayOrderId)) {
-            throw new Exception("Payment ID and Order ID are required to create an invoice.");
+        // Ensure the order ID is provided
+        if (empty($razorpayOrderId)) {
+            throw new Exception("Order ID is required to create an invoice.");
         }
 
-        // Debug log for the payment and order ID
-        error_log("Payment ID: $razorpayPaymentId");
-        error_log("Order ID: $razorpayOrderId");
+        // Check if the invoice already exists
+        $invoices = $api->invoice->all(['type' => 'invoice', 'count' => 10]);
+        $existingInvoice = null;
 
-        // Invoice payload
-        $invoice_payload = [
-            'type' => 'invoice',
-            'description' => 'Course Booking Invoice - Order ID: ' . $razorpayOrderId, // Include order ID in the description
-            'customer' => [
-                'name' => $form_data['name'],
-                'email' => $form_data['email'],
-                'contact' => $form_data['contact_no'],
-            ],
-            'line_items' => [
-                [
-                    'name' => $course_name,
-                    'amount' => intval($total_amount), // Amount in cents
-                    'currency' => 'USD',
-                    'quantity' => 1,
-                ]
-            ],
-            'sms_notify' => 1,
-            'email_notify' => 1,
-            'currency' => 'USD',
-            'receipt' => 'rcpt_' . $tempId,
-            'payment_id' => $razorpayPaymentId, // Link the payment ID
-            'notes' => [
-                'order_id' => $razorpayOrderId, // Add the order ID as a note
-            ],
-        ];
-
-        error_log("Invoice payload: " . json_encode($invoice_payload));
-
-        // Create the invoice
-        $invoice = $api->invoice->create($invoice_payload);
-
-        // Retrieve the invoice ID and fetch details
-        $invoiceId = $invoice['id'];
-        $fetchedInvoice = $api->invoice->fetch($invoiceId);
-        error_log("Invoice id is: ", $fetchedInvoice);
-        // Get the PDF URL
-        $pdf_url = isset($fetchedInvoice['pdf_url']) ? $fetchedInvoice['pdf_url'] : null;
-
-        if ($pdf_url) {
-            // Download the PDF
-            $pdf_content = file_get_contents($pdf_url);
-            if ($pdf_content === false) {
-                throw new Exception("Failed to download invoice PDF.");
+        foreach ($invoices['items'] as $invoice) {
+            if (isset($invoice['notes']['order_id']) && $invoice['notes']['order_id'] === $razorpayOrderId) {
+                $existingInvoice = $invoice;
+                break;
             }
+        }
 
-            // Save the PDF temporarily
-            $pdf_path = sys_get_temp_dir() . "/invoice_$invoiceId.pdf";
-            file_put_contents($pdf_path, $pdf_content);
-
-            // Send email with PDF attachment
-            $to = $form_data['email'];
-            $subject = "Your Course Booking Invoice";
-            $message = "Hello " . $form_data['name'] . ",\n\n";
-            $message .= "Thank you for booking the course. Please find your invoice attached.\n\n";
-            $message .= "Order ID: $razorpayOrderId\n\n";
-            $message .= "Best regards,\nDUBKII INDIA CULTURE CENTER PRIVATE LIMITED";
-
-            $headers = ['From: no-reply@dubkii.com'];
-
-            if (wp_mail($to, $subject, $message, $headers, [$pdf_path])) {
-                error_log("Invoice email sent successfully to: $to");
-            } else {
-                error_log("Failed to send invoice email to: $to");
-            }
-
-            // Clean up the temporary file
-            unlink($pdf_path);
+        if ($existingInvoice) {
+            error_log("Existing Invoice Found: " . json_encode($existingInvoice));
+            $invoiceId = $existingInvoice['id'];
         } else {
-            throw new Exception("PDF URL not found in invoice response.");
+            // Create a new invoice if not found
+            $invoice_payload = [
+                'type' => 'invoice',
+                'description' => 'Order ID: ' . $razorpayOrderId,
+                'customer' => [
+                    'name' => $form_data['name'],
+                    'email' => $form_data['email'],
+                    'contact' => $form_data['contact_no'],
+                ],
+                'line_items' => [
+                    [
+                        'name' => $course_name,
+                        'amount' => intval($total_amount),
+                        'currency' => 'USD',
+                        'quantity' => 1,
+                    ],
+                ],
+                'sms_notify' => 1,
+                'email_notify' => 1,
+                'currency' => 'USD',
+                'receipt' => 'rcpt_' . $tempId,
+                'notes' => [
+                    'order_id' => $razorpayOrderId,
+                ],
+            ];
+
+            error_log("Invoice Payload: " . json_encode($invoice_payload));
+            $newInvoice = $api->invoice->create($invoice_payload);
         }
     } catch (Exception $e) {
         error_log("Failed to create Razorpay invoice: " . $e->getMessage());
@@ -432,7 +401,7 @@ function handle_payment_verification(WP_REST_Request $request)
             'amount' => $total_amount / 100, // Convert cents to dollars
             'email' => $email,
             'bookingId' => $wpdb->insert_id,
-            'invoiceUrl' => $pdf_url
+            'invoiceUrl' => isset($newInvoice['short_url']) ? $newInvoice['short_url'] : null
         ],
     ], 200);
 }

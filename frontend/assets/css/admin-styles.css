@@ -132,3 +132,24 @@ input[type="number"] {
 #course_name {
   width: 400px;
 }
+
+.modal-content.edit-modal {
+  width: 700px;
+}
+
+#edit_duration_wrapper,
+#edit_start_date_wrapper {
+  height: 150px;
+  overflow: auto;
+}
+
+#edit_duration_wrapper .duration-field,
+#edit_start_date_wrapper .start-date-field {
+  padding-right: 10px;
+}
+
+.duration-field,
+.start-date-field {
+  margin-bottom: 8px;
+  margin-right: 4px;
+}

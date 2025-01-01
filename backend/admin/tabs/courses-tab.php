@@ -84,6 +84,97 @@ if (isset($_POST['submit_course'])) {
     }
 }
 
+if (isset($_POST['update_course'])) {
+    $course_id = intval($_POST['course_id']);
+    $course_name = sanitize_text_field($_POST['course_name']);
+    $durations = $_POST['edit_durations'];
+    $start_dates = $_POST['edit_start_dates'];
+    $prices = array_map('floatval', ($_POST['edit_prices']));
+
+    try {
+        // Start transaction
+        $wpdb->query('START TRANSACTION');
+
+        // Update course name
+        $wpdb->update($courses_table, array(
+            'course_name' => $course_name,
+        ), array('id' => $course_id));
+
+        // Delete old durations, prices, and start dates
+        $wpdb->delete($durations_table, array('course_id' => $course_id));
+        $wpdb->delete($course_prices_table, array('course_id' => $course_id));
+        $wpdb->delete($start_dates_table, array('course_id' => $course_id));
+
+        // Insert new durations and prices
+        foreach ($durations as $index => $duration_weeks) {
+            if (!empty($duration_weeks)) {
+                // Insert into durations table
+                $wpdb->insert($durations_table, array(
+                    'course_id' => $course_id,
+                    'duration_weeks' => intval($duration_weeks)
+                ));
+                $duration_id = $wpdb->insert_id;
+
+                // Insert into prices table for each duration
+                if (isset($prices[$index]) && !empty($prices[$index])) {
+                    $wpdb->insert($course_prices_table, array(
+                        'course_id' => $course_id,
+                        'duration_id' => $duration_id,
+                        'price' => floatval($prices[$index])
+                    ));
+                }
+            }
+        }
+
+        // Insert new start dates
+        foreach ($start_dates as $start_date) {
+            if (!empty($start_date)) {
+                $wpdb->insert($start_dates_table, array(
+                    'course_id' => $course_id,
+                    'start_date' => sanitize_text_field($start_date)
+                ));
+            }
+        }
+
+        // Commit the transaction
+        $wpdb->query('COMMIT');
+        add_settings_error('dubkii_booking', 'course_update_success', 'Course updated successfully!', 'updated');
+    } catch (Exception $e) {
+        // Rollback in case of error
+        $wpdb->query('ROLLBACK');
+        add_settings_error('dubkii_booking', 'course_update_error', 'An error occurred: ' . $e->getMessage(), 'error');
+    }
+}
+
+if (isset($_POST['delete_course'])) {
+    $course_id = intval($_POST['delete_course_id']);
+
+    try {
+        // Start transaction
+        $wpdb->query('START TRANSACTION');
+
+        // Delete related durations, prices, and start dates
+        $wpdb->delete($durations_table, array('course_id' => $course_id));
+        $wpdb->delete($course_prices_table, array('course_id' => $course_id));
+        $wpdb->delete($start_dates_table, array('course_id' => $course_id));
+
+        // Delete the course
+        $deleted = $wpdb->delete($courses_table, array('id' => $course_id));
+        if (!$deleted) {
+            throw new Exception('Failed to delete course.');
+        }
+
+        // Commit the transaction
+        $wpdb->query('COMMIT');
+        add_settings_error('dubkii_booking', 'course_delete_success', 'Course deleted successfully!', 'updated');
+    } catch (Exception $e) {
+        // Rollback in case of error
+        $wpdb->query('ROLLBACK');
+        add_settings_error('dubkii_booking', 'course_delete_error', 'Error deleting course: ' . $e->getMessage(), 'error');
+    }
+}
+
+
 // Display error or success messages
 settings_errors('dubkii_booking');
 
@@ -104,6 +195,7 @@ $courses = $wpdb->get_results("
             LEFT JOIN $course_prices_table cp ON c.id = cp.course_id AND d.id = cp.duration_id
             LEFT JOIN $start_dates_table s ON c.id = s.course_id
             GROUP BY c.id
+            ORDER BY c.id DESC
             LIMIT $courses_per_page OFFSET $offset
         ");
 
@@ -145,7 +237,7 @@ $total_pages = ceil($total_courses / $courses_per_page);
                 <th><label for="start_dates">Start Dates</label></th>
                 <td>
                     <div id="start-date-wrapper">
-                        <input type="date" name="start_dates[]">
+                        <input type="date" name="start_dates[]" class="start-date-field">
                     </div>
                     <button type="button" onclick="addStartDateField()">Add Another Start Date</button>
                 </td>
@@ -175,7 +267,14 @@ $total_pages = ceil($total_courses / $courses_per_page);
                         <td><?php echo implode(', ', explode(',', $course->durations)); ?></td>
                         <td><?php echo implode(', ', explode(',', $course->prices)); ?></td>
                         <td>
-                            <a href="" class="button delete-course" data-course-id="<?php echo $course->id; ?>">Delete</a>
+                            <form method="POST" style="display: inline-block;">
+                                <input type="hidden" name="course_id" value="<?php echo esc_attr($course->id); ?>" />
+                                <button type="button" class="button" onclick='openCourseEditModal(<?php echo json_encode($course); ?>)'>Edit</button>
+                            </form>
+                            <form method="POST" style="display: inline-block;">
+                                <input type="hidden" name="delete_course_id" value="<?php echo esc_attr($course->id); ?>" />
+                                <button type="submit" name="delete_course" class="button button-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete</button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -201,6 +300,41 @@ $total_pages = ceil($total_courses / $courses_per_page);
         ));
         ?>
     </div>
+    <div id="editCourseModal" class="modal" style="display: none;">
+        <div class="modal-content edit-modal">
+            <h2>Edit Course</h2>
+            <form id="editCourseForm" method="POST">
+                <input type="hidden" name="course_id" id="edit_course_id" />
+                <table class="form-table">
+                    <tr>
+                        <th><label for="edit_course_name">Course Name</label></th>
+                        <td><input type="text" name="course_name" id="edit_course_name" required /></td>
+                    </tr>
+                    <tr>
+                        <th><label for="edit_durations">Durations (weeks)</label></th>
+                        <td>
+                            <div id="edit_duration_wrapper">
+                                <!-- Dynamically populated duration fields -->
+                            </div>
+                            <button type="button" onclick="addEditDurationField()">Add Another Duration</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="edit_start_dates">Start Dates</label></th>
+                        <td>
+                            <div id="edit_start_date_wrapper">
+                                <!-- Dynamically populated start date fields -->
+                            </div>
+                            <button type="button" onclick="addEditStartDateField()">Add Another Start Date</button>
+                        </td>
+                    </tr>
+                </table>
+                <p><input type="submit" name="update_course" class="button button-primary" value="Update Course" /></p>
+                <button style="width: 100%;" type="button" class="button button-secondary" onclick="closeCourseModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
 </div>
 <script>
     function addDurationField() {
@@ -230,56 +364,89 @@ $total_pages = ceil($total_courses / $courses_per_page);
     function addStartDateField() {
         const wrapper = document.getElementById('start-date-wrapper');
         const input = document.createElement('input');
+        input.classList.add('start-date-field')
         input.type = 'date';
         input.name = 'start_dates[]';
         wrapper.appendChild(input);
     }
+
+    function openCourseEditModal(course) {
+        document.getElementById('edit_course_id').value = course.id;
+        document.getElementById('edit_course_name').value = course.course_name;
+
+        // Populate durations
+        const durationWrapper = document.getElementById('edit_duration_wrapper');
+        durationWrapper.innerHTML = ''; // Clear existing fields
+        const durations = course.durations.split(',');
+        const prices = course.prices.split(',');
+        durations.forEach((duration, index) => {
+            const durationField = `
+            <div class="duration-field">
+                <input type="number" name="edit_durations[]" value="${duration.trim()}" placeholder="Duration in weeks" required />
+                <input type="number" name="edit_prices[]" value="${prices[index]?.trim() || ''}" step="0.01" placeholder="Price" required />
+            </div>
+        `;
+            durationWrapper.insertAdjacentHTML('beforeend', durationField);
+        });
+
+        // Populate start dates
+        const startDateWrapper = document.getElementById('edit_start_date_wrapper');
+        startDateWrapper.innerHTML = ''; // Clear existing fields
+        const startDates = course.start_dates.split(',');
+        startDates.forEach((date) => {
+            const dateField = `
+            <div class="start-date-field">
+                <input type="date" name="edit_start_dates[]" value="${date.trim()}" required />
+            </div>
+        `;
+            startDateWrapper.insertAdjacentHTML('beforeend', dateField);
+        });
+
+        // Open the modal
+        document.getElementById('editCourseModal').style.display = 'flex';
+    }
+    // Function to add a new duration field in edit mode
+    function addEditDurationField() {
+        const durationWrapper = document.getElementById('edit_duration_wrapper');
+        const newDurationField = document.createElement('div');
+        newDurationField.classList.add('duration-field');
+
+        // Create duration input
+        const durationInput = document.createElement('input');
+        durationInput.type = 'number';
+        durationInput.name = 'edit_durations[]';
+        durationInput.placeholder = 'Duration in weeks';
+        newDurationField.appendChild(durationInput);
+
+        // Create price input
+        const priceInput = document.createElement('input');
+        priceInput.type = 'number';
+        priceInput.name = 'edit_prices[]';
+        priceInput.step = '0.01';
+        priceInput.placeholder = 'Price';
+        newDurationField.appendChild(priceInput);
+
+        // Add new fields to the wrapper
+        durationWrapper.appendChild(newDurationField);
+    }
+
+    // Function to add a new start date field in edit mode
+    function addEditStartDateField() {
+        const startDateWrapper = document.getElementById('edit_start_date_wrapper');
+        const newStartDateField = document.createElement('div');
+        newStartDateField.classList.add('start-date-field');
+
+        // Create start date input
+        const startDateInput = document.createElement('input');
+        startDateInput.type = 'date';
+        startDateInput.name = 'edit_start_dates[]';
+        newStartDateField.appendChild(startDateInput);
+
+        // Add new start date field to the wrapper
+        startDateWrapper.appendChild(newStartDateField);
+    }
+
+    function closeCourseModal() {
+        document.getElementById('editCourseModal').style.display = 'none';
+    }
 </script>
-<?php
-function dubkii_handle_delete_course_ajax()
-{
-    global $wpdb;
-    error_log('Delete course AJAX function called');
-
-    $course_id = isset($_POST['course_id']) ? intval($_POST['course_id']) : 0;
-
-    if ($course_id <= 0) {
-        wp_send_json_error(['message' => 'Invalid course ID.']);
-        return;
-    }
-
-    $wpdb->query('START TRANSACTION');
-    try {
-        // Table definitions
-        $courses_table = $wpdb->prefix . 'dubkii_courses';
-        $durations_table = $wpdb->prefix . 'dubkii_course_durations';
-        $start_dates_table = $wpdb->prefix . 'dubkii_course_start_dates';
-        $course_prices_table = $wpdb->prefix . 'dubkii_courses_prices';
-        // Log for debugging
-        error_log('Attempting to delete related records and course');
-        // Deleting related records
-        $wpdb->delete($durations_table, ['course_id' => $course_id]);
-        $wpdb->delete($start_dates_table, ['course_id' => $course_id]);
-        $wpdb->delete($course_prices_table, ['course_id' => $course_id]);
-
-        // Delete the main course record
-        $deleted = $wpdb->delete($courses_table, ['id' => $course_id]);
-
-        if (!$deleted) {
-            error_log("Failed to delete course from main table.");
-            throw new Exception('Failed to delete course.');
-        }
-
-        $wpdb->query('COMMIT');
-        wp_send_json_success(['message' => 'Course deleted successfully!']);
-    } catch (Exception $e) {
-        $wpdb->query('ROLLBACK');
-        error_log("Error during deletion: " . $e->getMessage());
-        wp_send_json_error(['message' => $e->getMessage()]);
-    }
-}
-
-// Hook the function to admin-ajax action
-add_action('wp_ajax_delete_course', 'dubkii_handle_delete_course_ajax');
-add_action('wp_ajax_nopriv_delete_course', 'dubkii_handle_delete_course_ajax');
-?>

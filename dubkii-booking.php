@@ -116,11 +116,11 @@ function enqueue_dubkii_admin_assets($hook)
         array(),
         filemtime(plugin_dir_path(__FILE__) . 'frontend/assets/css/admin-styles.css')
     );
-    wp_enqueue_script('dubkii-admin-js', plugin_dir_url(__FILE__) . 'backend/assets/js/admin.js', ['jquery'], null, true);
+    // wp_enqueue_script('dubkii-admin-js', plugin_dir_url(__FILE__) . 'backend/assets/js/admin.js', ['jquery'], null, true);
     // Correct localization of ajaxurl
-    wp_localize_script('dubkii-admin-js', 'dubkii_ajax_obj', array(
-        'ajaxurl' => admin_url('admin-ajax.php') // Pass the AJAX URL to JavaScript
-    ));
+    // wp_localize_script('dubkii-admin-js', 'dubkii_ajax_obj', array(
+    //     'ajaxurl' => admin_url('admin-ajax.php') // Pass the AJAX URL to JavaScript
+    // ));
 }
 
 add_action('admin_enqueue_scripts', 'enqueue_dubkii_admin_assets');

@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let originalCoursePrice = 0.0;
   let discountAmount = 0;
   let couponData = [];
+  let appliedCoupon = null;
 
   // Sidebar rows mapped to their respective steps
   const stepRows = {
@@ -800,19 +801,51 @@ document.addEventListener("DOMContentLoaded", function () {
     minDiscount,
     maxDiscount
   ) {
+    const minDiscountNum = parseFloat(minDiscount);
+    const maxDiscountNum = parseFloat(maxDiscount);
+    // Ensure selectedPrice is within the valid range
+    if (isNaN(selectedPrice) || selectedPrice <= 0) {
+      console.error("Invalid selectedPrice");
+      return 0; // Or handle this case as per your requirements
+    }
+
+    if (isNaN(minPrice) || minPrice <= 0 || isNaN(maxPrice) || maxPrice <= 0) {
+      console.error("Invalid minPrice or maxPrice");
+      return 0; // Or handle this case
+    }
+
+    if (minPrice === maxPrice) {
+      console.error("minPrice cannot be equal to maxPrice");
+      return 0; // Or handle this case
+    }
+
+    if (isNaN(minDiscount) || isNaN(maxDiscount) || minDiscount > maxDiscount) {
+      console.error("Invalid discount values");
+      return 0; // Or handle this case
+    }
     if (selectedPrice < minPrice) selectedPrice = minPrice;
     if (selectedPrice > maxPrice) selectedPrice = maxPrice;
+    // Proportional calculation for discount
+    const proportionalValue = (selectedPrice - minPrice) / (maxPrice - minPrice);
+    // Round the proportional value to avoid floating point issues
+    const roundedProportionalValue = Math.round(proportionalValue * 10000) / 10000;
 
     const discountPercentage =
-      minDiscount +
-      ((selectedPrice - minPrice) / (maxPrice - minPrice)) * (maxDiscount - minDiscount);
+      minDiscountNum + roundedProportionalValue * (maxDiscountNum - minDiscountNum);
+
+    // Round the discount percentage to avoid floating point issues
+    const roundedDiscountPercentage = Math.round(discountPercentage * 100) / 100;
+
+    // Check if any of the values is NaN before performing the calculation
+    if (isNaN(minDiscount) || isNaN(maxDiscount) || isNaN(roundedProportionalValue)) {
+      console.error("One of the values involved in the calculation is NaN.");
+    }
 
     const finalDiscountPercentage = Math.min(
       Math.max(discountPercentage, minDiscount),
       maxDiscount
     );
-
-    return finalDiscountPercentage.toFixed(2);
+    return finalDiscountPercentage;
   }
 
   // Function to apply a percentage-based coupon
@@ -826,9 +859,99 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     const discountAmount = (selectedPrice * discountPercentage) / 100;
-
     return discountAmount;
   }
+
+  // Event listener for applying a coupon by typing in the input box
+  document.getElementById("apply-coupon").addEventListener("click", (event) => {
+    event.preventDefault();
+    const couponInput = document.getElementById("coupon_code");
+    const enteredCouponCode = couponInput.value.trim();
+
+    // Clear previous messages
+    const couponMessage = document.getElementById("coupon-message");
+    couponMessage.style.display = "none";
+    couponMessage.textContent = "";
+
+    // Validate input
+    if (!enteredCouponCode) {
+      couponMessage.style.color = "red";
+      couponMessage.textContent = "Please enter a coupon code.";
+      couponMessage.style.display = "block";
+      return;
+    }
+    console.log(couponData);
+    // Check if coupon exists in couponData
+    const coupon = couponData.find((c) => c.code === enteredCouponCode);
+
+    if (!coupon) {
+      couponMessage.style.color = "red";
+      couponMessage.textContent = "Invalid coupon code. Please try again.";
+      couponMessage.style.display = "block";
+      return;
+    }
+
+    // Check if the coupon is already applied
+    if (appliedCoupon === enteredCouponCode) {
+      couponMessage.style.color = "orange";
+      couponMessage.textContent = "This coupon is already applied.";
+      couponMessage.style.display = "block";
+      return;
+    }
+
+    // Get the original course price
+    const originalPrice = getOriginalCoursePrice();
+    let discountAmount = 0;
+
+    // Calculate discount
+    if (coupon.discount_type === "fixed") {
+      discountAmount = coupon.discount_value;
+    } else if (coupon.discount_type === "percentage") {
+      discountAmount = applyPercentageCoupon(
+        originalPrice,
+        coupon.min_price_range,
+        coupon.max_price_range,
+        coupon.min_discount_percentage,
+        coupon.max_discount_percentage
+      );
+    }
+
+    // Ensure discount doesn't exceed course price
+    if (discountAmount > originalPrice) {
+      couponMessage.style.color = "red";
+      couponMessage.textContent =
+        "This coupon cannot be applied as the discount exceeds the course price.";
+      couponMessage.style.display = "block";
+      return;
+    }
+
+    // Mark coupon as applied
+    appliedCoupon = enteredCouponCode;
+
+    // Update the UI with discount details
+    document.querySelector("#review-discount-amount").textContent = `-$ ${discountAmount.toFixed(
+      2
+    )}`;
+    const discountRow = document.querySelector(".review-discount-row");
+    if (discountRow) {
+      discountRow.style.display = "flex";
+    }
+
+    // Update total cost
+    updateTotalCost();
+
+    // Update button and input state
+    updateInputButton("Remove");
+
+    // Show the coupon modal
+    showCouponModal(discountAmount);
+
+    // Display success message
+    couponMessage.style.color = "green";
+    couponMessage.textContent = "Coupon applied successfully!";
+    couponMessage.style.display = "block";
+    couponInput.value = enteredCouponCode;
+  });
 
   function populateReviewTab() {
     // Populate user details
@@ -891,23 +1014,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function displayBookingDetails(bookingDetails) {
-    const successConstainer = document.querySelector(".step-5");
-    if (successConstainer) {
-      successConstainer.innerHTML = `
-      <h3>Payment Successful!</h3>
-      <p>Thank you for your booking.</p>
-      <p><strong>Course:</strong> ${bookingDetails.courseName}</p>
-      <p><strong>Registration Fee:</strong> $ ${bookingDetails.registrationFee.toFixed(2)}</p>
-      <p><strong>Accommodation Fee:</strong> $ ${bookingDetails.accommodationFee.toFixed(2)}</p>
-      <p><strong>Total Paid:</strong> $ ${bookingDetails.amount.toFixed(2)}</p>
-      <p><strong>Email:</strong> ${bookingDetails.email}</p>
-      <p>Your booking ID is <strong>${bookingDetails.bookingId}</strong>.</p>
-      <div class="button-container"><button onclick="window.location.reload()">Back to Home</button></div>
-    `;
-    }
-  }
-
   // Check if Stripe is loaded
   if (typeof Razorpay === "undefined") {
     console.error("Razorpay not loaded");
@@ -920,6 +1026,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Form submission handling
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
+
+    const submitButton = form.querySelector("button[type=submit]");
+    submitButton.disabled = false;
 
     // Validate form data before proceeding
     const requiredFields = ["name", "email", "course", "start_date", "duration"];
@@ -1025,9 +1134,10 @@ document.addEventListener("DOMContentLoaded", function () {
             markCompleted(4);
             showStep(5);
             removeSidebar();
-            displayBookingDetails(verifyData.bookingDetails);
+            submitButton.disabled = true;
           } else {
             alert("Payment verification failed.");
+            submitButton.disabled = false;
           }
         },
       };
@@ -1128,5 +1238,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.target === document.getElementById("coupon-details-modal")) {
       document.getElementById("coupon-details-modal").style.display = "none";
     }
+  });
+
+  document.querySelector(".reload").addEventListener("click", function (e) {
+    e.preventDefault();
+    window.location.reload();
   });
 });
