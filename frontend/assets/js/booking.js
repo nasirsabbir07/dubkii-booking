@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const storedFees = JSON.parse(localStorage.getItem("fees"));
 
   let allCourses = [];
-  let appliedCouponCode = [];
   let originalCoursePrice = 0.0;
   let discountAmount = 0;
   let couponData = [];
@@ -561,6 +560,8 @@ document.addEventListener("DOMContentLoaded", function () {
     populateReviewTab();
   }
 
+  updateInputButton("Apply");
+
   // Event listener to show coupons
   async function showCoupons() {
     try {
@@ -578,7 +579,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const couponList = couponData
           .map((coupon) => {
             // Skip rendering the apply button if coupon is already applied
-            const isApplied = appliedCouponCode.includes(coupon.code);
+            const isApplied = appliedCoupon?.code === coupon.code;
             // Format the expiry date to dd-mm-yyyy
             const formattedExpiryDate = formatCouponDate(coupon.expiry_date);
             return `
@@ -653,7 +654,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const couponInput = document.getElementById("coupon_code");
     couponInput.value = couponCode; // Fill the input field with the selected coupon code
 
-    if (appliedCouponCode === couponCode) {
+    if (appliedCoupon === couponCode) {
       alert("This coupon has already been applied");
       return;
     }
@@ -690,7 +691,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Update total cost with the discounted price
     updateTotalCost();
-    appliedCouponCode = couponCode;
+    appliedCoupon = couponCode;
     updateCouponButton(couponCode);
     updateInputButton("Remove");
     // Notify the user
@@ -699,6 +700,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Function to update the coupon button (toggle between "Apply" and "Remove")
   function updateCouponButton(couponCode) {
+    // Reset the state of the previously applied coupon, if any
+    if (appliedCoupon && appliedCoupon !== couponCode) {
+      const previousButton = document.querySelector(
+        `.apply-coupon-btn[data-code="${appliedCoupon}"]`
+      );
+      if (previousButton) {
+        previousButton.textContent = "Apply";
+        previousButton.setAttribute("data-action", "apply");
+        previousButton.classList.remove("coupon-btn-remove");
+        previousButton.classList.add("coupon-btn-apply");
+      }
+    }
     const button = document.querySelector(`.apply-coupon-btn[data-code="${couponCode}"]`);
     if (button) {
       console.log("Button found:", button); // Debugging log
@@ -724,6 +737,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to update the input button (toggle between "Apply Coupon" and "Remove Coupon")
   function updateInputButton(buttonText) {
     const applyButton = document.getElementById("apply-coupon");
+    if (!applyButton) return;
     applyButton.textContent = buttonText;
     applyButton.setAttribute("data-action", buttonText === "Remove" ? "remove" : "apply");
     if (buttonText === "Remove") {
@@ -736,7 +750,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function removeCoupon(couponCode) {
-    appliedCouponCode = null; // Clear applied coupon
+    if (appliedCoupon !== couponCode) {
+      alert("No such coupon is currently applied.");
+      return;
+    }
+    appliedCoupon = null; // Clear applied coupon
     discountAmount = 0;
     updateTotalCost(); // Update total cost
 
@@ -759,37 +777,131 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("click", function (event) {
     if (event.target.classList.contains("apply-coupon-btn")) {
       event.preventDefault();
-      // Fetch data attributes from the clicked button
-      const couponCode =
-        event.target.getAttribute("data-code") || document.getElementById("coupon_code").value; // Fetch coupon code
-      const discountType = event.target.getAttribute("data-type"); // Fetch discount type
-      const discountValue = parseFloat(event.target.getAttribute("data-value")) || 0.0; // Fetch discount value
-      const minPrice = parseFloat(event.target.getAttribute("data-min-price")) || 0.0;
-      const maxPrice = parseFloat(event.target.getAttribute("data-max-price")) || 0.0;
-      const minDiscount = parseFloat(event.target.getAttribute("data-min-discount")) || 0.0;
-      const maxDiscount = parseFloat(event.target.getAttribute("data-max-discount")) || 0.0;
+      if (event.target.closest(".coupons")) {
+        const couponInput = document.getElementById("coupon_code");
+        const enteredCouponCode = couponInput.value.trim();
 
-      if (!couponCode) {
-        alert("Please enter or select a valid coupon code.");
-        return;
+        // Clear previous messages
+        const couponMessage = document.getElementById("coupon-message");
+        couponMessage.style.display = "none";
+        couponMessage.textContent = "";
+
+        const action = event.target.getAttribute("data-action");
+        if (action === "apply") {
+          // Validate input
+          if (!enteredCouponCode) {
+            couponMessage.style.color = "red";
+            couponMessage.textContent = "Please enter a coupon code.";
+            couponMessage.style.display = "block";
+            return;
+          }
+          console.log(couponData);
+          // Check if coupon exists in couponData
+          const coupon = couponData.find((c) => c.code === enteredCouponCode);
+
+          if (!coupon) {
+            couponMessage.style.color = "red";
+            couponMessage.textContent = "Invalid coupon code. Please try again.";
+            couponMessage.style.display = "block";
+            return;
+          }
+
+          // Check if the coupon is already applied
+          if (appliedCoupon === enteredCouponCode) {
+            couponMessage.style.color = "orange";
+            couponMessage.textContent = "This coupon is already applied.";
+            couponMessage.style.display = "block";
+            return;
+          }
+
+          // Get the original course price
+          const originalPrice = getOriginalCoursePrice();
+          discountAmount = 0;
+
+          // Calculate discount
+          if (coupon.discount_type === "fixed") {
+            discountAmount = coupon.discount_value;
+          } else if (coupon.discount_type === "percentage") {
+            discountAmount = applyPercentageCoupon(
+              originalPrice,
+              coupon.min_price_range,
+              coupon.max_price_range,
+              coupon.min_discount_percentage,
+              coupon.max_discount_percentage
+            );
+          }
+
+          // Ensure discount doesn't exceed course price
+          if (discountAmount > originalPrice) {
+            couponMessage.style.color = "red";
+            couponMessage.textContent =
+              "This coupon cannot be applied as the discount exceeds the course price.";
+            couponMessage.style.display = "block";
+            return;
+          }
+
+          // Mark coupon as applied
+          appliedCoupon = enteredCouponCode;
+
+          // Update the UI with discount details
+          document.querySelector(
+            "#review-discount-amount"
+          ).textContent = `-$ ${discountAmount.toFixed(2)}`;
+          const discountRow = document.querySelector(".review-discount-row");
+          if (discountRow) {
+            discountRow.style.display = "flex";
+          }
+
+          // Update total cost
+          updateTotalCost();
+
+          // Update button and input state
+          updateCouponButton(enteredCouponCode);
+          updateInputButton("Remove");
+
+          // Show the coupon modal
+          showCouponModal(discountAmount);
+
+          // Display success message
+          couponMessage.style.color = "green";
+          couponMessage.textContent = "Coupon applied successfully!";
+          couponMessage.style.display = "block";
+          couponInput.value = enteredCouponCode;
+          console.log("Manual input coupon applied:", enteredCouponCode);
+        } else if (action === "remove") {
+          removeCoupon(enteredCouponCode);
+        }
+      } else {
+        // Fetch data attributes from the clicked button
+        const couponCode =
+          event.target.getAttribute("data-code") || document.getElementById("coupon_code").value; // Fetch coupon code
+        const discountType = event.target.getAttribute("data-type"); // Fetch discount type
+        const discountValue = parseFloat(event.target.getAttribute("data-value")) || 0.0; // Fetch discount value
+        const minPrice = parseFloat(event.target.getAttribute("data-min-price")) || 0.0;
+        const maxPrice = parseFloat(event.target.getAttribute("data-max-price")) || 0.0;
+        const minDiscount = parseFloat(event.target.getAttribute("data-min-discount")) || 0.0;
+        const maxDiscount = parseFloat(event.target.getAttribute("data-max-discount")) || 0.0;
+
+        if (!couponCode) {
+          alert("Please enter or select a valid coupon code.");
+          return;
+        }
+
+        if (event.target.getAttribute("data-action") === "apply") {
+          applyCoupon(
+            couponCode,
+            discountType,
+            discountValue,
+            minPrice,
+            maxPrice,
+            minDiscount,
+            maxDiscount
+          );
+        } else if (event.target.getAttribute("data-action") === "remove") {
+          // Remove the coupon if it's already applied
+          removeCoupon(couponCode);
+        }
       }
-
-      if (event.target.getAttribute("data-action") === "apply") {
-        applyCoupon(
-          couponCode,
-          discountType,
-          discountValue,
-          minPrice,
-          maxPrice,
-          minDiscount,
-          maxDiscount
-        );
-      } else if (event.target.getAttribute("data-action") === "remove") {
-        // Remove the coupon if it's already applied
-        removeCoupon(couponCode);
-      }
-
-      // document.getElementById("coupon-modal").style.display = "none"; // Close the modal
     }
   });
 
@@ -861,97 +973,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const discountAmount = (selectedPrice * discountPercentage) / 100;
     return discountAmount;
   }
-
-  // Event listener for applying a coupon by typing in the input box
-  document.getElementById("apply-coupon").addEventListener("click", (event) => {
-    event.preventDefault();
-    const couponInput = document.getElementById("coupon_code");
-    const enteredCouponCode = couponInput.value.trim();
-
-    // Clear previous messages
-    const couponMessage = document.getElementById("coupon-message");
-    couponMessage.style.display = "none";
-    couponMessage.textContent = "";
-
-    // Validate input
-    if (!enteredCouponCode) {
-      couponMessage.style.color = "red";
-      couponMessage.textContent = "Please enter a coupon code.";
-      couponMessage.style.display = "block";
-      return;
-    }
-    console.log(couponData);
-    // Check if coupon exists in couponData
-    const coupon = couponData.find((c) => c.code === enteredCouponCode);
-
-    if (!coupon) {
-      couponMessage.style.color = "red";
-      couponMessage.textContent = "Invalid coupon code. Please try again.";
-      couponMessage.style.display = "block";
-      return;
-    }
-
-    // Check if the coupon is already applied
-    if (appliedCoupon === enteredCouponCode) {
-      couponMessage.style.color = "orange";
-      couponMessage.textContent = "This coupon is already applied.";
-      couponMessage.style.display = "block";
-      return;
-    }
-
-    // Get the original course price
-    const originalPrice = getOriginalCoursePrice();
-    let discountAmount = 0;
-
-    // Calculate discount
-    if (coupon.discount_type === "fixed") {
-      discountAmount = coupon.discount_value;
-    } else if (coupon.discount_type === "percentage") {
-      discountAmount = applyPercentageCoupon(
-        originalPrice,
-        coupon.min_price_range,
-        coupon.max_price_range,
-        coupon.min_discount_percentage,
-        coupon.max_discount_percentage
-      );
-    }
-
-    // Ensure discount doesn't exceed course price
-    if (discountAmount > originalPrice) {
-      couponMessage.style.color = "red";
-      couponMessage.textContent =
-        "This coupon cannot be applied as the discount exceeds the course price.";
-      couponMessage.style.display = "block";
-      return;
-    }
-
-    // Mark coupon as applied
-    appliedCoupon = enteredCouponCode;
-
-    // Update the UI with discount details
-    document.querySelector("#review-discount-amount").textContent = `-$ ${discountAmount.toFixed(
-      2
-    )}`;
-    const discountRow = document.querySelector(".review-discount-row");
-    if (discountRow) {
-      discountRow.style.display = "flex";
-    }
-
-    // Update total cost
-    updateTotalCost();
-
-    // Update button and input state
-    updateInputButton("Remove");
-
-    // Show the coupon modal
-    showCouponModal(discountAmount);
-
-    // Display success message
-    couponMessage.style.color = "green";
-    couponMessage.textContent = "Coupon applied successfully!";
-    couponMessage.style.display = "block";
-    couponInput.value = enteredCouponCode;
-  });
 
   function populateReviewTab() {
     // Populate user details
