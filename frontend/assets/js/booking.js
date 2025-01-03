@@ -651,6 +651,16 @@ document.addEventListener("DOMContentLoaded", function () {
     minDiscount,
     maxDiscount
   ) {
+    // Reset the manual input button to default state
+    updateInputButton("Apply");
+    //  Reset all coupon buttons to their default state
+    document.querySelectorAll(".apply-coupon-btn").forEach((button) => {
+      button.textContent = "Apply";
+      button.setAttribute("data-action", "apply");
+      button.classList.remove("coupon-btn-remove");
+      button.classList.add("coupon-btn-apply");
+    });
+
     const couponInput = document.getElementById("coupon_code");
     couponInput.value = couponCode; // Fill the input field with the selected coupon code
 
@@ -740,9 +750,12 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!applyButton) return;
     applyButton.textContent = buttonText;
     applyButton.setAttribute("data-action", buttonText === "Remove" ? "remove" : "apply");
+    // Reset styles for active and focus states
+    applyButton.style.backgroundColor = "";
+    applyButton.style.color = "";
     if (buttonText === "Remove") {
-      applyButton.style.backgroundColor = "red"; // Set background color to red
-      applyButton.style.color = "white"; // Set text color to white
+      applyButton.style.backgroundColor = "red !important"; // Set background color to red
+      applyButton.style.color = "white !important"; // Set text color to white
     } else {
       applyButton.style.backgroundColor = ""; // Reset background color
       applyButton.style.color = ""; // Reset text color
