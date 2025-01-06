@@ -154,8 +154,9 @@ button {
 
 .apply-coupon-btn {
   font-size: 14px !important;
-  font-weight: 400 !important;
+  font-weight: 600 !important;
   padding: 5px 10px 5px 10px !important;
+  background: none !important;
 }
 
 .button-container {
@@ -270,7 +271,6 @@ button {
 .details-under-total {
   font-size: 0.9em; /* Smaller font for the details */
   color: #555; /* Optional: add a lighter color */
-  margin-top: 10px; /* Adds some space between the total and the details */
 }
 
 .details-under-total div {
@@ -283,6 +283,10 @@ button {
 
 .coupon-section {
   width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #fff;
 }
 
 .review-user-details {
@@ -382,10 +386,8 @@ button {
 
 /* Style each coupon item */
 .coupon-item {
-  border: 1px solid #ddd;
   padding: 10px;
   margin-bottom: 10px;
-  background-color: #f9f9f9;
   transition: box-shadow 0.3s ease;
 }
 
@@ -402,12 +404,14 @@ button {
 }
 
 /* Style the coupon code text */
-.coupon-header strong {
-  font-size: 1rem;
+.coupon-header span {
+  font-size: 14px;
+  font-weight: 600;
   color: #333;
-  background-color: #ddd;
+  background-color: #ecf3ff;
   padding: 2px 4px;
   border-radius: 5px;
+  line-height: 24px;
 }
 
 /* Style the "Apply" button */
@@ -505,12 +509,13 @@ button {
 }
 
 .review-booking-row .booking-label {
-  font-weight: 400;
+  font-weight: 600;
+  font-size: 12px;
 }
 
-.review-booking-row .review-total-label {
-  font-weight: bold;
-  font-size: 1.4em;
+.review-booking-row .booking-label.review-total-label {
+  font-weight: 500;
+  font-size: 1.1em;
 }
 
 #coupon-details-modal {
@@ -597,13 +602,11 @@ button {
 }
 
 .coupon-btn-remove {
-  background-color: red !important;
-  color: white !important;
+  color: red !important;
 }
 
 .coupon-btn-apply {
-  background-color: #4caf50 !important;
-  color: white !important;
+  color: #0f6bff !important;
 }
 
 .success-page {
@@ -633,11 +636,40 @@ button {
 
 button:disabled {
   background-color: #ccc !important; /* Light gray background */
-  color: #999 !important; /* Gray text */
+  color: #f9f9f9 !important; /* Gray text */
   cursor: not-allowed; /* Change cursor to indicate the button is not clickable */
 }
 .available-coupons {
   padding-right: 8px;
   height: 400px;
   overflow: auto;
+}
+
+.button-container .prev-button {
+  background-color: #ccc !important;
+  color: #f9f9f9 !important;
+}
+
+.coupon-details span:first-child {
+  font-weight: 600;
+  font-size: 14px;
+  color: #4caf50;
+}
+
+.coupon-section-header {
+  font-size: 16px !important;
+}
+
+.coupon-separator {
+  border-top: 1px dashed red;
+  margin: 16px 0;
+  height: 0; /* Prevents extra space caused by div height */
+}
+
+.coupon-details .discount-info {
+  margin-top: 10px !important;
+}
+
+.coupon-details .expiry-date {
+  margin-top: 15px !important;
 }

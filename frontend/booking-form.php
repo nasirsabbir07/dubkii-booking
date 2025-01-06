@@ -188,8 +188,9 @@
                             <!-- Apply Coupon Section -->
                             <div class="coupon-section">
                                 <!-- <label for="coupon_code">Apply a coupon</label> -->
+                                <h3 class="coupon-section-header">Apply coupon or gift card</h3>
                                 <div class="coupons">
-                                    <input type="text" id="coupon_code" name="coupon_code" placeholder="Select an available coupon">
+                                    <input type="text" id="coupon_code" name="coupon_code" placeholder="Coupon/Gift Card">
                                     <button type="button" id="apply-coupon" class="apply-coupon-btn">Apply</button>
                                 </div>
 
@@ -228,6 +229,7 @@
                                         <span class="booking-value" id="review-discount-amount">-$ 0.00</span>
                                     </div>
                                 </div>
+                                <hr style="margin-block: 15px;">
                                 <div class="review-booking-row">
                                     <span class="booking-label review-total-label"> Total price </span><span id="review-total-cost">$ 0.00</span>
                                 </div>

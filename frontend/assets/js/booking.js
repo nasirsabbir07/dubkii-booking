@@ -585,7 +585,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return `
             <li class="coupon-item">
               <div class="coupon-header">
-                <strong>${coupon.code}</strong> 
+                <span>${coupon.code}</span> 
                 <button 
                   class="apply-coupon-btn ${isApplied ? "coupon-btn-remove" : "coupon-btn-apply"}" 
                   data-code="${coupon.code}" 
@@ -600,19 +600,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 </button>
               </div>
               <div class="coupon-details">
-                ${
+                <span class="discount-info">${
                   coupon.discount_type === "fixed"
                     ? `$${coupon.discount_value} off`
                     : `${coupon.min_discount_percentage}% - ${coupon.max_discount_percentage}% off`
-                }
-                <br><span>Expires: ${formattedExpiryDate}</span>
+                }</span>
+                <br><span class="expiry-date">Expires: ${formattedExpiryDate} hrs</span>
                 <br><button class="know-more-btn" data-code="${
                   coupon.code
-                }" style="font-weight: bold; font-size: 14px; background: none; border: none; padding: 0; text-decoration: none; color: inherit; cursor: pointer;">
+                }" style="font-weight: bold; font-size: 12px; background: none; border: none; padding: 0; text-decoration: none; color: inherit; cursor: pointer;">
                     Know More
                   </button>
               </div>
+             
             </li>
+            <div class="coupon-separator"></div>
           `;
           })
           .join("");
