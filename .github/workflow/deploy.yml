@@ -1,0 +1,23 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - main # Replace with your branch name if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.DUBKII_SSH_PRIVATE_KEY }}
+
+      - name: Upload files to Hostinger
+        run: |
+          rsync -avz --delete ./ u405203284@145.223.77.182:/home/u405203284/domains/dubkii.com/public_html/staging
