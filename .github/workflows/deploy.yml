@@ -18,6 +18,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.DUBKII_SSH_PRIVATE_KEY }}
 
+      - name: Add Host Key
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -p 65002 145.223.77.182 >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+
       - name: Upload files to Hostinger
         run: |
           rsync -avz --delete -e "ssh -p 65002" ./ u405203284@145.223.77.182:/home/u405203284/domains/dubkii.com/public_html/staging
