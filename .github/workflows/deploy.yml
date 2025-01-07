@@ -19,10 +19,10 @@ jobs:
           ssh-private-key: ${{ secrets.DUBKII_SSH_PRIVATE_KEY }}
 
       - name: Add Host Key
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -p 65002 145.223.77.182 >> ~/.ssh/known_hosts
-        chmod 644 ~/.ssh/known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p 65002 145.223.77.182 >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Upload files to Hostinger
         run: |
