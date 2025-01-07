@@ -189,6 +189,7 @@
                             <div class="coupon-section">
                                 <!-- <label for="coupon_code">Apply a coupon</label> -->
                                 <h3 class="coupon-section-header">Apply coupon or gift card</h3>
+                                <div style="margin-block: 10px; border-top:1px dashed red"></div>
                                 <div class="coupons">
                                     <input type="text" id="coupon_code" name="coupon_code" placeholder="Coupon/Gift Card">
                                     <button type="button" id="apply-coupon" class="apply-coupon-btn">Apply</button>
