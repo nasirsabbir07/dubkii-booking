@@ -139,6 +139,8 @@ button {
 .coupons {
   display: flex;
   justify-content: space-between;
+  border: 1px solid #ddd;
+  border-radius: inherit;
 }
 
 #show-coupons {
@@ -258,23 +260,14 @@ button {
 
 /* Make the total cost bold or larger */
 #review-total-cost {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 1.4em; /* You can adjust this size to your preference */
   color: #474d50;
 }
 
-/* .booking-row.total {
-  background-color: #28a745;
-} */
-
-/* Style the additional details with smaller font and display under the total */
-.details-under-total {
-  font-size: 0.9em; /* Smaller font for the details */
-  color: #555; /* Optional: add a lighter color */
-}
-
 .details-under-total div {
-  margin-bottom: 5px; /* Adds space between each detail */
+  margin-bottom: 0px;
+  padding: 0px;
 }
 
 #step-review p {
@@ -441,6 +434,8 @@ button {
   color: #666;
   line-height: 1.4;
   margin-top: 5px;
+  display: flex;
+  flex-direction: column;
 }
 
 .total-cost-section {
@@ -467,6 +462,16 @@ button {
   text-align: center;
   flex-direction: column;
   align-items: center;
+  /* Add opacity and transition for fade-in */
+  opacity: 0; /* Initially transparent */
+  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+}
+
+/* Active state for the modal */
+.modal.active {
+  display: flex; /* Show the modal */
+  opacity: 1; /* Fully visible */
+  transform: translate(-50%, -50%) scale(1); /* Normal scale */
 }
 
 .modal-content .header {
@@ -493,7 +498,7 @@ button {
 }
 
 /* Modal Overlay */
-.overlay {
+#modal-overlay {
   display: none; /* Hidden by default */
   position: fixed;
   top: 0;
@@ -504,6 +509,10 @@ button {
   z-index: 999;
 }
 
+#modal-overlay.active {
+  opacity: 1;
+}
+
 #review-discount-amount {
   color: #4caf50;
 }
@@ -511,6 +520,12 @@ button {
 .review-booking-row .booking-label {
   font-weight: 600;
   font-size: 12px;
+  letter-spacing: 0.4px;
+}
+
+.review-booking-row .booking-value {
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .review-booking-row .booking-label.review-total-label {
@@ -519,16 +534,20 @@ button {
 }
 
 #coupon-details-modal {
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
   display: none;
-  justify-content: center;
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  top: 50%;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 500px;
   align-items: center;
+  opacity: 0; /* Initially transparent */
+  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
 }
 
 /* Modal Content Style */
@@ -537,8 +556,13 @@ button {
   background-color: white;
   padding: 20px;
   border-radius: 5px;
-  width: 80%;
+  width: 100%;
   max-width: 600px;
+}
+
+#coupon-details-modal.active {
+  opacity: 1; /* Fully visible */
+  transform: translate(-50%, -50%) scale(1); /* Scale back to normal */
 }
 
 /* Close Button Style */
@@ -572,9 +596,10 @@ button {
 
 .coupon-details-modal-header {
   width: fit-content;
-  background-color: #ddd;
+  background-color: #ecf3ff;
   border-radius: 8px;
-  padding: 5px 6px;
+  padding: 10px 10px;
+  margin-block: 0px;
 }
 
 .coupon-details-modal-subheader strong {
@@ -658,6 +683,10 @@ button:disabled {
 
 .coupon-section-header {
   font-size: 16px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.4px !important;
+  margin-inline: 16px !important;
+  text-align: center;
 }
 
 .coupon-separator {
@@ -671,5 +700,19 @@ button:disabled {
 }
 
 .coupon-details .expiry-date {
-  margin-top: 15px !important;
+  margin-top: 10px !important;
+  margin-bottom: 5px;
+}
+
+#coupon_code {
+  border: none !important;
+  background: none !important;
+}
+
+#coupon_code::placeholder {
+  color: #555;
+}
+
+#apply-coupon {
+  color: #555;
 }

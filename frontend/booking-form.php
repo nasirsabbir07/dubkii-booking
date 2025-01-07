@@ -207,6 +207,10 @@
 
                             <!-- Total Cost Section -->
                             <div class="total-cost-section">
+                                <div class="review-booking-row">
+                                    <span class="booking-label review-total-label"> Total price </span><span id="review-total-cost">$ 0.00</span>
+                                </div>
+                                <hr style="margin-block: 15px;">
                                 <div class="details-under-total">
                                     <div class="review-booking-row">
                                         <span class="booking-label">Course Price: </span>
@@ -229,11 +233,6 @@
                                         <span class="booking-value" id="review-discount-amount">-$ 0.00</span>
                                     </div>
                                 </div>
-                                <hr style="margin-block: 15px;">
-                                <div class="review-booking-row">
-                                    <span class="booking-label review-total-label"> Total price </span><span id="review-total-cost">$ 0.00</span>
-                                </div>
-
                             </div>
                         </div>
                     </div>
@@ -299,7 +298,7 @@
             </div>
         </div>
     </div>
-    <!-- Modal Structure -->
+    <!-- Coupon Success Modal -->
     <div id="coupon-modal" class="modal">
         <div class="modal-content">
             <h4 class="header">Coupon Applied!</h4>

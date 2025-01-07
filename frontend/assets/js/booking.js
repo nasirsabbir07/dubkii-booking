@@ -605,10 +605,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     ? `$${coupon.discount_value} off`
                     : `${coupon.min_discount_percentage}% - ${coupon.max_discount_percentage}% off`
                 }</span>
-                <br><span class="expiry-date">Expires: ${formattedExpiryDate} hrs</span>
-                <br><button class="know-more-btn" data-code="${
+                <span class="expiry-date">Expires: ${formattedExpiryDate} hrs</span>
+                <button class="know-more-btn" data-code="${
                   coupon.code
-                }" style="font-weight: bold; font-size: 12px; background: none; border: none; padding: 0; text-decoration: none; color: inherit; cursor: pointer;">
+                }" style="font-weight: bold; font-size: 12px; background: none; border: none; padding: 0; text-decoration: none; color: inherit; cursor: pointer; text-align:left;">
                     Know More
                   </button>
               </div>
@@ -752,15 +752,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!applyButton) return;
     applyButton.textContent = buttonText;
     applyButton.setAttribute("data-action", buttonText === "Remove" ? "remove" : "apply");
+
     // Reset styles for active and focus states
-    applyButton.style.backgroundColor = "";
-    applyButton.style.color = "";
+    // Remove both classes before adding the new one
+    applyButton.classList.remove("coupon-btn-apply", "coupon-btn-remove");
+
     if (buttonText === "Remove") {
-      applyButton.style.backgroundColor = "red !important"; // Set background color to red
-      applyButton.style.color = "white !important"; // Set text color to white
+      applyButton.classList.add("coupon-btn-remove");
     } else {
-      applyButton.style.backgroundColor = ""; // Reset background color
-      applyButton.style.color = ""; // Reset text color
+      applyButton.style.color = "";
     }
   }
 
@@ -1222,17 +1222,33 @@ document.addEventListener("DOMContentLoaded", function () {
     modal.style.display = "flex";
     overlay.style.display = "block";
 
+    setTimeout(() => {
+      modal.classList.add("active"); // Add active class to trigger fade-in
+      overlay.classList.add("active"); // Optional: Add active class for overlay fade-in
+    }, 10);
+
     // Add an event listener to close the modal
-    document.getElementById("close-modal").addEventListener("click", function () {
-      modal.style.display = "none";
-      overlay.style.display = "none";
-    });
+    document.getElementById("close-modal").addEventListener("click", hideCouponModal);
 
     // Close modal when overlay is clicked
-    overlay.addEventListener("click", function () {
+    overlay.addEventListener("click", hideCouponModal);
+  }
+
+  // Function to hide the modal
+  function hideCouponModal() {
+    const modal = document.getElementById("coupon-modal");
+    const overlay = document.getElementById("modal-overlay");
+
+    if (!modal || !overlay) return;
+
+    // Remove the active class to trigger fade-out
+    modal.classList.remove("active");
+    overlay.classList.remove("active");
+    // Wait for the transition to complete, then hide the modal and overlay
+    setTimeout(() => {
       modal.style.display = "none";
       overlay.style.display = "none";
-    });
+    }, 400); // Match the timeout to the CSS transition duration
   }
 
   function openCouponDetailsModal(couponCode) {
@@ -1260,13 +1276,20 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
 
       document.getElementById("coupon-details-content").innerHTML = modalContent;
-      document.getElementById("coupon-details-modal").style.display = "flex";
+      modal = document.getElementById("coupon-details-modal");
+      const overlay = document.getElementById("modal-overlay");
+      modal.style.display = "flex";
+      overlay.style.display = "block";
+      setTimeout(() => {
+        modal.classList.add("active"); // Add active class for fade-in
+        overlay.classList.add("active");
+      }, 10);
     }
   }
 
   // Close the modal when the close button is clicked
   document.getElementById("modal-close").addEventListener("click", () => {
-    document.getElementById("coupon-details-modal").style.display = "none";
+    closeCouponDetailsModal();
   });
 
   // Close the modal if the user clicks outside the modal content
@@ -1280,4 +1303,21 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     window.location.reload();
   });
+
+  // Function to close the modal
+  function closeCouponDetailsModal() {
+    const modal = document.getElementById("coupon-details-modal");
+    const overlay = document.getElementById("modal-overlay");
+
+    if (!modal || !overlay) return;
+
+    // Remove the active class to trigger fade-out
+    modal.classList.remove("active");
+    overlay.classList.remove("active");
+    // Wait for the transition to complete, then hide the modal and overlay
+    setTimeout(() => {
+      modal.style.display = "none";
+      overlay.style.display = "none";
+    }, 400); // Match the timeout to the CSS transition duration
+  }
 });
