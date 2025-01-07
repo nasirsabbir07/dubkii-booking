@@ -21,7 +21,9 @@ jobs:
       - name: Add Host Key
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -p 65002 145.223.77.182 >> ~/.ssh/known_hosts
+          if ! ssh-keygen -F "[145.223.77.182]:65002" > /dev/null; then
+            ssh-keyscan -p 65002 145.223.77.182 >> ~/.ssh/known_hosts
+          fi
           chmod 644 ~/.ssh/known_hosts
 
       - name: Upload files to Hostinger
