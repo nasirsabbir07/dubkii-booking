@@ -151,10 +151,10 @@
                 </div>
             </div>
             <div id="step-review" class="form-step step-4" style="display: none;">
-                <p>Please review your booking and move on to payment. Thank you.</p>
                 <div class="review-container">
                     <div class="review-left-column">
                         <!-- User Details Section -->
+                        <p>Please review your booking and move on to payment. Thank you.</p>
                         <div class="review-user-details">
                             <h3>Your Details</h3>
                             <div class="user-details-row">
@@ -193,8 +193,6 @@
                                     <input type="text" id="coupon_code" name="coupon_code" placeholder="Coupon/Gift Card">
                                     <button type="button" id="apply-coupon" class="apply-coupon-btn">Apply</button>
                                 </div>
-
-
                                 <div id="coupon-message" style="margin-top: 5px; color: green; display: none;"></div>
                                 <!-- Available Coupons Section -->
                                 <div class="available-coupons" style="margin-top: 15px;">
@@ -203,14 +201,12 @@
                                     </ul>
                                 </div>
                             </div>
-
-
                             <!-- Total Cost Section -->
                             <div class="total-cost-section">
                                 <div class="review-booking-row">
                                     <span class="booking-label review-total-label"> Total price </span><span id="review-total-cost">$ 0.00</span>
                                 </div>
-                                <hr style="margin-block: 15px;">
+                                <div style="margin-block: 10px; border-top:1px dashed red"></div>
                                 <div class="details-under-total">
                                     <div class="review-booking-row">
                                         <span class="booking-label">Course Price: </span>
@@ -237,15 +233,11 @@
                         </div>
                     </div>
                 </div>
-
-
                 <div class="button-container">
                     <button type="button" class="prev-button" data-prev-step="3">Back</button>
                     <button type="submit">Submit & Pay</button>
                 </div>
-
             </div>
-
             <div class="form-step step-5" style="display: none;">
                 <div class="success-page">
                     <div class="success-icon">
@@ -268,7 +260,6 @@
         </form>
         <!-- Sidebar Section -->
         <div class="sidebar">
-
             <div class="booking-details">
                 <div class="booking-row">
                     <h4 class="sidebar-title booking-label">Booking Details</h4>
@@ -317,8 +308,6 @@
             </div>
         </div>
     </div>
-
     <!-- Modal Overlay -->
     <div id="modal-overlay" class="overlay"></div>
-
 </div>

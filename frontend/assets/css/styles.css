@@ -288,7 +288,7 @@ button {
 
 .user-details-row,
 .booking-details-row {
-  color: #474d50;
+  color: #7b7e85;
 }
 
 .review-booking-details {
@@ -362,6 +362,8 @@ button {
 .coupon-total {
   flex-direction: column-reverse;
   gap: 10px;
+  width: 100%;
+  padding-top: 5px;
 }
 
 #apply-coupon {
@@ -707,12 +709,20 @@ button:disabled {
 #coupon_code {
   border: none !important;
   background: none !important;
+  padding-left: 10px;
 }
 
 #coupon_code::placeholder {
   color: #555;
+  font-size: 14px;
 }
 
 #apply-coupon {
   color: #0f6bff;
+}
+
+.review-user-details h3,
+.review-booking-details h3 {
+  margin-block: 0 !important;
+  color: #104173 !important;
 }
