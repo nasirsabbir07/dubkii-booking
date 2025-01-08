@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      .details {
+        margin-bottom: 20px;
+      }
+      .details th,
+      .details td {
+        text-align: left;
+        padding: 5px;
+      }
+      .details th {
+        width: 200px;
+      }
+      .total {
+        font-size: 18px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Invoice</h1>
+    <p>Thank you for your booking!</p>
+
+    <table class="details">
+      <tr>
+        <th>Order ID:</th>
+        <td>{{order_id}}</td>
+      </tr>
+      <tr>
+        <th>Course Name:</th>
+        <td>{{course_name}}</td>
+      </tr>
+      <tr>
+        <th>Registration Fee:</th>
+        <td>${{registration_fee}}</td>
+      </tr>
+      <tr>
+        <th>Accommodation Fee:</th>
+        <td>${{accommodation_fee}}</td>
+      </tr>
+      <tr>
+        <th>Total Amount:</th>
+        <td>${{total_amount}}</td>
+      </tr>
+      <tr>
+        <th>Customer Email:</th>
+        <td>{{email}}</td>
+      </tr>
+    </table>
+
+    <p class="total">Total Amount: ${{total_amount}}</p>
+  </body>
+</html>
