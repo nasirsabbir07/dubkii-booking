@@ -155,19 +155,6 @@
                     <div class="review-left-column">
                         <!-- User Details Section -->
                         <p>Please review your booking and move on to payment. Thank you.</p>
-                        <div class="review-user-details">
-                            <h3>Your Details</h3>
-                            <div class="user-details-row">
-                                <div class="user-details-top">
-                                    <div id="review-name"><span></span></div>
-                                    <div id="review-email"><span></span></div>
-                                </div>
-                                <div class="user-details-bottom">
-                                    <div id="review-contact"><span></span></div>
-                                    <div id="review-address"><span></span></div>
-                                </div>
-                            </div>
-                        </div>
                         <!-- Booking Cost Breakdown Section -->
                         <div class="review-booking-details">
                             <h3>Selected Course</h3>
@@ -182,6 +169,61 @@
                             </div>
 
                         </div>
+                        <div class="review-user-details">
+                            <h3>Your Details</h3>
+                            <div class="user-details-row">
+                                <div class="user-details-top">
+                                    <div id="review-name">
+                                        <div class="personal-icon">
+                                            <svg fill="#000000" width="20px" height="20px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                                                <title>ionicons-v5-j</title>
+                                                <path d="M258.9,48C141.92,46.42,46.42,141.92,48,258.9,49.56,371.09,140.91,462.44,253.1,464c117,1.6,212.48-93.9,210.88-210.88C462.44,140.91,371.09,49.56,258.9,48ZM385.32,375.25a4,4,0,0,1-6.14-.32,124.27,124.27,0,0,0-32.35-29.59C321.37,329,289.11,320,256,320s-65.37,9-90.83,25.34a124.24,124.24,0,0,0-32.35,29.58,4,4,0,0,1-6.14.32A175.32,175.32,0,0,1,80,259C78.37,161.69,158.22,80.24,255.57,80S432,158.81,432,256A175.32,175.32,0,0,1,385.32,375.25Z" />
+                                                <path d="M256,144c-19.72,0-37.55,7.39-50.22,20.82s-19,32-17.57,51.93C191.11,256,221.52,288,256,288s64.83-32,67.79-71.24c1.48-19.74-4.8-38.14-17.68-51.82C293.39,151.44,275.59,144,256,144Z" />
+                                            </svg>
+                                        </div>
+                                        <span></span>
+                                    </div>
+                                    <div id="review-email">
+                                        <div class="email-icon">
+                                            <svg fill="#000000" width="20px" height="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                viewBox="0 0 24 24" xml:space="preserve">
+                                                <style type="text/css">
+                                                    .st0 {
+                                                        fill: none;
+                                                    }
+                                                </style>
+                                                <path d="M21,11c0,6.7-4.3,6.4-4.8,6.4c-0.6,0-1.1-0.1-1.6-0.4c-0.4-0.3-0.8-0.6-1-1.1c-0.4,0.5-0.8,0.9-1.3,1.1 c-0.5,0.3-1,0.4-1.6,0.4c-0.5,0-1-0.1-1.4-0.3c-0.4-0.2-0.8-0.6-1-1c-0.3-0.4-0.5-0.9-0.6-1.5c-0.1-0.6-0.1-1.3-0.1-2 c0.1-0.9,0.3-1.7,0.6-2.5c0.3-0.7,0.7-1.4,1.1-1.9c0.4-0.5,0.9-0.9,1.5-1.2c0.6-0.3,1.2-0.4,1.8-0.4c2,0,3.1,1,3.3,1.2L15.4,14 c0,0.4-0.2,1.8,1.1,1.8c0.4,0,2.4-0.5,2.4-4.7c0-0.1,0.9-7-6.6-7C6.3,4,5,9.9,5,12c0,8.4,5.3,8,7,8c2,0,3.1-0.4,3.3-0.5l0.4,1.8 C15.5,21.5,14.5,22,12,22c-3.1,0-9-0.1-9-10c0-1.4,0.8-10,9.5-10C20.8,2,21,9.6,21,11z M10.1,12.6c-0.1,0.9,0,1.7,0.2,2.2 c0.2,0.5,0.6,0.7,1.2,0.7c1.1,0,1.7-1.4,1.8-1.8l0.5-5.1c-0.1,0-0.7-0.1-0.9-0.1c-0.8,0-1.5,0.4-1.9,1.1 C10.5,10.2,10.2,11.2,10.1,12.6z" />
+                                                <rect class="st0" width="24" height="24" />
+                                            </svg>
+                                        </div>
+                                        <span></span>
+                                    </div>
+                                </div>
+                                <div class="user-details-bottom">
+                                    <div id="review-contact">
+                                        <div class="contact-icon">
+                                            <svg fill="#000000" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                viewBox="0 0 484.849 484.849" xml:space="preserve">
+                                                <g>
+                                                    <path d="M262.797,274.552c30.206,30.206,63.252,49.446,81.428,47.771c13.579-1.252,30.7-19.862,30.7-19.862l-38.945-38.944 l-15.532,15.532L258.3,216.901l15.532-15.532l-38.945-38.944c0,0-18.611,17.12-19.862,30.699 C213.351,211.3,232.59,244.345,262.797,274.552z" />
+                                                    <path d="M49.924,0v113.712h-22.5v30h22.5v83.712h-25v30h25v83.712h-25v30h25v113.712h410V0H49.924z M79.924,371.136h25v-30h-25 v-83.712h25v-30h-25v-83.712h25v-30h-25V30h50v424.849h-50V371.136z M429.924,454.849h-270V30h270V454.849z" />
+                                                </g>
+                                            </svg>
+                                        </div>
+                                        <span></span>
+                                    </div>
+                                    <div id="review-address">
+                                        <div class="location-icon">
+                                            <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 21C15.5 17.4 19 14.1764 19 10.2C19 6.22355 15.866 3 12 3C8.13401 3 5 6.22355 5 10.2C5 14.1764 8.5 17.4 12 21Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </div>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="review-right-column">
                         <div class="booking-details-row coupon-total">
@@ -189,7 +231,7 @@
                             <div class="coupon-section">
                                 <!-- <label for="coupon_code">Apply a coupon</label> -->
                                 <h3 class="coupon-section-header">Apply coupon or gift card</h3>
-                                <div style="margin-block: 10px; border-top:1px dashed red"></div>
+                                <div style="margin-block: 10px; border:0.5px dashed #e6e6e6"></div>
                                 <div class="coupons">
                                     <input type="text" id="coupon_code" name="coupon_code" placeholder="Coupon/Gift Card">
                                     <button type="button" id="apply-coupon" class="apply-coupon-btn">Apply</button>
@@ -207,7 +249,7 @@
                                 <div class="review-booking-row">
                                     <span class="booking-label review-total-label"> Total price </span><span id="review-total-cost">$ 0.00</span>
                                 </div>
-                                <div style="margin-block: 10px; border-top:1px dashed red"></div>
+                                <div style="margin-block: 10px; border:0.5px dashed #e6e6e6"></div>
                                 <div class="details-under-total">
                                     <div class="review-booking-row">
                                         <span class="booking-label">Course Price: </span>
@@ -251,8 +293,8 @@
                             </g>
                         </svg>
                     </div>
-                    <h2>Payment Successful!</h2>
-                    <p>Thank you for your booking.</p>
+                    <h2>Congratulations!!</h2>
+                    <p id="success-message"></p>
                     <div class="button-container">
                         <button class="reload">Done</button>
                     </div>
@@ -293,17 +335,18 @@
     <!-- Coupon Success Modal -->
     <div id="coupon-modal" class="modal">
         <div class="modal-content">
+            <span id="modal-close" class="close">&times;</span>
             <h4 class="header">Coupon Applied!</h4>
             <p id="coupon-modal-message"></p>
         </div>
-        <div class="modal-footer">
+        <!-- <div class="modal-footer">
             <button id="close-modal" class="btn">Close</button>
-        </div>
+        </div> -->
     </div>
     <!-- Coupon Details Modal -->
     <div id="coupon-details-modal" style="display: none;">
         <div class="modal-content">
-            <span id="modal-close" class="close">&times;</span>
+            <span id="detail-modal-close" class="close">&times;</span>
             <div id="coupon-details-content">
                 <!-- Dynamic coupon details will be inserted here -->
             </div>

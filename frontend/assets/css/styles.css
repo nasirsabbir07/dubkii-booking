@@ -216,7 +216,7 @@ button {
 .booking-details-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .course-info {
@@ -456,7 +456,7 @@ button {
   top: 50%;
   transform: translate(-50%, -50%);
   background-color: #fff;
-  padding: 20px;
+  padding: 24px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   width: 80%;
@@ -542,7 +542,7 @@ button {
   left: 50%;
   top: 50%;
   background-color: #fff;
-  padding: 20px;
+  padding: 24px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   width: 80%;
@@ -556,7 +556,6 @@ button {
 .modal-content {
   position: relative; /* Make it relative to place the close button */
   background-color: white;
-  padding: 20px;
   border-radius: 5px;
   width: 100%;
   max-width: 600px;
@@ -568,17 +567,20 @@ button {
 }
 
 /* Close Button Style */
-#modal-close {
-  color: red;
+.close {
+  color: #7b7e85;
   font-size: 28px;
-  font-weight: bold;
   position: absolute; /* Keep it inside the modal content */
-  top: 10px;
-  right: 15px;
+  top: -55px;
+  right: -20px;
+  width: 30px;
+  border-radius: 50%;
+  text-align: center;
+  background-color: #f9f9f9;
 }
 
-#modal-close:hover,
-#modal-close:focus {
+.close:hover,
+.close:focus {
   color: black;
   text-decoration: none;
   cursor: pointer;
@@ -587,7 +589,6 @@ button {
 #coupon-details-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 .coupon-details-modal-header-section {
@@ -602,12 +603,15 @@ button {
   border-radius: 8px;
   padding: 10px 10px;
   margin-block: 0px;
+  font-size: 16px !important;
+  font-weight: 600 !important;
 }
 
-.coupon-details-modal-subheader strong {
-  color: #000;
-  font-size: 22px;
+.coupon-details-modal-subheader span {
+  color: #201e25;
+  font-size: 20px;
   font-weight: 600;
+  line-height: 28px;
 }
 
 #coupon-details-content li {
@@ -617,9 +621,15 @@ button {
 }
 
 .coupon-details-key-terms span {
-  font-size: 16px;
+  font-size: 14px;
   color: #000;
-  font-weight: 700;
+  font-weight: 600;
+}
+
+.coupon-details-key-terms li > span {
+  font-size: 14px;
+  color: #7b7e85;
+  font-weight: 400;
 }
 
 #coupon-modal-message {
@@ -756,4 +766,30 @@ button:disabled {
 
 .coupon-section h3 {
   margin-top: 0px;
+}
+
+#review-name,
+#review-email,
+#review-contact,
+#review-address {
+  display: flex;
+  flex-direction: row;
+  max-width: 500px;
+  gap: 8px;
+  align-items: center;
+}
+
+.personal-icon,
+.email-icon,
+.contact-icon,
+.location-icon {
+  display: flex;
+  align-items: center;
+}
+
+.personal-icon,
+.email-icon,
+.contact-icon,
+.location-icon svg {
+  opacity: 0.5;
 }

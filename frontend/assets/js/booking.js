@@ -59,6 +59,10 @@ document.addEventListener("DOMContentLoaded", function () {
       removeSidebar();
       showCoupons();
     }
+    if (step === 5) {
+      removeSidebar();
+      populateConfirmationTab();
+    }
   }
 
   // Function to update the visibility of sidebar rows
@@ -123,6 +127,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (nextStep === 4) {
           populateReviewTab();
         }
+
+        if (nextStep === 5) {
+          populateConfirmationTab();
+        }
         // Scroll to the tabs at the top of the form
         const bookingFormContainer = document.querySelector(".booking-form"); // Replace with the correct tabs container selector
         if (bookingFormContainer) {
@@ -160,6 +168,9 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       showStep(targetStep);
       updateSidebar(targetStep);
+      if (targetStep === 5) {
+        populateConfirmationTab();
+      }
     });
   });
 
@@ -230,6 +241,10 @@ document.addEventListener("DOMContentLoaded", function () {
         option.value = item.id;
         option.textContent = item.duration_weeks ? `${item.duration_weeks} Weeks` : item.name;
         option.setAttribute("data-duration-weeks", item.duration_weeks);
+      } else if (isValidDate(item)) {
+        // Handle start dates
+        option.value = item; // Assuming `item` is in ISO 8601 format (YYYY-MM-DD)
+        option.textContent = formatDate(item); // Use your formatDate helper
       } else {
         option.value = item; // For start dates or other plain values
         option.textContent = item;
@@ -1043,6 +1058,17 @@ document.addEventListener("DOMContentLoaded", function () {
       : "Not selected";
   }
 
+  function populateConfirmationTab() {
+    const courseName = document.querySelector("#review-selected-course span").textContent;
+
+    const startDate = document.querySelector("#review-course-start-date span").textContent;
+
+    const courseDuration = document.querySelector("#review-course-duration span").textContent;
+
+    const successMessageElement = document.querySelector("#success-message");
+    successMessageElement.textContent = `${courseName}, starting on ${startDate} (${courseDuration}), has been successfully booked. Please check your email for the corresponding invoice. Thank you.`;
+  }
+
   function removeSidebar() {
     const sidebar = document.querySelector(".sidebar");
     if (sidebar) {
@@ -1228,7 +1254,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 10);
 
     // Add an event listener to close the modal
-    document.getElementById("close-modal").addEventListener("click", hideCouponModal);
+    document.getElementById("modal-close").addEventListener("click", hideCouponModal);
 
     // Close modal when overlay is clicked
     overlay.addEventListener("click", hideCouponModal);
@@ -1262,17 +1288,22 @@ document.addEventListener("DOMContentLoaded", function () {
         <h3 class="coupon-details-modal-header">${coupon.code}</h3>
         <p class="coupon-details-modal-subheader">${
           coupon.discount_type === "fixed"
-            ? `<strong>Flat $${coupon.discount_value} off</strong>`
-            : `<strong>Minimum ${coupon.min_discount_percentage}% to maximum ${coupon.max_discount_percentage}% off</strong>`
+            ? `<span>Flat $${coupon.discount_value} off</span>`
+            : `<span>Upto ${coupon.max_discount_percentage}% off</span>`
         }</p>
       </div>
+      <div style="margin-block: 20px; border:0.5px dashed #e6e6e6"></div>
       <div class="coupon-details-key-terms">
         <span>Key terms and condition</span>
-      <ul>
-        <li><strong>Coupon valid till ${formatCouponDate(coupon.expiry_date)} hrs</strong> </li>
-      </ul>
-      </div>
-      
+        <ul>
+          <li><span>Coupon valid till ${formatCouponDate(coupon.expiry_date)}, hrs</span> </li>
+          ${
+            coupon.discount_type === "fixed"
+              ? `<li><span>Get a flat discount of $${coupon.discount_value} on selected course.</span></li>`
+              : `<li><span>Get a maximum discount of ${coupon.max_discount_percentage}%</span></li> <li><span>Get a minimum discount of ${coupon.min_discount_percentage}%</span></li>`
+          }
+        </ul>
+      </div>  
     `;
 
       document.getElementById("coupon-details-content").innerHTML = modalContent;
@@ -1288,15 +1319,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Close the modal when the close button is clicked
-  document.getElementById("modal-close").addEventListener("click", () => {
+  document.getElementById("detail-modal-close").addEventListener("click", () => {
     closeCouponDetailsModal();
-  });
-
-  // Close the modal if the user clicks outside the modal content
-  window.addEventListener("click", (e) => {
-    if (e.target === document.getElementById("coupon-details-modal")) {
-      document.getElementById("coupon-details-modal").style.display = "none";
-    }
   });
 
   document.querySelector(".reload").addEventListener("click", function (e) {
@@ -1319,5 +1343,11 @@ document.addEventListener("DOMContentLoaded", function () {
       modal.style.display = "none";
       overlay.style.display = "none";
     }, 400); // Match the timeout to the CSS transition duration
+  }
+
+  // Helper function to check if a string is a valid date
+  function isValidDate(dateString) {
+    const date = new Date(dateString);
+    return !isNaN(date); // Returns true if the date is valid
   }
 });
