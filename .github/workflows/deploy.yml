@@ -29,4 +29,4 @@ jobs:
       - name: Deploy to Staging
         run: |
           rsync -avz --exclude '.git' --exclude 'node_modules' --exclude '*.log' \
-          -e "ssh -p 65002" ./ u405203284@145.223.77.182:/home/u405203284/domains/dubkii.com/public_html/staging/wp-content/plugins/dubkii-booking
+          -e "ssh -p 65002" ./ u405203284@145.223.77.182:/home/u405203284/domains/dubkii.com/public_html/dev/wp-content/plugins/dubkii-booking

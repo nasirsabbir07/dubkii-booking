@@ -629,7 +629,7 @@ document.addEventListener("DOMContentLoaded", function () {
               </div>
              
             </li>
-            <div class="coupon-separator"></div>
+            <div style="margin-block: 10px; border:0.5px dashed #e6e6e6"></div>
           `;
           })
           .join("");
