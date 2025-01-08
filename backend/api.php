@@ -452,6 +452,12 @@ function fetch_active_coupons_rest(WP_REST_Request $request)
 
 function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name)
 {
+    // Validate booking data
+    if (!isset($booking_data['registrationFee'], $booking_data['accommodationFee'], $booking_data['totalAmount'], $booking_data['email'], $booking_data['name'])) {
+        error_log("Invalid booking data: " . print_r($booking_data, true));
+        return false;
+    }
+
     // Extract booking details
     $registration_fee = number_format($booking_data['registrationFee'], 2);
     $accommodation_fee = number_format($booking_data['accommodationFee'], 2);
@@ -463,7 +469,7 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     $template_path = plugin_dir_path(__FILE__) . 'templates/invoice-template.html';
     if (!file_exists($template_path)) {
         error_log("Invoice template not found at: $template_path");
-        return false;
+        return new WP_Error('template_missing', 'Invoice template not found.', ['status' => 500]);
     }
 
     // Load and replace template placeholders
@@ -480,26 +486,31 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
 
     // Generate the PDF
     require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
-    $dompdf = new Dompdf();
-    $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'portrait');
-    $dompdf->render();
-    $pdf_output = $dompdf->output();
+    try {
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $pdf_output = $dompdf->output();
+    } catch (Exception $e) {
+        error_log("Dompdf error: " . $e->getMessage());
+        return false;
+    }
 
-    // Send the PDF directly via email
+    // Save the PDF to a temporary file
+    $upload_dir = wp_upload_dir();
+    $temp_dir = $upload_dir['basedir'] . '/invoices';
+    if (!file_exists($temp_dir)) {
+        wp_mkdir_p($temp_dir);
+    }
+    $pdf_file_path = $temp_dir . "/invoice_{$razorpayOrderId}.pdf";
+    file_put_contents($pdf_file_path, $pdf_output);
+
+    // Send the email
     $subject = "Your Booking Invoice";
     $message = "Dear {$name},<br><br>Thank you for your booking. Please find your invoice attached.<br><br>Best regards,<br>Your Company.";
     $headers = [
         'Content-Type: text/html; charset=UTF-8',
-    ];
-
-    // Attach the PDF
-    $attachments = [
-        [
-            'name' => "invoice_{$razorpayOrderId}.pdf",
-            'type' => 'application/pdf',
-            'data' => $pdf_output, // Raw PDF data
-        ],
     ];
 
     $email_sent = wp_mail(
@@ -507,8 +518,13 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
         $subject,
         $message,
         $headers,
-        $attachments
+        [$pdf_file_path] // Attach the file
     );
+
+    // Delete the temporary file after sending the email
+    if (file_exists($pdf_file_path)) {
+        unlink($pdf_file_path);
+    }
 
     if (!$email_sent) {
         error_log("Failed to send email to {$email} with invoice.");
