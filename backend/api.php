@@ -485,7 +485,7 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     $html = str_replace(array_keys($replacements), array_values($replacements), $template_content);
 
     // Generate the PDF
-    require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
+    require_once plugin_dir_path(__FILE__) . '../../vendor/autoload.php';
     try {
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
