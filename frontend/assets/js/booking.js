@@ -189,7 +189,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = await response.json();
       if (data.success) {
         allCourses = [data.course];
-        populateDropdown(courseSelect, allCourses, "Select a course");
+
+        // Directly populate the course dropdown
+        const courseSelect = document.querySelector("#course");
+        populateDropdown(courseSelect, allCourses, "Select a course", allCourses[0].id);
+        handleCourseSelection();
       }
     } catch (error) {
       console.error("Error fetching course data:", error);
@@ -210,7 +214,6 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       const data = await response.json();
-
       if (data.success) {
         populateDropdown(startDateSelect, data.start_dates, "Select a start date");
         populateDropdown(durationSelect, data.durations, "Select duration (weeks)");
@@ -223,9 +226,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Function to populate a dropdown
-  function populateDropdown(selectElement, items, placeholder) {
+  function populateDropdown(selectElement, items, placeholder, selectedValue) {
     clearDropdown(selectElement);
-
     // Add placeholder option
     const placeholderOption = document.createElement("option");
     placeholderOption.textContent = placeholder;
@@ -249,6 +251,10 @@ document.addEventListener("DOMContentLoaded", function () {
         option.value = item; // For start dates or other plain values
         option.textContent = item;
       }
+      // Set selected option based on the provided selectedValue
+      if (option.value === selectedValue) {
+        option.selected = true;
+      }
       selectElement.appendChild(option);
     });
   }
@@ -260,6 +266,7 @@ document.addEventListener("DOMContentLoaded", function () {
       fetchCourseDetails(selectedCourseId);
 
       const selectedCourse = allCourses.find((course) => course.id === selectedCourseId);
+      console.log(selectedCourse);
       if (selectedCourse) {
         document.getElementById("selected-course").textContent = selectedCourse.name;
       }
@@ -272,10 +279,8 @@ document.addEventListener("DOMContentLoaded", function () {
       // Optionally clear sidebar as well
       document.getElementById("selected-course").textContent = "None";
       document.getElementById("course-price").textContent = "$ 0.00";
-      // selectedCourseCost = 0;
       resetAccommodationFee();
     }
-    // updateTotalCost();
   }
 
   // Function to fetch price from the server and update the sidebar
@@ -324,7 +329,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function setCoursePrice(price) {
     const coursePriceElem = document.getElementById("course-price");
     coursePriceElem.textContent = `$ ${price.toFixed(2)}`;
-
     // Save the original price as a data attribute for further calculations
     if (!originalCoursePrice) {
       originalCoursePrice = price;
@@ -539,7 +543,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const fee = calculateAccommodationFee(duration);
     const formattedFee = parseFloat(fee).toFixed(2);
     feeElem.textContent = `$ ${formattedFee}`;
-
     updateTotalCost();
   }
 
@@ -547,7 +550,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const accommodationFeeElem = document.querySelector("#accommodation-fee");
 
     accommodationFeeElem.textContent = "$ 0.00";
-    updateTotalCost(); // Recalculate total cost to reflect the reset
+    updateTotalCost();
   }
 
   // Trigger accommodation fee update on duration change
@@ -620,12 +623,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     ? `$${coupon.discount_value} off`
                     : `${coupon.min_discount_percentage}% - ${coupon.max_discount_percentage}% off`
                 }</span>
-                <span class="expiry-date">Expires: ${formattedExpiryDate} hrs</span>
-                <button class="know-more-btn" data-code="${
+                <span class="discount-description">Get assured discount with for your desired course <button class="know-more-btn" data-code="${
                   coupon.code
                 }" style="font-weight: bold; font-size: 12px; background: none; border: none; padding: 0; text-decoration: none; color: inherit; cursor: pointer; text-align:left;">
                     Know More
-                  </button>
+                  </button></span>
+                
               </div>
              
             </li>
@@ -768,7 +771,6 @@ document.addEventListener("DOMContentLoaded", function () {
     applyButton.textContent = buttonText;
     applyButton.setAttribute("data-action", buttonText === "Remove" ? "remove" : "apply");
 
-    // Reset styles for active and focus states
     // Remove both classes before adding the new one
     applyButton.classList.remove("coupon-btn-apply", "coupon-btn-remove");
 
@@ -1066,7 +1068,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const courseDuration = document.querySelector("#review-course-duration span").textContent;
 
     const successMessageElement = document.querySelector("#success-message");
-    successMessageElement.textContent = `${courseName}, starting on ${startDate} (${courseDuration}), has been successfully booked. Please check your email for the corresponding invoice. Thank you.`;
+    successMessageElement.innerHTML = `${courseName}, <span class="highlight">starting on ${startDate} (${courseDuration})</span>, has been successfully booked. Please check your email for the corresponding invoice.`;
   }
 
   function removeSidebar() {

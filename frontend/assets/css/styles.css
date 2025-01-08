@@ -140,7 +140,9 @@ button {
   justify-content: space-between;
   border: 1px solid #ddd;
   border-radius: inherit;
-  margin-block: 15px;
+  margin-top: 15px;
+  margin-bottom: 0px;
+  margin-inline: 8px;
 }
 
 #show-coupons {
@@ -188,7 +190,6 @@ button {
   display: flex;
   flex: 2;
   flex-direction: column;
-  gap: 10px;
 }
 
 .review-right-column {
@@ -387,7 +388,7 @@ button {
 }
 
 .coupon-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Flex container for the header */
@@ -400,9 +401,9 @@ button {
 
 /* Style the coupon code text */
 .coupon-header span {
-  font-size: 14px;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #333;
+  color: #201e25;
   background-color: #ecf3ff;
   padding: 2px 4px;
   border-radius: 5px;
@@ -422,12 +423,6 @@ button {
 
 .apply-coupon-btn:hover {
   background-color: #45a049;
-}
-
-/* Coupon applied text */
-.coupon-header span {
-  font-size: 0.9rem;
-  color: #666;
 }
 
 /* Style the coupon details */
@@ -601,15 +596,15 @@ button {
   width: fit-content;
   background-color: #ecf3ff;
   border-radius: 8px;
-  padding: 10px 10px;
+  padding: 8px;
   margin-block: 0px;
-  font-size: 16px !important;
+  font-size: 1.4rem !important;
   font-weight: 600 !important;
 }
 
 .coupon-details-modal-subheader span {
   color: #201e25;
-  font-size: 20px;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 28px;
 }
@@ -655,11 +650,13 @@ button {
   text-align: center;
   color: #333;
 }
-.success-icon {
-  margin-bottom: 20px;
-}
+
 .success-icon svg {
   animation: pop 0.3s ease-out;
+}
+
+.success-page p {
+  margin-bottom: 0 !important;
 }
 
 @keyframes pop {
@@ -687,17 +684,10 @@ button:disabled {
   color: #f9f9f9 !important;
 }
 
-.coupon-details span:first-child {
-  font-weight: 600;
-  font-size: 14px;
-  color: #4caf50;
-}
-
 .coupon-section-header {
-  font-size: 16px !important;
-  font-weight: 500 !important;
+  font-size: 1.5rem !important;
   letter-spacing: 0.4px !important;
-  margin-inline: 16px !important;
+  margin-inline: 0px !important;
   text-align: center;
 }
 
@@ -709,17 +699,23 @@ button:disabled {
 
 .coupon-details .discount-info {
   margin-top: 10px !important;
+  font-weight: 600;
+  font-size: 0.87rem;
+  color: #11a670;
 }
 
-.coupon-details .expiry-date {
-  margin-top: 10px !important;
+.coupon-details .discount-description {
   margin-bottom: 5px;
+  font-size: 0.75rem;
+  color: #7b7e85;
+  font-weight: 500;
 }
 
 #coupon_code {
   border: none !important;
   background: none !important;
   padding-left: 10px;
+  margin-left: 0.8rem;
 }
 
 #coupon_code::placeholder {
@@ -729,6 +725,7 @@ button:disabled {
 
 #apply-coupon {
   color: #0f6bff;
+  margin-right: 0.8rem;
 }
 
 .review-user-details h3,
@@ -792,4 +789,35 @@ button:disabled {
 .contact-icon,
 .location-icon svg {
   opacity: 0.5;
+}
+
+.form-step .section-titles {
+  color: #104173 !important;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .tab-list {
+    flex-wrap: wrap;
+    justify-content: space-between; /* Adjust spacing between tabs */
+  }
+
+  .tab {
+    flex: 0 0 calc(50% - 10px); /* Two tabs per row */
+    margin-bottom: 10px; /* Add spacing between rows */
+    clip-path: none; /* Remove arrow effect for simplicity on small screens */
+    border-radius: 5px; /* Add rounded corners */
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .tab {
+    flex: 0 0 100%; /* One tab per row */
+    margin-bottom: 10px;
+  }
+}
+
+.highlight {
+  color: #0f6bff;
+  font-weight: 600;
 }

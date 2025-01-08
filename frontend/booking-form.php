@@ -14,7 +14,7 @@
             <!-- Step 1: Select Course -->
 
             <div class="form-step step-1">
-                <h3>Course Selection</h3>
+                <h3 class="section-titles">Course Selection</h3>
                 <div class="course-detail-selection">
                     <label for="course" class="selection-label">Select Course</label>
                     <select name="course" id="course" required>
@@ -43,7 +43,7 @@
 
             <!-- Step 2: Personal Details -->
             <div class="form-step step-2" style="display: none;">
-                <h3>Personal Details</h3>
+                <h3 class="section-titles">Personal Details</h3>
                 <div class="personal-details">
                     <label for="name" class="personal-details-label">Full Name</label>
                     <input type="text" id="name" name="name" class="details-input" required>
@@ -98,7 +98,7 @@
                     </select>
                 </div>
                 <div class="emergency-contact" style="margin-bottom: 10px;">
-                    <h3>Emergency Details</h3>
+                    <h3 class="section-titles">Emergency Details</h3>
                     <div class="contact-type-selection personal-details">
                         <label for="contact_type" class="personal-details-label">Contact Type</label>
                         <select name="contact_type" id="contact_type" class="details-selection" required>
@@ -130,7 +130,7 @@
             </div>
             <!-- Step 3: Transport Selection -->
             <div class="form-step step-3" style="display: none;">
-                <h3>Transport Options</h3>
+                <h3 class="section-titles">Transport Options</h3>
                 <p>We can arrange for you to be met at your arrival airport and taken to your accommodation</p>
                 <div class="transport-details">
                     <span class="transport-details-txt">
@@ -157,7 +157,7 @@
                         <p>Please review your booking and move on to payment. Thank you.</p>
                         <!-- Booking Cost Breakdown Section -->
                         <div class="review-booking-details">
-                            <h3>Selected Course</h3>
+                            <h3 class="section-titles">Selected Course</h3>
                             <div class="booking-details-row">
                                 <div class="course-info">
                                     <div id="review-selected-course">Course: <span></span></div>
@@ -170,7 +170,7 @@
 
                         </div>
                         <div class="review-user-details">
-                            <h3>Your Details</h3>
+                            <h3 class="section-titles">Your Details</h3>
                             <div class="user-details-row">
                                 <div class="user-details-top">
                                     <div id="review-name">
@@ -231,7 +231,7 @@
                             <div class="coupon-section">
                                 <!-- <label for="coupon_code">Apply a coupon</label> -->
                                 <h3 class="coupon-section-header">Apply coupon or gift card</h3>
-                                <div style="margin-block: 10px; border:0.5px dashed #e6e6e6"></div>
+                                <div style="margin-block: 10px; border:0.5px solid #e6e6e6"></div>
                                 <div class="coupons">
                                     <input type="text" id="coupon_code" name="coupon_code" placeholder="Coupon/Gift Card">
                                     <button type="button" id="apply-coupon" class="apply-coupon-btn">Apply</button>
@@ -249,7 +249,7 @@
                                 <div class="review-booking-row">
                                     <span class="booking-label review-total-label"> Total price </span><span id="review-total-cost">$ 0.00</span>
                                 </div>
-                                <div style="margin-block: 10px; border:0.5px dashed #e6e6e6"></div>
+                                <div style="margin-block: 10px; border:0.5px solid #e6e6e6"></div>
                                 <div class="details-under-total">
                                     <div class="review-booking-row">
                                         <span class="booking-label">Course Price: </span>
@@ -295,6 +295,7 @@
                     </div>
                     <h2>Congratulations!!</h2>
                     <p id="success-message"></p>
+                    <p>Thank you.</p>
                     <div class="button-container">
                         <button class="reload">Done</button>
                     </div>
