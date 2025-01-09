@@ -1068,7 +1068,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const courseDuration = document.querySelector("#review-course-duration span").textContent;
 
     const successMessageElement = document.querySelector("#success-message");
-    successMessageElement.innerHTML = `${courseName}, <span class="highlight">starting on ${startDate} (${courseDuration})</span>, has been successfully booked. Please check your email for the corresponding invoice.`;
+    successMessageElement.innerHTML = `
+      <p>Your booking for the <span class="highlight">${courseName}</span> has been successfully confirmed!</p>
+      <p class="highlight">${startDate}</p>
+      <p class="highlight">${courseDuration}</p>`;
   }
 
   function removeSidebar() {

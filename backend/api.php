@@ -474,6 +474,12 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     $address = sanitize_text_field($booking_data['address']);
     $contact = sanitize_text_field($booking_data['contact']);
 
+    // Path to the image
+    $image_path = plugin_dir_path(__FILE__) . 'assets/images/Dubkii_en.png';
+    $type = pathinfo($image_path, PATHINFO_EXTENSION);
+    $data = file_get_contents($image_path);
+    $base64_image = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
     // Path to the template
     $template_path = plugin_dir_path(__FILE__) . 'templates/invoice-template.html';
     if (!file_exists($template_path)) {
@@ -483,11 +489,8 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
 
     // Load and replace template placeholders
     $template_content = file_get_contents($template_path);
-    $css_path = plugin_dir_url(__FILE__) . 'assets/css/invoice.css';
-    $image_path = plugin_dir_url(__FILE__) . 'assets/images/Dubkii_en.png';
     $replacements = [
-        '{{css_path}}' => $css_path,
-        '{{image_path}}' => $image_path,
+        '{{image_path}}' => $base64_image,
         '{{order_id}}' => $razorpayOrderId,
         '{{course_name}}' => $course_name,
         '{{course_price}}' => $course_price,

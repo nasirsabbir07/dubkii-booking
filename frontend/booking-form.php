@@ -294,8 +294,9 @@
                         </svg>
                     </div>
                     <h2>Congratulations!!</h2>
-                    <p id="success-message"></p>
-                    <p>Thank you.</p>
+                    <div id="success-message"></div>
+                    <p>Please check your email for the invoice and additional details.</p>
+                    <p>Thank you for choosing us, and we look forward to helping you on this exciting journey!</p>
                     <div class="button-container">
                         <button class="reload">Done</button>
                     </div>
