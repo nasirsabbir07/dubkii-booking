@@ -1071,7 +1071,10 @@ document.addEventListener("DOMContentLoaded", function () {
     successMessageElement.innerHTML = `
       <p>Your booking for the <span class="highlight">${courseName}</span> has been successfully confirmed!</p>
       <p class="highlight">${startDate}</p>
-      <p class="highlight">${courseDuration}</p>`;
+      <p class="highlight">${courseDuration}</p>
+      <p>Please check your email for the invoice and additional details.</p>
+      <p>Thank you for choosing us, and we look forward to helping you on this exciting journey!</p>
+    `;
   }
 
   function removeSidebar() {
