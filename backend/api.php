@@ -483,6 +483,8 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
 
     // Load and replace template placeholders
     $template_content = file_get_contents($template_path);
+    $css_path = plugin_dir_url(__FILE__) . 'assets/css/invoice.css';
+    $image_path = plugin_dir_url(__FILE__) . 'assets/images/Dubkii_en.png';
     $replacements = [
         '{{order_id}}' => $razorpayOrderId,
         '{{course_name}}' => $course_name,
