@@ -1128,10 +1128,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const coursePrice =
       parseFloat(document.querySelector("#review-course-price").textContent.replace("$", "")) ||
       0.0;
+    console.log("course price for form: ", coursePrice);
     const discountAmount =
       parseFloat(document.querySelector("#review-discount-amount").textContent.replace("-$", "")) ||
       0.0;
-
+    console.log("Discount amount for form: ", discountAmount);
     const selectedDurationOption = form["duration"].options[form["duration"].selectedIndex];
     const durationWeeks = selectedDurationOption
       ? parseInt(selectedDurationOption.getAttribute("data-duration-weeks"), 10)

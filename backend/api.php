@@ -527,7 +527,7 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
 
     // Send the email
     $subject = "Your Booking Invoice";
-    $message = "Dear {$name},<br><br>Thank you for your booking. Please find your invoice attached.<br><br>Best regards,<br>Your Company.";
+    $message = "Dear {$name},<br><br>Thank you for your booking. Please find your invoice attached.<br><br>Best regards,<br>Dubkii India Culture Center";
     $headers = [
         'Content-Type: text/html; charset=UTF-8',
     ];
