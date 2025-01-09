@@ -453,7 +453,7 @@ function fetch_active_coupons_rest(WP_REST_Request $request)
     }
 }
 
-function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name)
+function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name, $course_price, $discount_amount)
 {
 
     // Validate booking data
@@ -468,7 +468,7 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     $transportation_fee = number_format(($booking_data['transportationFee']));
     $total_amount = number_format($booking_data['totalAmount'] / 100, 2); // Assuming cents
     $course_price = number_format($course_price, 2);
-    $discount_amount = number_format($discount_amount, 2)
+    $discount_amount = number_format($discount_amount, 2);
     $email = sanitize_email($booking_data['email']);
     $name = sanitize_text_field($booking_data['name']);
     $address = sanitize_text_field($booking_data['address']);
