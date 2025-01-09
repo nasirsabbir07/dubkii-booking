@@ -486,6 +486,8 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     $css_path = plugin_dir_url(__FILE__) . 'assets/css/invoice.css';
     $image_path = plugin_dir_url(__FILE__) . 'assets/images/Dubkii_en.png';
     $replacements = [
+        '{{css_path}}' => $css_path,
+        '{{image_path}}' => $image_path,
         '{{order_id}}' => $razorpayOrderId,
         '{{course_name}}' => $course_name,
         '{{course_price}}' => $course_price,
