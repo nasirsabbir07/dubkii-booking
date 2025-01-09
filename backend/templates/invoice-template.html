@@ -13,27 +13,32 @@
         text-align: center;
       }
 
-      .details-section {
-        display: flex;
-        justify-content: space-between;
+      .details-table {
+        width: 100%;
+        margin-top: 1rem;
+        border-collapse: collapse;
       }
 
-      .details-section p {
-        margin-block: 5px;
+      .details-table td {
+        vertical-align: top;
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+
+      .details-table p {
+        margin: 5px 0;
         font-size: 0.8rem;
         font-weight: 600;
         color: #7b7e85;
       }
 
-      .recipient-details,
-      .sender-details {
-        display: flex;
-        flex-direction: column;
-        font-size: 0.9rem;
+      .details-table span {
+        display: inline-block;
+        margin-bottom: 0.2em;
       }
-      .recipient-details,
-      .sender-details span {
-        margin-block: 0.2em;
+
+      .details-table .sender-details {
+        text-align: end;
       }
 
       .logo-section {
@@ -45,35 +50,29 @@
         margin-inline: auto;
       }
 
-      .invoice-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        font-family: Arial, sans-serif;
+      .invoice-table {
         width: 100%;
+        border-collapse: collapse;
         margin-top: 2rem;
+        font-family: Arial, sans-serif;
       }
 
-      .grid-header {
-        font-weight: bold;
-        background-color: #104173;
+      .invoice-table th,
+      .invoice-table td {
+        padding: 10px;
         text-align: left;
-        padding: 10px;
-        border-bottom: 2px solid #104173;
+        border: 1px solid #ddd;
+      }
+
+      .invoice-table thead th {
+        background-color: #104173;
         color: #fff;
-      }
-
-      .grid-item {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-      }
-
-      .grid-footer {
         font-weight: bold;
-        padding: 10px;
-        grid-column: 2;
       }
 
-      .grid-footer:last-child {
+      .invoice-table tfoot .total-row {
+        font-weight: bold;
+        text-align: left;
         background-color: #5c9aff;
         color: #000;
       }
@@ -82,12 +81,12 @@
         font-size: 20px;
         font-weight: 600;
       }
-      .invoice-section {
+      {% comment %} .invoice-section {
         display: flex;
         flex-direction: column;
         width: 80%;
         margin-inline: auto;
-      }
+      } {% endcomment %}
     </style>
   </head>
   <body>
@@ -265,41 +264,60 @@
         <span class="order-highlight">{{order_id}}</span>.
       </p>
       <div class="details-section">
-        <div class="recipient-details">
-          <p>Sent to:</p>
-          <span>{{name}}</span>
-          <span>{{email}}</span>
-          <span>{{contact}}</span>
-          <span>{{address}}</span>
-        </div>
-        <div class="sender-details">
-          <p>Sent from:</p>
-          <span>Dubkii India culture center</span>
-          <span>dubkiiindia@gmail.com</span>
-          <span>+91 9695708861</span>
-        </div>
+        <table class="details-table">
+          <tr>
+            <td class="recipient-details">
+              <p>Sent to:</p>
+              <span>{{name}}</span><br />
+              <span>{{email}}</span><br />
+              <span>{{contact}}</span><br />
+              <span>{{address}}</span>
+            </td>
+            <td class="sender-details">
+              <p>Sent from:</p>
+              <span>Dubkii India Culture Center</span><br />
+              <span>dubkiiindia@gmail.com</span><br />
+              <span>+91 9695708861</span>
+            </td>
+          </tr>
+        </table>
       </div>
-      <div class="invoice-grid">
-        <div class="grid-header">Description</div>
-        <div class="grid-header">Amount</div>
-
-        <div class="grid-item">{{course_name}}</div>
-        <div class="grid-item">${{course_price}}</div>
-
-        <div class="grid-item">Registration Fee</div>
-        <div class="grid-item">${{registration_fee}}</div>
-
-        <div class="grid-item">Accommodation Fee</div>
-        <div class="grid-item">${{accommodation_fee}}</div>
-
-        <div class="grid-item">Transportation Fee</div>
-        <div class="grid-item">${{transportation_fee}}</div>
-
-        <div class="grid-item">Discount Amount</div>
-        <div class="grid-item">${{discount_amount}}</div>
-
-        <div class="grid-footer" colspan="2">Total: ${{total_amount}}</div>
-      </div>
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{course_name}}</td>
+            <td>${{course_price}}</td>
+          </tr>
+          <tr>
+            <td>Registration Fee</td>
+            <td>${{registration_fee}}</td>
+          </tr>
+          <tr>
+            <td>Accommodation Fee</td>
+            <td>${{accommodation_fee}}</td>
+          </tr>
+          <tr>
+            <td>Transportation Fee</td>
+            <td>${{transportation_fee}}</td>
+          </tr>
+          <tr>
+            <td>Discount Amount</td>
+            <td>${{discount_amount}}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="1"></td>
+            <td class="total-row">Total: ${{total_amount}}</td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   </body>
 </html>
