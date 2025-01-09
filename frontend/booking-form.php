@@ -297,7 +297,7 @@
                     <div id="success-message"></div>
                     <p>Please check your email for the invoice and additional details.</p>
                     <p>Thank you for choosing us, and we look forward to helping you on this exciting journey!</p>
-                    <div class="button-container">
+                    <div class="button-container done-btn">
                         <button class="reload">Done</button>
                     </div>
                 </div>
