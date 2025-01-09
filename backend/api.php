@@ -303,8 +303,6 @@ function handle_payment_verification(WP_REST_Request $request)
     $total_amount = floatval($form_data['totalAmount'] ?? 0);
     $email = sanitize_email($form_data['email']);
 
-    $course_price = floatval($form_data['coursePrice']);
-    $discount_amount = floatval($form_data['discountAmount']);
 
     // Save data permanently
     $personal_details = $wpdb->prefix . 'dubkii_personal_details';
@@ -393,7 +391,7 @@ function handle_payment_verification(WP_REST_Request $request)
     //     error_log("Failed to create Razorpay invoice: " . $e->getMessage());
     // }
 
-    $invoice_url = generate_and_send_invoice($form_data, $razorpayOrderId, $course_name, $course_price, $discount_amount);
+    $invoice_url = generate_and_send_invoice($form_data, $razorpayOrderId, $course_name);
 
     if (!$invoice_url) {
         return new WP_REST_Response(['message' => 'Payment verified, but failed to generate or send invoice.'], 500);
@@ -412,20 +410,6 @@ function handle_payment_verification(WP_REST_Request $request)
         ],
         200
     );
-
-    // return new WP_REST_Response([
-    //     'success' => true,
-    //     'message' => 'Payment verified and booking saved successfully!',
-    //     'bookingDetails' => [
-    //         'courseName' => $course_name,
-    //         'registrationFee' => $registration_fee,
-    //         'accommodationFee' => $accommodation_fee,
-    //         'amount' => $total_amount / 100, // Convert cents to dollars
-    //         'email' => $email,
-    //         'bookingId' => $wpdb->insert_id,
-    //         'invoiceUrl' => isset($newInvoice['short_url']) ? $newInvoice['short_url'] : null
-    //     ],
-    // ], 200);
 }
 function fetch_active_coupons_rest(WP_REST_Request $request)
 {
@@ -453,7 +437,7 @@ function fetch_active_coupons_rest(WP_REST_Request $request)
     }
 }
 
-function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name, $course_price, $discount_amount)
+function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name)
 {
 
     // Validate booking data
@@ -467,8 +451,8 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     $accommodation_fee = number_format($booking_data['accommodationFee'], 2);
     $transportation_fee = number_format(($booking_data['transportationFee']));
     $total_amount = number_format($booking_data['totalAmount'] / 100, 2); // Assuming cents
-    $course_price = number_format($course_price, 2);
-    $discount_amount = number_format($discount_amount, 2);
+    $course_price = number_format($booking_data['coursePrice'], 2);
+    $discount_amount = number_format($booking_data['discountAmount'], 2);
     $email = sanitize_email($booking_data['email']);
     $name = sanitize_text_field($booking_data['name']);
     $address = sanitize_text_field($booking_data['address']);
