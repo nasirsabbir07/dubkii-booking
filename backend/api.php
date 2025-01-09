@@ -452,6 +452,7 @@ function fetch_active_coupons_rest(WP_REST_Request $request)
 
 function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name)
 {
+    global $wpdb;
     // Validate booking data
     if (!isset($booking_data['registrationFee'], $booking_data['accommodationFee'], $booking_data['totalAmount'], $booking_data['email'], $booking_data['name'])) {
         error_log("Invalid booking data: " . print_r($booking_data, true));
@@ -459,12 +460,31 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     }
 
     // Extract booking details
+    $course_id = intval($booking_data['course']);
+    $duration_id = intval($booking_data['duration']);
     $registration_fee = number_format($booking_data['registrationFee'], 2);
     $accommodation_fee = number_format($booking_data['accommodationFee'], 2);
+    $transportation_fee = number_format(($booking_data['transportationFee']));
     $total_amount = number_format($booking_data['totalAmount'] / 100, 2); // Assuming cents
     $email = sanitize_email($booking_data['email']);
     $name = sanitize_text_field($booking_data['name']);
+    $address = sanitize_text_field($booking_data['address']);
+    $contact = sanitize_text_field($booking_data['contact']);
 
+    // Fetch course price
+    $price_table = $wpdb->prefix . 'dubkii_courses_prices';
+    $course_price = $wpdb->get_var($wpdb->prepare(
+        "SELECT price FROM $price_table WHERE course_id = %d AND duration_id = %d",
+        $course_id,
+        $duration_id
+    ));
+
+    if ($course_price === null) {
+        error_log("Failed to fetch course price for Course ID: $course_id and Duration ID: $duration_id");
+        return false;
+    }
+
+    $course_price = number_format($course_price, 2);
     // Path to the template
     $template_path = plugin_dir_path(__FILE__) . 'templates/invoice-template.html';
     if (!file_exists($template_path)) {
@@ -477,10 +497,15 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     $replacements = [
         '{{order_id}}' => $razorpayOrderId,
         '{{course_name}}' => $course_name,
+        '{{course_price}}' => $course_price,
         '{{registration_fee}}' => $registration_fee,
         '{{accommodation_fee}}' => $accommodation_fee,
+        '{{transportation_fee}}' => $transportation_fee,
         '{{total_amount}}' => $total_amount,
         '{{email}}' => $email,
+        '{{name}}' => $name,
+        '{{address}}' => $address,
+        '{{contact}}' => $contact,
     ];
     $html = str_replace(array_keys($replacements), array_values($replacements), $template_content);
 
