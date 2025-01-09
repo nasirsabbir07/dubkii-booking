@@ -1125,6 +1125,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const totalAmount =
       parseFloat(document.querySelector("#review-total-cost").textContent.replace("$", "")) * 100 ||
       0.0; // Convert to cents
+    const coursePrice =
+      parseFloat(document.querySelector("#review-course-price").textContent.replace("$", "")) ||
+      0.0;
+    const discountAmount =
+      parseFloat(document.querySelector("#review-discount-amount").textContent.replace("-$", "")) ||
+      0.0;
 
     const selectedDurationOption = form["duration"].options[form["duration"].selectedIndex];
     const durationWeeks = selectedDurationOption
@@ -1151,6 +1157,8 @@ document.addEventListener("DOMContentLoaded", function () {
       totalAmount: totalAmount,
       registrationFee: registrationFee,
       couponCode: couponCode || null,
+      coursePrice: coursePrice,
+      discountAmount: discountAmount,
       contact_type: form["contact_type"].value, // Correctly map emergency contact type
       emergency_name: form["emergency_name"].value, // Correctly map emergency contact name
       emergency_email: form["emergency_email"].value, // Correctly map emergency contact email

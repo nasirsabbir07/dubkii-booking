@@ -303,6 +303,9 @@ function handle_payment_verification(WP_REST_Request $request)
     $total_amount = floatval($form_data['totalAmount'] ?? 0);
     $email = sanitize_email($form_data['email']);
 
+    $course_price = floatval($form_data['coursePrice']);
+    $discount_amount = floatval($form_data['discountAmount']);
+
     // Save data permanently
     $personal_details = $wpdb->prefix . 'dubkii_personal_details';
     $inserted = $wpdb->insert($personal_details, [
@@ -390,7 +393,7 @@ function handle_payment_verification(WP_REST_Request $request)
     //     error_log("Failed to create Razorpay invoice: " . $e->getMessage());
     // }
 
-    $invoice_url = generate_and_send_invoice($form_data, $razorpayOrderId, $course_name);
+    $invoice_url = generate_and_send_invoice($form_data, $razorpayOrderId, $course_name, $course_price, $discount_amount);
 
     if (!$invoice_url) {
         return new WP_REST_Response(['message' => 'Payment verified, but failed to generate or send invoice.'], 500);
@@ -452,7 +455,7 @@ function fetch_active_coupons_rest(WP_REST_Request $request)
 
 function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name)
 {
-    global $wpdb;
+
     // Validate booking data
     if (!isset($booking_data['registrationFee'], $booking_data['accommodationFee'], $booking_data['totalAmount'], $booking_data['email'], $booking_data['name'])) {
         error_log("Invalid booking data: " . print_r($booking_data, true));
@@ -460,31 +463,17 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     }
 
     // Extract booking details
-    $course_id = intval($booking_data['course']);
-    $duration_id = intval($booking_data['duration']);
     $registration_fee = number_format($booking_data['registrationFee'], 2);
     $accommodation_fee = number_format($booking_data['accommodationFee'], 2);
     $transportation_fee = number_format(($booking_data['transportationFee']));
     $total_amount = number_format($booking_data['totalAmount'] / 100, 2); // Assuming cents
+    $course_price = number_format($course_price, 2);
+    $discount_amount = number_format($discount_amount, 2)
     $email = sanitize_email($booking_data['email']);
     $name = sanitize_text_field($booking_data['name']);
     $address = sanitize_text_field($booking_data['address']);
     $contact = sanitize_text_field($booking_data['contact']);
 
-    // Fetch course price
-    $price_table = $wpdb->prefix . 'dubkii_courses_prices';
-    $course_price = $wpdb->get_var($wpdb->prepare(
-        "SELECT price FROM $price_table WHERE course_id = %d AND duration_id = %d",
-        $course_id,
-        $duration_id
-    ));
-
-    if ($course_price === null) {
-        error_log("Failed to fetch course price for Course ID: $course_id and Duration ID: $duration_id");
-        return false;
-    }
-
-    $course_price = number_format($course_price, 2);
     // Path to the template
     $template_path = plugin_dir_path(__FILE__) . 'templates/invoice-template.html';
     if (!file_exists($template_path)) {
@@ -498,6 +487,7 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
         '{{order_id}}' => $razorpayOrderId,
         '{{course_name}}' => $course_name,
         '{{course_price}}' => $course_price,
+        '{{discount_amount}}' => $discount_amount,
         '{{registration_fee}}' => $registration_fee,
         '{{accommodation_fee}}' => $accommodation_fee,
         '{{transportation_fee}}' => $transportation_fee,
