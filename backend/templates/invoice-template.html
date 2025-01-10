@@ -13,11 +13,6 @@
         text-align: center;
       }
 
-      .logo-section {
-        display: flex;
-        flex-direction: row;
-      }
-
       .dubkii-logo {
         width: 200px;
         height: 100px;
@@ -70,26 +65,22 @@
       }
 
       .header {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
+        width: 100%;
       }
 
       .contact-section {
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-        padding-inline: 0.5rem;
+        padding-block: 2rem;
         background-color: #104173;
         color: #fff;
       }
       .email-img,
       .phone-img {
-        width: 60px;
+        width: 20px;
         text-align: center;
       }
       .image-container {
         border-radius: 50%;
+        background-color: #fff;
       }
 
       .contact-flex {
@@ -100,9 +91,8 @@
       }
 
       .details-section {
-        display: flex;
-        padding-block: 20px;
-        justify-content: space-between;
+        width: 100%;
+        margin-block: 20px;
       }
 
       .details-container {
@@ -110,13 +100,9 @@
         flex-direction: column;
       }
 
-      .recipient-details {
-        display: flex;
-        flex-direction: column;
-      }
-
       .recipient-details p {
         font-weight: bold;
+        margin-block: 10px !important;
       }
 
       .recipient-details span {
@@ -141,52 +127,108 @@
         font-size: 1.2rem;
         font-weight: 500;
       }
+
+      .contact-section .contact-details {
+        width: 100%;
+      }
+
+      .invoice-clmn {
+        text-align: end;
+      }
     </style>
   </head>
   <body>
-    <div class="header">
-      <div class="logo-section">
-        <img src="{{logo_image_path}}" alt="Dubkii Logo" srcset="" class="dubkii-logo" />
-        <div class="sender-details">
-          <h2>Dubkii India Culture Center</h2>
-          <p>Test address, kanpur, India</p>
-        </div>
-      </div>
-      <div class="contact-section">
-        <div class="contact-flex">
-          <div class="image-container">
-            <img src="{{email_image_path}}" alt="email img" srcset="" class="email-img" />
-          </div>
-          <span>dubkiiindia@gmail.com</span>
-        </div>
-        <div class="contact-flex">
-          <div class="image-container">
-            <img src="{{phone_image_path}}" alt="phone img" srcset="" class="phone-img" />
-          </div>
-          <span>+91 9695708861</span>
-        </div>
-      </div>
-    </div>
+    <table class="header">
+      <tr>
+        <td>
+          <table class="logo-section">
+            <tr>
+              <td>
+                <img
+                  src="../assets/images/Dubkii_en.png"
+                  alt="Dubkii Logo"
+                  srcset=""
+                  class="dubkii-logo"
+                />
+              </td>
+              <td>
+                <div class="sender-details">
+                  <h2>Dubkii India Culture Center</h2>
+                  <p>106 A, Arjun Nagar, Kanpur 208024 Uttar Pradesh, India</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td class="contact-section">
+          <table class="contact-details">
+            <tr>
+              <td>
+                <table>
+                  <tr>
+                    <td>
+                      <div class="image-container">
+                        <img
+                          src="../assets/images/email.png"
+                          alt="email img"
+                          srcset=""
+                          class="email-img"
+                        />
+                      </div>
+                    </td>
+                    <td><span>dubkiiindia@gmail.com</span></td>
+                  </tr>
+                </table>
+              </td>
+              <td>
+                <table>
+                  <tr>
+                    <td>
+                      <div class="image-container">
+                        <img
+                          src="../assets/images/phone.png"
+                          alt="phone img"
+                          srcset=""
+                          class="phone-img"
+                        />
+                      </div>
+                    </td>
+                    <td><span>+91 9695708861</span></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
     <div class="invoice-section">
       <h1>Invoice</h1>
       <p>
         Your order id is <span class="order-highlight">{{order_id}}</span>, We are looking forward
         to having you with us.
       </p>
-      <div class="details-section">
-        <div class="details-container">
-          <div class="recipient-details">
-            <p>INVOICE TO:</p>
-            <span>{{name}}</span>
-            <span>{{email}}</span>
-            <span>{{contact}}</span>
-            <span>{{address}}</span>
-          </div>
-        </div>
-        <div class="issue-section">
-          <p>Invoice Issued on: {{invoice_issue_date}}</p>
-        </div>
-      </div>
+      <table class="details-section">
+        <tbody>
+          <tr>
+            <td>
+              <div class="recipient-details">
+                <p>INVOICE TO:</p>
+                <p>{{name}}</p>
+                <p>{{email}}</p>
+                <p>{{contact}}</p>
+                <p>{{address}}</p>
+              </div>
+            </td>
+            <td class="invoice-clmn">
+              <div class="issue-section">
+                <p>Invoice Issued on: {{invoice_issue_date}}</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <div class="details-container"></div>
+      </table>
       <table class="invoice-table">
         <thead>
           <tr>
