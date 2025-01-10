@@ -461,9 +461,9 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     // Path to the image
     $logo_image_path = get_base64_image(plugin_dir_path(__FILE__) . 'assets/images/Dubkii_en.png');
     $email_image_path =
-        get_base64_image(plugin_dir_path(__FILE__) . 'assets/images/Dubkii_en.png');
+        get_base64_image(plugin_dir_path(__FILE__) . 'assets/images/email.png');
     $phone_image_path =
-        get_base64_image(plugin_dir_path(__FILE__) . 'assets/images/Dubkii_en.png');
+        get_base64_image(plugin_dir_path(__FILE__) . 'assets/images/phone.png');
 
     $invoice_issue_date = date('F j, Y');
     // Path to the template
@@ -498,11 +498,9 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     // Generate the PDF
     require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
     try {
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-        $pdf_output = $dompdf->output();
+        $mpdf = new mpdf();
+        $mpdf->WriteHTML($html);
+        $pdf_output = $mpdf->Output('', 'S');
     } catch (Exception $e) {
         error_log("Dompdf error: " . $e->getMessage());
         return false;

@@ -16,27 +16,10 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
         array (
             'WpOrg\\Requests\\' => 15,
         ),
-        'S' => 
-        array (
-            'Svg\\' => 4,
-            'Sabberworm\\CSS\\' => 15,
-        ),
         'R' => 
         array (
             'Razorpay\\Tests\\' => 15,
             'Razorpay\\Api\\' => 13,
-        ),
-        'M' => 
-        array (
-            'Masterminds\\' => 12,
-        ),
-        'F' => 
-        array (
-            'FontLib\\' => 8,
-        ),
-        'D' => 
-        array (
-            'Dompdf\\' => 7,
         ),
     );
 
@@ -44,14 +27,6 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
         'WpOrg\\Requests\\' => 
         array (
             0 => __DIR__ . '/..' . '/rmccue/requests/src',
-        ),
-        'Svg\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/dompdf/php-svg-lib/src/Svg',
-        ),
-        'Sabberworm\\CSS\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/sabberworm/php-css-parser/src',
         ),
         'Razorpay\\Tests\\' => 
         array (
@@ -61,24 +36,43 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
         array (
             0 => __DIR__ . '/..' . '/razorpay/razorpay/src',
         ),
-        'Masterminds\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/masterminds/html5/src',
-        ),
-        'FontLib\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/dompdf/php-font-lib/src/FontLib',
-        ),
-        'Dompdf\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/dompdf/dompdf/src',
-        ),
     );
 
     public static $classMap = array (
+        'CGIF' => __DIR__ . '/..' . '/mpdf/mpdf/classes/gif.php',
+        'CGIFCOLORTABLE' => __DIR__ . '/..' . '/mpdf/mpdf/classes/gif.php',
+        'CGIFFILEHEADER' => __DIR__ . '/..' . '/mpdf/mpdf/classes/gif.php',
+        'CGIFIMAGE' => __DIR__ . '/..' . '/mpdf/mpdf/classes/gif.php',
+        'CGIFIMAGEHEADER' => __DIR__ . '/..' . '/mpdf/mpdf/classes/gif.php',
+        'CGIFLZW' => __DIR__ . '/..' . '/mpdf/mpdf/classes/gif.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'Dompdf\\Cpdf' => __DIR__ . '/..' . '/dompdf/dompdf/lib/Cpdf.php',
+        'FPDF_TPL' => __DIR__ . '/..' . '/setasign/fpdi/fpdf_tpl.php',
+        'FPDI' => __DIR__ . '/..' . '/setasign/fpdi/fpdi.php',
+        'FilterASCII85' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterASCII85.php',
+        'FilterASCIIHexDecode' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterASCIIHexDecode.php',
+        'FilterLZW' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterLZW.php',
+        'INDIC' => __DIR__ . '/..' . '/mpdf/mpdf/classes/indic.php',
+        'MYANMAR' => __DIR__ . '/..' . '/mpdf/mpdf/classes/myanmar.php',
+        'OTLdump' => __DIR__ . '/..' . '/mpdf/mpdf/classes/otl_dump.php',
+        'PDFBarcode' => __DIR__ . '/..' . '/mpdf/mpdf/classes/barcode.php',
         'Requests' => __DIR__ . '/..' . '/rmccue/requests/library/Requests.php',
+        'SEA' => __DIR__ . '/..' . '/mpdf/mpdf/classes/sea.php',
+        'SVG' => __DIR__ . '/..' . '/mpdf/mpdf/classes/svg.php',
+        'TTFontFile' => __DIR__ . '/..' . '/mpdf/mpdf/classes/ttfontsuni.php',
+        'TTFontFile_Analysis' => __DIR__ . '/..' . '/mpdf/mpdf/classes/ttfontsuni_analysis.php',
+        'UCDN' => __DIR__ . '/..' . '/mpdf/mpdf/classes/ucdn.php',
+        'bmp' => __DIR__ . '/..' . '/mpdf/mpdf/classes/bmp.php',
+        'cssmgr' => __DIR__ . '/..' . '/mpdf/mpdf/classes/cssmgr.php',
+        'directw' => __DIR__ . '/..' . '/mpdf/mpdf/classes/directw.php',
+        'fpdi_pdf_parser' => __DIR__ . '/..' . '/setasign/fpdi/fpdi_pdf_parser.php',
+        'grad' => __DIR__ . '/..' . '/mpdf/mpdf/classes/grad.php',
+        'mPDF' => __DIR__ . '/..' . '/mpdf/mpdf/mpdf.php',
+        'meter' => __DIR__ . '/..' . '/mpdf/mpdf/classes/meter.php',
+        'mpdfform' => __DIR__ . '/..' . '/mpdf/mpdf/classes/mpdfform.php',
+        'otl' => __DIR__ . '/..' . '/mpdf/mpdf/classes/otl.php',
+        'pdf_context' => __DIR__ . '/..' . '/setasign/fpdi/pdf_context.php',
+        'tocontents' => __DIR__ . '/..' . '/mpdf/mpdf/classes/tocontents.php',
+        'wmf' => __DIR__ . '/..' . '/mpdf/mpdf/classes/wmf.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
