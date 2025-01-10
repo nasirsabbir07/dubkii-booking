@@ -1,6 +1,7 @@
 <?php
 // ** api created using rest api **//
 use Dompdf\Dompdf;
+use Mpdf\Mpdf;
 
 add_action('rest_api_init', function () {
     // Route: Fetch Courses
@@ -498,7 +499,7 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     // Generate the PDF
     require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
     try {
-        $mpdf = new \Mpdf\Mpdf();
+        $mpdf = new Mpdf();
         $mpdf->WriteHTML($html);
         $pdf_output = $mpdf->Output('', 'S');
     } catch (Exception $e) {
