@@ -47,8 +47,9 @@
       }
 
       .order-highlight {
-        font-size: 20px;
+        font-size: 1.2rem;
         font-weight: 600;
+        color: #104173;
       }
       .sender-details {
         display: flex;
@@ -144,12 +145,7 @@
           <table class="logo-section">
             <tr>
               <td>
-                <img
-                  src="../assets/images/Dubkii_en.png"
-                  alt="Dubkii Logo"
-                  srcset=""
-                  class="dubkii-logo"
-                />
+                <img src="{{logo_image_path}}" alt="Dubkii Logo" srcset="" class="dubkii-logo" />
               </td>
               <td>
                 <div class="sender-details">
@@ -169,7 +165,7 @@
                     <td>
                       <div class="image-container">
                         <img
-                          src="../assets/images/email.png"
+                          src="{{email_image_path}}"
                           alt="email img"
                           srcset=""
                           class="email-img"
@@ -186,7 +182,7 @@
                     <td>
                       <div class="image-container">
                         <img
-                          src="../assets/images/phone.png"
+                          src="{{phone_image_path}}"
                           alt="phone img"
                           srcset=""
                           class="phone-img"
@@ -211,23 +207,18 @@
       <table class="details-section">
         <tbody>
           <tr>
-            <td>
-              <div class="recipient-details">
-                <p>INVOICE TO:</p>
-                <p>{{name}}</p>
-                <p>{{email}}</p>
-                <p>{{contact}}</p>
-                <p>{{address}}</p>
-              </div>
+            <td class="recipient-details">
+              <p>INVOICE TO:</p>
+              <p>{{name}}</p>
+              <p>{{email}}</p>
+              <p>{{contact}}</p>
+              <p>{{address}}</p>
             </td>
             <td class="invoice-clmn">
-              <div class="issue-section">
-                <p>Invoice Issued on: {{invoice_issue_date}}</p>
-              </div>
+              <p>Invoice Issued on: {{invoice_issue_date}}</p>
             </td>
           </tr>
         </tbody>
-        <div class="details-container"></div>
       </table>
       <table class="invoice-table">
         <thead>
