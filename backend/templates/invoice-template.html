@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <style>
+    <style type="text/css">
       body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -13,43 +13,14 @@
         text-align: center;
       }
 
-      .details-table {
-        width: 100%;
-        margin-top: 1rem;
-        border-collapse: collapse;
-      }
-
-      .details-table td {
-        vertical-align: top;
-        padding: 10px;
-        font-size: 0.9rem;
-      }
-
-      .details-table p {
-        margin: 5px 0;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: #7b7e85;
-      }
-
-      .details-table span {
-        display: inline-block;
-        margin-bottom: 0.2em;
-      }
-
-      .details-table .sender-details {
-        text-align: end;
-      }
-
       .logo-section {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
       }
 
       .dubkii-logo {
         width: 200px;
-        height: 123px;
-        margin-inline: auto;
+        height: 100px;
       }
 
       .invoice-table {
@@ -75,44 +46,146 @@
       .invoice-table tfoot .total-row {
         font-weight: bold;
         text-align: left;
-        background-color: #5c9aff;
-        color: #000;
+        background-color: #a1bbf2;
+        color: #104173;
+        height: 80px;
       }
 
       .order-highlight {
         font-size: 20px;
         font-weight: 600;
       }
+      .sender-details {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .sender-details h2,
+      p {
+        margin: 0px;
+      }
+      .sender-details h2 {
+        color: #104173;
+      }
+
+      .header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .contact-section {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        padding-inline: 0.5rem;
+        background-color: #104173;
+        color: #fff;
+      }
+      .email-img,
+      .phone-img {
+        width: 60px;
+        text-align: center;
+      }
+      .image-container {
+        border-radius: 50%;
+      }
+
+      .contact-flex {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .details-section {
+        display: flex;
+        padding-block: 20px;
+        justify-content: space-between;
+      }
+
+      .details-container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .recipient-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .recipient-details p {
+        font-weight: bold;
+      }
+
+      .recipient-details span {
+        margin-top: 5px;
+      }
+
+      .issue-section {
+        font-size: 1.2rem;
+      }
+
+      .invoice-table tfoot .empty-clmn {
+        border: none;
+      }
+
+      .invoice-table tbody tr {
+        height: 80px;
+        background-color: #a1bbf2;
+      }
+
+      .invoice-table tbody td {
+        color: #104173;
+        font-size: 1.2rem;
+        font-weight: 500;
+      }
     </style>
   </head>
   <body>
-    <div class="logo-section">
-      <img src="{{image_path}}" alt="Dubkii Logo" srcset="" class="dubkii-logo" />
+    <div class="header">
+      <div class="logo-section">
+        <img src="{{logo_image_path}}" alt="Dubkii Logo" srcset="" class="dubkii-logo" />
+        <div class="sender-details">
+          <h2>Dubkii India Culture Center</h2>
+          <p>Test address, kanpur, India</p>
+        </div>
+      </div>
+      <div class="contact-section">
+        <div class="contact-flex">
+          <div class="image-container">
+            <img src="{{email_image_path}}" alt="email img" srcset="" class="email-img" />
+          </div>
+          <span>dubkiiindia@gmail.com</span>
+        </div>
+        <div class="contact-flex">
+          <div class="image-container">
+            <img src="{{phone_image_path}}" alt="phone img" srcset="" class="phone-img" />
+          </div>
+          <span>+91 9695708861</span>
+        </div>
+      </div>
     </div>
     <div class="invoice-section">
       <h1>Invoice</h1>
       <p>
-        Thank you for your booking! We are looking forward to having you with us, your order id is
-        <span class="order-highlight">{{order_id}}</span>.
+        Your order id is <span class="order-highlight">{{order_id}}</span>, We are looking forward
+        to having you with us.
       </p>
       <div class="details-section">
-        <table class="details-table">
-          <tr>
-            <td class="recipient-details">
-              <p>Sent to:</p>
-              <span>{{name}}</span><br />
-              <span>{{email}}</span><br />
-              <span>{{contact}}</span><br />
-              <span>{{address}}</span>
-            </td>
-            <td class="sender-details">
-              <p>Sent from:</p>
-              <span>Dubkii India Culture Center</span><br />
-              <span>dubkiiindia@gmail.com</span><br />
-              <span>+91 9695708861</span>
-            </td>
-          </tr>
-        </table>
+        <div class="details-container">
+          <div class="recipient-details">
+            <p>INVOICE TO:</p>
+            <span>{{name}}</span>
+            <span>{{email}}</span>
+            <span>{{contact}}</span>
+            <span>{{address}}</span>
+          </div>
+        </div>
+        <div class="issue-section">
+          <p>Invoice Issued on: {{invoice_issue_date}}</p>
+        </div>
       </div>
       <table class="invoice-table">
         <thead>
@@ -145,7 +218,7 @@
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="1"></td>
+            <td colspan="1" class="empty-clmn"></td>
             <td class="total-row">Total: ${{total_amount}}</td>
           </tr>
         </tfoot>
