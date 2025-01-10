@@ -1,7 +1,7 @@
 {
   "require": {
     "razorpay/razorpay": "^2.9",
-    "mpdf/mpdf": "^6.1"
+    "mpdf/mpdf": "^8.2.1"
   },
   "autoload": {
     "exclude-from-classmap": [
