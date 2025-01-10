@@ -498,7 +498,7 @@ function generate_and_send_invoice($booking_data, $razorpayOrderId, $course_name
     // Generate the PDF
     require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
     try {
-        $mpdf = new Mpdf();
+        $mpdf = new \Mpdf\Mpdf();
         $mpdf->WriteHTML($html);
         $pdf_output = $mpdf->Output('', 'S');
     } catch (Exception $e) {
