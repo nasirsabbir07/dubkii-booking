@@ -1070,8 +1070,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const successMessageElement = document.querySelector("#success-message");
     successMessageElement.innerHTML = `
       <p>Your booking for the <span class="highlight">${courseName}</span> has been successfully confirmed!</p>
-      <p class="highlight">${startDate}</p>
-      <p class="highlight">${courseDuration}</p>
+      <p>Start Date: <span class="highlight">${startDate}</span></p>
+      <p>Duration: <span class="highlight">${courseDuration}</span></p>
       <p>Please check your email for the invoice and additional details.</p>
       <p>Thank you for choosing us, and we look forward to helping you on this exciting journey!</p>
     `;
@@ -1257,14 +1257,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const overlay = document.getElementById("modal-overlay");
 
     // Set the modal message content
-    modalMessage.textContent = `Congrats! You have saved $${discountAmount.toFixed(
+    modalMessage.innerHTML = `<span style="color:#11A670; font-size: 1em;">Congrats!</span> You have saved $${discountAmount.toFixed(
       2
     )} on this course.`;
 
     // Show the modal and overlay
     modal.style.display = "flex";
     overlay.style.display = "block";
-
+    launchConfetti();
     setTimeout(() => {
       modal.classList.add("active"); // Add active class to trigger fade-in
       overlay.classList.add("active"); // Optional: Add active class for overlay fade-in

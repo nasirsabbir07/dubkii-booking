@@ -60,6 +60,24 @@ add_action('woocommerce_process_product_meta', 'save_plugin_course_id_field');
 // Enqueue frontend assets
 function enqueue_booking_assets()
 {
+
+
+    // Enqueue Canvas Confetti Library
+    wp_enqueue_script(
+        'canvas-confetti',
+        'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js',
+        [],
+        null,
+        true // Load in the footer
+    );
+
+    wp_enqueue_script(
+        'confetti-js',
+        plugins_url('frontend/assets/js/confetti.js', __FILE__),
+        ['canvas-confetti'],
+        null,
+        true
+    );
     // Enqueue Razorpay Javascript SDK
     wp_enqueue_script(
         'razorpay-checkout',
@@ -74,7 +92,7 @@ function enqueue_booking_assets()
 
     wp_enqueue_style('booking-styles', plugins_url('frontend/assets/css/styles.css', __FILE__)); // Enqueue CSS
 
-    wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery', 'razorpay-checkout', 'countries-script'), null, true);
+    wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery', 'razorpay-checkout', 'countries-script', 'canvas-confetti', 'confetti-js'), null, true);
     wp_enqueue_script('booking-js'); // Enqueue booking.js script
 
 

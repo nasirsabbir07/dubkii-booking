@@ -161,13 +161,13 @@ button {
   font-weight: 600 !important;
   padding: 5px 10px 5px 10px !important;
   background: none !important;
+  cursor: pointer;
 }
 
 .button-container {
   display: flex;
   justify-content: space-between; /* Aligns buttons to the right */
-  gap: 10px; /* Adds spacing between buttons */
-  margin-top: 20px; /* Adds some spacing above the buttons */
+  margin-top: 1.8em; /* Adds some spacing above the buttons */
 }
 
 .right-btn {
@@ -367,12 +367,6 @@ button {
   padding-top: 5px;
 }
 
-#apply-coupon {
-  padding: 5px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
 /* Style the coupon list container*/
 #coupon-list {
   list-style: none;
@@ -405,24 +399,9 @@ button {
   font-weight: 600;
   color: #201e25;
   background-color: #ecf3ff;
-  padding: 2px 4px;
+  padding: 8px;
   border-radius: 5px;
   line-height: 24px;
-}
-
-/* Style the "Apply" button */
-.apply-coupon-btn {
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s ease;
-}
-
-.apply-coupon-btn:hover {
-  background-color: #45a049;
 }
 
 /* Style the coupon details */
@@ -472,7 +451,7 @@ button {
 }
 
 .modal-content .header {
-  font-size: 20px;
+  font-size: 2rem;
   margin-bottom: 10px;
   color: #104173;
 }
@@ -628,24 +607,27 @@ button {
 }
 
 #coupon-modal-message {
-  font-size: 24px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #000;
+  margin-bottom: 1em;
 }
 
 .coupon-btn-remove {
   color: red !important;
+  margin-right: 0.5em;
 }
 
 .coupon-btn-apply {
   color: #0f6bff !important;
+  margin-right: 0.5em;
 }
 
 .success-page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between;
   height: 50vh;
   text-align: center;
   color: #333;
@@ -657,6 +639,15 @@ button {
 
 .success-page p {
   margin-bottom: 0 !important;
+}
+
+.success-page h2 {
+  margin: 0px !important;
+  color: #11a670 !important;
+}
+
+.success-icon {
+  display: flex;
 }
 
 @keyframes pop {
@@ -735,7 +726,7 @@ button:disabled {
 }
 
 .review-left-column p {
-  margin-bottom: 0px;
+  margin-bottom: 8px;
 }
 
 /* For WebKit browsers (e.g., Chrome, Safari) */
@@ -820,4 +811,8 @@ button:disabled {
 .highlight {
   color: #104173;
   font-weight: 600;
+}
+
+.button-container.done-btn {
+  margin-top: 0px;
 }

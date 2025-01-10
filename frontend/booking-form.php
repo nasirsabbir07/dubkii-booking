@@ -154,7 +154,7 @@
                 <div class="review-container">
                     <div class="review-left-column">
                         <!-- User Details Section -->
-                        <p>Please review your booking and move on to payment. Thank you.</p>
+                        <p>Kindly review your booking details before proceeding to payment. Thank you!</p>
                         <!-- Booking Cost Breakdown Section -->
                         <div class="review-booking-details">
                             <h3 class="section-titles">Selected Course</h3>
