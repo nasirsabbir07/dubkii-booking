@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const currentStep = document.querySelector(`.step-${step}`);
     const requiredFields = currentStep.querySelectorAll("[required");
     let isValid = true;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     requiredFields.forEach((field) => {
       if (field.type === "radio") {
@@ -103,6 +104,16 @@ document.addEventListener("DOMContentLoaded", function () {
           currentStep.querySelector(`#${field.name}-error`)?.classList.add("visible");
         } else {
           currentStep.querySelector(`#${field.name}-error`)?.classList.remove("visible");
+        }
+      } else if (field.type === "email") {
+        // Validate email fields
+        if (!emailPattern.test(field.value.trim())) {
+          isValid = false;
+          field.style.borderColor = "red"; // Highlight invalid email fields
+          alert(`Please enter a valid email address in the field: ${field.name}`);
+          field.focus();
+        } else {
+          field.style.borderColor = ""; // Reset if valid
         }
       } else if (!field.value.trim()) {
         isValid = false;
@@ -1106,6 +1117,15 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!form[field].value) {
         return;
       }
+    }
+
+    // Validate email format
+    const emailField = form["email"];
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(emailField.value)) {
+      alert("Please enter a valid email address.");
+      emailField.focus();
+      return;
     }
 
     // Validate transport selection
