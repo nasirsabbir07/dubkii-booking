@@ -586,6 +586,7 @@ button {
   font-size: 1rem;
   font-weight: 600;
   line-height: 28px;
+  white-space: pre;
 }
 
 #coupon-details-content li {
@@ -693,6 +694,7 @@ button:disabled {
   font-weight: 600;
   font-size: 0.87rem;
   color: #11a670;
+  white-space: pre;
 }
 
 .coupon-details .discount-description {
