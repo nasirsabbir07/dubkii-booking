@@ -631,10 +631,12 @@ document.addEventListener("DOMContentLoaded", function () {
               <div class="coupon-details">
                 <span class="discount-info">${
                   coupon.discount_type === "fixed"
-                    ? `$${coupon.discount_value} off`
-                    : `${coupon.min_discount_percentage}% - ${coupon.max_discount_percentage}% off`
+                    ? `$${parseFloat(coupon.discount_value)} off`
+                    : `${parseFloat(coupon.min_discount_percentage)}% - ${parseFloat(
+                        coupon.max_discount_percentage
+                      )}% off`
                 }</span>
-                <span class="discount-description">Get assured discount with for your desired course <button class="know-more-btn" data-code="${
+                <span class="discount-description">Get assured discount for your desired course <button class="know-more-btn" data-code="${
                   coupon.code
                 }" style="font-weight: bold; font-size: 12px; background: none; border: none; padding: 0; text-decoration: none; color: inherit; cursor: pointer; text-align:left;">
                     Know More
@@ -648,7 +650,12 @@ document.addEventListener("DOMContentLoaded", function () {
           })
           .join("");
 
-        document.getElementById("coupon-list").innerHTML = couponList;
+        const couponListElement = document.getElementById("coupon-list");
+        if (couponListElement) {
+          couponListElement.innerHTML = couponList;
+        } else {
+          console.error("Coupon list container not found.");
+        }
         // Add event listeners for "Know More" buttons
         const knowMoreButtons = document.querySelectorAll(".know-more-btn");
         knowMoreButtons.forEach((button) => {
