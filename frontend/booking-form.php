@@ -255,6 +255,10 @@
                                         <span class="booking-label">Course Price: </span>
                                         <span class="booking-value" id="review-course-price">$ 0.00</span>
                                     </div>
+                                    <div class="review-booking-row review-discount-row" style="display: none;">
+                                        <span class="booking-label">Discount: </span>
+                                        <span class="booking-value" id="review-discount-amount">-$ 0.00</span>
+                                    </div>
                                     <div class="review-booking-row">
                                         <span class="booking-label">Registration: </span>
                                         <span class="booking-value" id="review-registration-fee">$ 0.00</span>
@@ -267,10 +271,7 @@
                                         <span class="booking-label">Transport: </span>
                                         <span class="booking-value" id="review-transport-cost">$ 0.00</span>
                                     </div>
-                                    <div class="review-booking-row review-discount-row" style="display: none;">
-                                        <span class="booking-label">Discount: </span>
-                                        <span class="booking-value" id="review-discount-amount">-$ 0.00</span>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -350,6 +351,13 @@
             <div id="coupon-details-content">
                 <!-- Dynamic coupon details will be inserted here -->
             </div>
+        </div>
+    </div>
+
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <span id="modal-close" class="close">&times;</span>
+            <p id="error-modal-message"></p>
         </div>
     </div>
     <!-- Modal Overlay -->

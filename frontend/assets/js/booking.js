@@ -93,6 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const requiredFields = currentStep.querySelectorAll("[required");
     let isValid = true;
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    let errorMessage = "";
 
     requiredFields.forEach((field) => {
       if (field.type === "radio") {
@@ -101,6 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const isChecked = Array.from(radioGroup).some((radio) => radio.checked);
         if (!isChecked) {
           isValid = false;
+          errorMessage = `Please select an option for: <strong>${field.name}</strong>`;
           currentStep.querySelector(`#${field.name}-error`)?.classList.add("visible");
         } else {
           currentStep.querySelector(`#${field.name}-error`)?.classList.remove("visible");
@@ -110,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!emailPattern.test(field.value.trim())) {
           isValid = false;
           field.style.borderColor = "red"; // Highlight invalid email fields
-          alert(`Please enter a valid email address in the field: ${field.name}`);
+          errorMessage = `Please enter a valid email address for: <strong>${field.name}</strong>`;
           field.focus();
         } else {
           field.style.borderColor = ""; // Reset if valid
@@ -118,10 +120,18 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (!field.value.trim()) {
         isValid = false;
         field.style.borderColor = "red"; // Highlight empty fields
+        if (!errorMessage) {
+          errorMessage = `Please fill in all required fields before proceeding.`;
+        }
       } else {
         field.style.borderColor = ""; // Reset if valid
       }
     });
+
+    // If there's a specific error message, show it
+    if (!isValid && errorMessage) {
+      showErrorModal(errorMessage); // Show the specific error message
+    }
     return isValid;
   }
 
@@ -147,8 +157,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (bookingFormContainer) {
           bookingFormContainer.scrollIntoView({ behavior: "smooth" }); // Smooth scrolling to the tabs
         }
-      } else {
-        alert("Please fill in all required fields before proceeding.");
       }
     });
   });
@@ -174,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Validate the current step before allowing tab switch
       const currentStep = Array.from(tabs).findIndex((t) => t.classList.contains("active")) + 1;
       if (targetStep > currentStep && !validateStep(currentStep)) {
-        alert("Please fill in all required fields before switching tabs.");
+        showErrorModal("Please fill in all required fields before switching tabs.");
         return;
       }
       showStep(targetStep);
@@ -668,11 +676,11 @@ document.addEventListener("DOMContentLoaded", function () {
           });
         });
       } else {
-        alert("No active coupons available.");
+        showErrorModal("No active coupons available.");
       }
     } catch (error) {
       console.error("Error fetching coupons:", error);
-      alert("Error fetching coupons.");
+      showErrorModal("Error fetching coupons.");
     }
   }
 
@@ -706,7 +714,7 @@ document.addEventListener("DOMContentLoaded", function () {
     couponInput.value = couponCode; // Fill the input field with the selected coupon code
 
     if (appliedCoupon === couponCode) {
-      alert("This coupon has already been applied");
+      showErrorModal("This coupon has already been applied");
       return;
     }
 
@@ -728,7 +736,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     // Check if discount exceeds course price
     if (discountAmount > originalPrice) {
-      alert("This coupon cannot be applied as the discount exceeds the course price.");
+      showErrorModal("This coupon cannot be applied as the discount exceeds the course price.");
       return; // Exit without applying the coupon
     }
 
@@ -805,7 +813,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function removeCoupon(couponCode) {
     if (appliedCoupon !== couponCode) {
-      alert("No such coupon is currently applied.");
+      showErrorModal("No such coupon is currently applied.");
       return;
     }
     appliedCoupon = null; // Clear applied coupon
@@ -947,7 +955,7 @@ document.addEventListener("DOMContentLoaded", function () {
           parseFloat(event.target.getAttribute("data-max-discount-cap")) || 0.0;
 
         if (!couponCode) {
-          alert("Please enter or select a valid coupon code.");
+          showErrorModal("Please enter or select a valid coupon code.");
           return;
         }
 
@@ -1163,7 +1171,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const emailField = form["email"];
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(emailField.value)) {
-      alert("Please enter a valid email address.");
+      showErrorModal("Please enter a valid email address.");
       emailField.focus();
       return;
     }
@@ -1173,7 +1181,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const isTransportSelected = Array.from(transportOptions).some((option) => option.checked);
 
     if (!isTransportSelected) {
-      alert("Please select a transport option before submitting.");
+      showErrorModal("Please select a transport option before submitting.");
       return;
     }
 
@@ -1275,7 +1283,7 @@ document.addEventListener("DOMContentLoaded", function () {
             removeSidebar();
             submitButton.disabled = true;
           } else {
-            alert("Payment verification failed.");
+            showErrorModal("Payment verification failed.");
             submitButton.disabled = false;
           }
         },

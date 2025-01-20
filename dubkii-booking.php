@@ -15,6 +15,9 @@ include_once plugin_dir_path(__FILE__) . 'backend/db-setup.php';
 // include_once plugin_dir_path(__FILE__) . 'backend/admin/admin-dashboard.php';
 require_once plugin_dir_path(__FILE__) . 'backend/form-handler.php';
 require_once plugin_dir_path(__FILE__) . 'backend/api.php';
+
+
+
 $admin_tabs_dir = plugin_dir_path(__FILE__) . 'backend/admin/admin-tabs/';
 
 if (is_admin()) {
@@ -60,8 +63,6 @@ add_action('woocommerce_process_product_meta', 'save_plugin_course_id_field');
 // Enqueue frontend assets
 function enqueue_booking_assets()
 {
-
-
     // Enqueue Canvas Confetti Library
     wp_enqueue_script(
         'canvas-confetti',
@@ -86,16 +87,22 @@ function enqueue_booking_assets()
         null,
         true
     );
+    // Enqueue the error helper script
+    wp_enqueue_script(
+        'error-helper',
+        plugins_url('frontend/assets/js/error-helper.js', __FILE__),
+        array(),
+        null,
+        true
+    );
     // Register scripts and styles
     wp_register_script('countries-script', plugins_url('frontend/assets/js/countries.js', __FILE__), array(), null, true);
     wp_enqueue_script('countries-script'); // Make sure the countries script is enqueued
 
     wp_enqueue_style('booking-styles', plugins_url('frontend/assets/css/styles.css', __FILE__)); // Enqueue CSS
 
-    wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery', 'razorpay-checkout', 'countries-script', 'canvas-confetti', 'confetti-js'), null, true);
+    wp_register_script('booking-js', plugins_url('frontend/assets/js/booking.js', __FILE__), array('jquery', 'razorpay-checkout', 'countries-script', 'canvas-confetti', 'confetti-js', 'error-helper'), null, true);
     wp_enqueue_script('booking-js'); // Enqueue booking.js script
-
-
 
     // Get the saved Razorpay API keys from your settings
     $razorpay_key_id = get_option('razorpay_key_id');
@@ -116,7 +123,6 @@ function enqueue_booking_assets()
             $localized_data['currentCourseId'] = $plugin_course_id; // Include plugin course ID
         }
     }
-
     // Localize the script
     wp_localize_script('booking-js', 'bookingData', $localized_data);
 }
@@ -134,14 +140,11 @@ function enqueue_dubkii_admin_assets($hook)
         array(),
         filemtime(plugin_dir_path(__FILE__) . 'frontend/assets/css/admin-styles.css')
     );
-    // wp_enqueue_script('dubkii-admin-js', plugin_dir_url(__FILE__) . 'backend/assets/js/admin.js', ['jquery'], null, true);
-    // Correct localization of ajaxurl
-    // wp_localize_script('dubkii-admin-js', 'dubkii_ajax_obj', array(
-    //     'ajaxurl' => admin_url('admin-ajax.php') // Pass the AJAX URL to JavaScript
-    // ));
 }
 
 add_action('admin_enqueue_scripts', 'enqueue_dubkii_admin_assets');
+
+
 // Shortcode for booking form
 function booking_form_shortcode()
 {

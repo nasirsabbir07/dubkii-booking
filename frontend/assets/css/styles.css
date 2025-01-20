@@ -818,3 +818,26 @@ button:disabled {
 .button-container.done-btn {
   margin-top: 0px;
 }
+
+#error-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  top: 50%;
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 500px;
+  align-items: center;
+  opacity: 0; /* Initially transparent */
+  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+}
+
+#error-modal.visible {
+  display: flex; /* Ensure visibility is set to block */
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
