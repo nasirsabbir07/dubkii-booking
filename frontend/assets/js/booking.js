@@ -375,6 +375,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const countrySelect = document.getElementById("country");
   const nationalitySelect = document.getElementById("nationality");
+  const phoneNumberInput = document.getElementById("contact_no");
 
   // Function to populate country dropdown
   function populateCountryDropdown() {
@@ -390,6 +391,18 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Countries list not found or not loaded correctly");
     }
   }
+
+  // Handle country selection change
+  countrySelect.addEventListener("change", function () {
+    const selectedCountry = countrySelect.value;
+    const countryData = countries.find((country) => country.name === selectedCountry);
+
+    if (countryData) {
+      // Automatically set country code based on selection
+      const countryCode = countryData.countryCode;
+      phoneNumberInput.value = countryCode + ""; // You can add the country code as a prefix
+    }
+  });
 
   // Function to populate the nationality dropdown
   function populateNationalityDropdown() {
