@@ -99,6 +99,8 @@ $sql_coupons = "CREATE TABLE $table_name_coupons(
     min_discount_percentage decimal (5,2) DEFAULT NULL,
     max_redemptions int NOT NULL, 
     current_redemptions int DEFAULT 0,
+    image_url VARCHAR(255) DEFAULT NULL,
+    max_discount_cap DECIMAL(10, 2) NOT NULL DEFAULT 0,
     expiry_date DATETIME NOT NULL,
     is_active tinyint(1) DEFAULT 1,
     PRIMARY KEY (id),

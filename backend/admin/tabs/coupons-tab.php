@@ -2,6 +2,25 @@
 global $wpdb;
 $table_name_coupons = $wpdb->prefix . 'dubkii_coupons';
 
+// Check if the 'image_url' column exists
+$image_url_exists = $wpdb->get_var(
+    $wpdb->prepare("SHOW COLUMNS FROM $table_name_coupons LIKE %s", 'image_url')
+);
+
+// Add the 'image_url' column if it doesn't exist
+if (empty($image_url_exists)) {
+    $wpdb->query("ALTER TABLE $table_name_coupons ADD COLUMN image_url VARCHAR(255) DEFAULT NULL");
+}
+
+// Check if the 'max_discount_cap' column exists
+$max_discount_cap_exists = $wpdb->get_var(
+    $wpdb->prepare("SHOW COLUMNS FROM $table_name_coupons LIKE %s", 'max_discount_cap')
+);
+
+// Add the 'max_discount_cap' column if it doesn't exist
+if (empty($max_discount_cap_exists)) {
+    $wpdb->query("ALTER TABLE $table_name_coupons ADD COLUMN max_discount_cap DECIMAL(10, 2) NOT NULL DEFAULT 0");
+}
 // Handle form submission for adding a new coupon
 if (isset($_POST['create_coupon'])) {
     // Sanitize and validate input fields
@@ -9,6 +28,7 @@ if (isset($_POST['create_coupon'])) {
     $discount_type = sanitize_text_field($_POST['discount_type']);
     $max_redemptions = intval($_POST['max_redemptions']);
     $expiry_date = sanitize_text_field($_POST['expiry_date']);
+    $max_discount_cap = isset($_POST['max_discount_cap']) ? floatval($_POST['max_discount_cap']) : 0;
     try {
         // Optionally specify the timezone if necessary
         $formatted_expiry_date = (new DateTime($expiry_date))->format('Y-m-d H:i:s');
@@ -36,6 +56,25 @@ if (isset($_POST['create_coupon'])) {
         wp_die('Expiry date is required.');
     }
 
+    // Validate max_discount_cap
+    if ($max_discount_cap < 0) {
+        wp_die('Maximum discount cap must be a positive number or zero.');
+    }
+
+    $image_url = null;
+    if (!empty($_FILES['image']['name'])) {
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        $uploaded_file = $_FILES['image'];
+        $upload_overrodes = ['test_form' => false];
+
+        $movefile = wp_handle_upload($uploaded_file, $upload_overrodes);
+        if ($movefile && !isset($movefile['error'])) {
+            $image_url = $movefile['url'];
+        } else {
+            wp_die('Image upload failed: ' . $movefile['error']);
+        }
+    }
+
     // Process discount-specific fields
     $data = [
         'code' => $code,
@@ -43,6 +82,8 @@ if (isset($_POST['create_coupon'])) {
         'max_redemptions' => $max_redemptions,
         'expiry_date' => $formatted_expiry_date,
         'is_active' => $is_active,
+        'image_url' => $image_url,
+        'max_discount_cap' => $max_discount_cap,
     ];
 
     // Process discount-specific fields
@@ -94,7 +135,9 @@ if (isset($_POST['create_coupon'])) {
             '%f', // min price range
             '%f', // max price range
             '%f', // min discount range
-            '%f' // max discount range
+            '%f', // max discount range
+            '%s', // image
+            '%f', // max_discount_cap
 
         ]
     );
@@ -123,7 +166,7 @@ if (isset($_POST['update_coupon']) && isset($_POST['coupon_id'])) {
     $max_redemptions = intval($_POST['max_redemptions']);
     $expiry_date = sanitize_text_field($_POST['expiry_date']);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
-
+    $max_discount_cap = isset($_POST['max_discount_cap']) ? floatval($_POST['max_discount_cap']) : 0;
     // Validation
     if (empty($code)) {
         wp_die('Coupon code is required.');
@@ -134,6 +177,10 @@ if (isset($_POST['update_coupon']) && isset($_POST['coupon_id'])) {
     if (empty($expiry_date)) {
         wp_die('Expiry date is required.');
     }
+    // Ensure max_discount_cap is non-negative
+    if ($max_discount_cap < 0) {
+        wp_die('Max Discount Cap must be a non-negative value.');
+    }
 
     // Process discount-specific fields
     $data = [
@@ -141,7 +188,23 @@ if (isset($_POST['update_coupon']) && isset($_POST['coupon_id'])) {
         'max_redemptions' => $max_redemptions,
         'expiry_date' => $expiry_date,
         'is_active' => $is_active,
+        'max_discount_cap' => $max_discount_cap,
     ];
+
+
+    // Handle image upload
+    if (!empty($_FILES['image']['name'])) {
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        $uploaded_file = $_FILES['image'];
+        $upload_overrides = ['test_form' => false];
+
+        $movefile = wp_handle_upload($uploaded_file, $upload_overrides);
+        if ($movefile && !isset($movefile['error'])) {
+            $data['image_url'] = $movefile['url'];
+        } else {
+            wp_die('Image upload failed: ' . $movefile['error']);
+        }
+    }
 
     // Process discount-specific fields based on current discount type
     $existing_coupon = $wpdb->get_row($wpdb->prepare(
@@ -202,8 +265,9 @@ if (isset($_POST['update_coupon']) && isset($_POST['coupon_id'])) {
             '%f', // min price range
             '%f', // max price range
             '%f', // min discount range
-            '%f' // max discount range
-
+            '%f', // max discount range
+            '%s', // image
+            '%f' // max discount cap
         ],
         ['%d']
     );
@@ -230,7 +294,7 @@ if (isset($_POST['delete_coupon']) && isset($_POST['coupon_id'])) {
 $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry_date DESC", ARRAY_A);
 ?>
 <div id="coupons" class="tab-content" style="display: <?php echo ($active_tab === 'coupons') ? 'block' : 'none'; ?>;">
-    <form method="POST" id="coupon_form" style="margin-bottom: 30px;">
+    <form method="POST" id="coupon_form" enctype="multipart/form-data" style="margin-bottom: 30px;">
         <h2>Add New Coupon</h2>
         <table class="form-table">
             <tr>
@@ -274,6 +338,26 @@ $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry
                 <th><label for="expiry_date">Expiry Date</label></th>
                 <td><input type="datetime-local" name="expiry_date" id="expiry_date" required /></td>
             </tr>
+            <!-- Image Upload -->
+            <tr>
+                <th><label for="coupon_image">Coupon Image</label></th>
+                <td><input type="file" name="coupon_image" id="coupon_image" accept="image/*" /></td>
+            </tr>
+
+            <tr>
+                <th><label for="max_discount_cap">Maximum Discount Cap (Optional)</label></th>
+                <td>
+                    <input
+                        type="number"
+                        name="max_discount_cap"
+                        id="max_discount_cap"
+                        step="0.01"
+                        min="0"
+                        value="<?php echo isset($coupon['max_discount_cap']) ? esc_attr($coupon['max_discount_cap']) : ''; ?>"
+                        placeholder="Enter max discount cap">
+                    <p class="description">Set a maximum limit on the discount amount. Leave empty for no cap.</p>
+                </td>
+            </tr>
             <tr>
                 <th><label for="is_active">Active</label></th>
                 <td><input type="checkbox" name="is_active" id="is_active" value="1" /></td>
@@ -295,6 +379,7 @@ $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry
                 <th>Min Course Price</th>
                 <th>Max Discount Percent</th>
                 <th>Min Discount Percent</th>
+                <th>Max Discount Cap</th>
                 <th>Max Redemptions</th>
                 <th>Current Redemptions</th>
                 <th>Expiry Date</th>
@@ -313,6 +398,7 @@ $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry
                         <td><?php echo esc_html($coupon['min_price_range'] !== null ? $coupon['min_price_range'] : 'N/A'); ?></td>
                         <td><?php echo esc_html($coupon['max_discount_percentage'] !== null ? $coupon['max_discount_percentage'] : 'N/A'); ?></td>
                         <td><?php echo esc_html($coupon['min_discount_percentage'] !== null ? $coupon['min_discount_percentage'] : 'N/A'); ?></td>
+                        <td><?php echo esc_html($coupon['max_discount_cap'] !== null ? $coupon['max_discount_cap'] : 'N/A'); ?></td>
                         <td><?php echo esc_html($coupon['max_redemptions']); ?></td>
                         <td><?php echo esc_html($coupon['current_redemptions']); ?></td>
                         <td><?php echo esc_html(date('d-m-Y H:i', strtotime($coupon['expiry_date']))); ?></td>
@@ -341,7 +427,7 @@ $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry
         <div class="modal-content">
             <!-- <span class="close-button" onclick="closeModal()">&times;</span> -->
             <h2>Edit Coupon</h2>
-            <form id="editCouponForm" method="POST">
+            <form id="editCouponForm" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="coupon_id" id="edit_coupon_id" />
                 <table class="form-table">
                     <tr>
@@ -380,6 +466,15 @@ $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry
                         <th><label for="expiry_date">Expiry Date</label></th>
                         <td><input type="datetime-local" name="expiry_date" id="edit_expiry_date" required /></td>
                     </tr>
+                    <!-- Image Upload -->
+                    <tr>
+                        <th><label for="coupon_image">Coupon Image</label></th>
+                        <td><input type="file" name="coupon_image" id="coupon_image" accept="image/*" /></td>
+                    </tr>
+                    <tr>
+                        <th><label for="max_discount_cap">Max Discount Cap</label></th>
+                        <td><input type="number" name="max_discount_cap" id="max_discount_cap" step="0.01" min="0" value="<?php echo esc_attr($coupon['max_discount_cap']); ?>" /></td>
+                    </tr>
 
                     <tr>
                         <th><label for="edit_is_active">Active</label></th>
@@ -404,6 +499,8 @@ $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry
         const minPercentageField = document.getElementById('min_discount_percentage');
         const maxPercentageField = document.getElementById('max_discount_percentage');
         const expiryDateField = document.getElementById('expiry_date');
+        const fileInput = document.getElementById('coupon_image');
+        const maxSize = 30 * 1024 * 1024; // 2 MB in bytes
 
         function updateDiscountFields() {
             const discountType = discountTypeField.value;
@@ -453,6 +550,13 @@ $coupons = $wpdb->get_results("SELECT * FROM $table_name_coupons ORDER BY expiry
             if (!isValid) {
                 e.preventDefault(); // Prevent form submission
                 alert(errorMessage.trim()); // Show error messages
+            }
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if (file.size > maxSize) {
+                    e.preventDefault();
+                    alert('The uploaded image exceeds the maximum size of 2 MB. Please upload a smaller file.');
+                }
             }
         });
     });

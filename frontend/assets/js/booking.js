@@ -605,6 +605,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (data.success) {
         couponData = data.data;
+        console.log(couponData);
         const couponList = couponData
           .map((coupon) => {
             // Skip rendering the apply button if coupon is already applied
@@ -624,6 +625,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   data-max-price="${coupon.max_price_range || ""}" 
                   data-min-discount="${coupon.min_discount_percentage || ""}" 
                   data-max-discount="${coupon.max_discount_percentage || ""}"
+                  data-max-discount-cap="${coupon.max_discount_cap || ""}"
                   data-action="${isApplied ? "remove" : "apply"}">
                   ${isApplied ? "Remove" : "Apply"}
                 </button>
@@ -687,7 +689,8 @@ document.addEventListener("DOMContentLoaded", function () {
     minPrice,
     maxPrice,
     minDiscount,
-    maxDiscount
+    maxDiscount,
+    maxDiscountCap
   ) {
     // Reset the manual input button to default state
     updateInputButton("Apply");
@@ -719,7 +722,8 @@ document.addEventListener("DOMContentLoaded", function () {
         minPrice,
         maxPrice,
         minDiscount,
-        maxDiscount
+        maxDiscount,
+        maxDiscountCap
       );
     }
     // Check if discount exceeds course price
@@ -870,14 +874,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Calculate discount
           if (coupon.discount_type === "fixed") {
-            discountAmount = coupon.discount_value;
+            discountAmount = parseFloat(coupon.discount_value);
+            // Ensure it's a valid number
+            if (isNaN(discountAmount)) {
+              couponMessage.style.color = "red";
+              couponMessage.textContent = "Invalid fixed discount value for this coupon.";
+              couponMessage.style.display = "block";
+              return;
+            }
           } else if (coupon.discount_type === "percentage") {
             discountAmount = applyPercentageCoupon(
               originalPrice,
               coupon.min_price_range,
               coupon.max_price_range,
               coupon.min_discount_percentage,
-              coupon.max_discount_percentage
+              coupon.max_discount_percentage,
+              coupon.max_discount_cap
             );
           }
 
@@ -931,6 +943,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const maxPrice = parseFloat(event.target.getAttribute("data-max-price")) || 0.0;
         const minDiscount = parseFloat(event.target.getAttribute("data-min-discount")) || 0.0;
         const maxDiscount = parseFloat(event.target.getAttribute("data-max-discount")) || 0.0;
+        const maxDiscountCap =
+          parseFloat(event.target.getAttribute("data-max-discount-cap")) || 0.0;
 
         if (!couponCode) {
           alert("Please enter or select a valid coupon code.");
@@ -945,7 +959,8 @@ document.addEventListener("DOMContentLoaded", function () {
             minPrice,
             maxPrice,
             minDiscount,
-            maxDiscount
+            maxDiscount,
+            maxDiscountCap
           );
         } else if (event.target.getAttribute("data-action") === "remove") {
           // Remove the coupon if it's already applied
@@ -1011,7 +1026,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Function to apply a percentage-based coupon
-  function applyPercentageCoupon(selectedPrice, minPrice, maxPrice, minDiscount, maxDiscount) {
+  function applyPercentageCoupon(
+    selectedPrice,
+    minPrice,
+    maxPrice,
+    minDiscount,
+    maxDiscount,
+    maxDiscountCap
+  ) {
     const discountPercentage = calculateDiscountPercentage(
       selectedPrice,
       minPrice,
@@ -1020,7 +1042,18 @@ document.addEventListener("DOMContentLoaded", function () {
       maxDiscount
     );
 
-    const discountAmount = (selectedPrice * discountPercentage) / 100;
+    let discountAmount = (selectedPrice * discountPercentage) / 100;
+    // Apply max discount cap
+    const maxCap = parseFloat(maxDiscountCap);
+    if (!isNaN(maxCap) && maxCap > 0 && discountAmount > maxCap) {
+      discountAmount = maxCap;
+    }
+
+    // Ensure a valid number is returned
+    if (isNaN(discountAmount)) {
+      console.error("Invalid discount amount:", discountAmount);
+      return 0; // Return 0 if something goes wrong
+    }
     return discountAmount;
   }
 
