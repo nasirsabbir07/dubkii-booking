@@ -430,47 +430,11 @@
                   <!-- Phone and Email in Same Row -->
                   <td style="text-align: left; color: white; vertical-align: middle">
                     <div style="display: inline-block; vertical-align: middle; margin-right: 5px">
-                      <div
-                        style="
-                          width: 20px;
-                          height: 20px;
-                          border-radius: 50%;
-                          background-color: white;
-                          display: inline-block;
-                          vertical-align: middle;
-                          text-align: center;
-                          line-height: 18px;
-                        "
-                      >
-                        <img
-                          src="{{phone_image_path}}"
-                          alt="phone icon"
-                          style="width: 15px; height: 15px; vertical-align: middle"
-                        />
-                      </div>
                       <span style="margin-left: 2px; vertical-align: middle">+91 9695708861</span>
                     </div>
                   </td>
                   <td style="text-align: left; color: white; vertical-align: middle">
                     <div style="display: inline-block; vertical-align: middle">
-                      <div
-                        style="
-                          width: 20px;
-                          height: 20px;
-                          border-radius: 50%;
-                          background-color: white;
-                          display: inline-block;
-                          vertical-align: middle;
-                          text-align: center;
-                          line-height: 18px;
-                        "
-                      >
-                        <img
-                          src="{{email_image_path}}"
-                          alt="email icon"
-                          style="max-width: 15px; height: 15px; vertical-align: middle"
-                        />
-                      </div>
                       <span style="margin-left: 2px; vertical-align: middle"
                         >dubkiiindia@gmail.com</span
                       >
@@ -508,34 +472,74 @@
           </thead>
           <tbody>
             <tr>
-              <td class="desc">
+              <td
+                class="desc"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
                 <h3>{{course_name}}</h3>
               </td>
-              <td class="total">${{course_price}}</td>
+              <td
+                class="total"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
+                ${{course_price}}
+              </td>
             </tr>
             <tr>
-              <td class="desc">
+              <td
+                class="desc"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
                 <h3>Discount Amount</h3>
               </td>
-              <td class="total">${{discount_amount}}</td>
+              <td
+                class="total"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
+                ${{discount_amount}}
+              </td>
             </tr>
             <tr>
-              <td class="desc">
+              <td
+                class="desc"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
                 <h3>Registration Fee</h3>
               </td>
-              <td class="total">${{registration_fee}}</td>
+              <td
+                class="total"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
+                ${{registration_fee}}
+              </td>
             </tr>
             <tr>
-              <td class="desc">
+              <td
+                class="desc"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
                 <h3>Accommodation Fee</h3>
               </td>
-              <td class="total">${{accommodation_fee}}</td>
+              <td
+                class="total"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
+                ${{accommodation_fee}}
+              </td>
             </tr>
             <tr>
-              <td class="desc">
+              <td
+                class="desc"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
                 <h3>Transportation</h3>
               </td>
-              <td class="total">${{transportation_fee}}</td>
+              <td
+                class="total"
+                style="border-bottom: 5px solid #ffffff; border-right: 4px solid #e8f3db"
+              >
+                ${{transportation_fee}}
+              </td>
             </tr>
           </tbody>
         </table>
