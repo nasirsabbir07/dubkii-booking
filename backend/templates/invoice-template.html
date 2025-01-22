@@ -1,261 +1,490 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>HTML to API - Invoice</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,700&subset=latin,latin-ext"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <!-- <link rel="stylesheet" href="sass/main.css" media="screen" charset="utf-8"/> -->
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta http-equiv="content-type" content="text-html; charset=utf-8" />
     <style type="text/css">
-      body {
-        font-family: Arial, sans-serif;
+      html,
+      body,
+      div,
+      span,
+      applet,
+      object,
+      iframe,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      p,
+      blockquote,
+      pre,
+      a,
+      abbr,
+      acronym,
+      address,
+      big,
+      cite,
+      code,
+      del,
+      dfn,
+      em,
+      img,
+      ins,
+      kbd,
+      q,
+      s,
+      samp,
+      small,
+      strike,
+      strong,
+      sub,
+      sup,
+      tt,
+      var,
+      b,
+      u,
+      i,
+      center,
+      dl,
+      dt,
+      dd,
+      ol,
+      ul,
+      li,
+      fieldset,
+      form,
+      label,
+      legend,
+      table,
+      caption,
+      tbody,
+      tfoot,
+      thead,
+      tr,
+      th,
+      td,
+      article,
+      aside,
+      canvas,
+      details,
+      embed,
+      figure,
+      figcaption,
+      footer,
+      header,
+      hgroup,
+      menu,
+      nav,
+      output,
+      ruby,
+      section,
+      summary,
+      time,
+      mark,
+      audio,
+      video {
         margin: 0;
-        padding: 20px;
-      }
-      h1 {
-        background-color: #104173;
-        color: #fff;
-        text-align: center;
-      }
-
-      .dubkii-logo {
-        width: 200px;
-        height: 100px;
+        padding: 0;
+        border: 0;
+        font: inherit;
+        font-size: 100%;
+        vertical-align: baseline;
       }
 
-      .invoice-table {
-        width: 100%;
+      html {
+        line-height: 1;
+      }
+
+      ol,
+      ul {
+        list-style: none;
+      }
+
+      table {
         border-collapse: collapse;
-        margin-top: 2rem;
-        font-family: Arial, sans-serif;
+        border-spacing: 0;
       }
 
-      .invoice-table th,
-      .invoice-table td {
-        padding: 10px;
+      caption,
+      th,
+      td {
         text-align: left;
-        border: 1px solid #ddd;
+        font-weight: normal;
+        vertical-align: middle;
       }
 
-      .invoice-table thead th {
-        background-color: #104173;
-        color: #fff;
-        font-weight: bold;
+      q,
+      blockquote {
+        quotes: none;
+      }
+      q:before,
+      q:after,
+      blockquote:before,
+      blockquote:after {
+        content: "";
+        content: none;
       }
 
-      .invoice-table tfoot .total-row {
-        font-weight: bold;
-        text-align: left;
-        background-color: #a1bbf2;
-        color: #104173;
-        height: 80px;
-      }
-
-      .order-highlight {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #104173;
-      }
-      .sender-details {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-
-      .sender-details h2,
-      p {
-        margin: 0px;
-      }
-      .sender-details h2 {
-        color: #104173;
-      }
-
-      .header {
-        width: 100%;
-      }
-
-      .contact-section {
-        padding-block: 2rem;
-        background-color: #104173;
-        color: #fff;
-      }
-      .email-img,
-      .phone-img {
-        width: 20px;
-        text-align: center;
-      }
-      .image-container {
-        border-radius: 50%;
-        background-color: #fff;
-      }
-
-      .contact-flex {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        align-items: center;
-      }
-
-      .details-section {
-        width: 100%;
-        margin-block: 20px;
-      }
-
-      .details-container {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .recipient-details p {
-        font-weight: bold;
-        margin-block: 10px !important;
-      }
-
-      .recipient-details span {
-        margin-top: 5px;
-      }
-
-      .issue-section {
-        font-size: 1.2rem;
-      }
-
-      .invoice-table tfoot .empty-clmn {
+      a img {
         border: none;
       }
 
-      .invoice-table tbody tr {
-        height: 80px;
-        background-color: #a1bbf2;
+      article,
+      aside,
+      details,
+      figcaption,
+      figure,
+      footer,
+      header,
+      hgroup,
+      main,
+      menu,
+      nav,
+      section,
+      summary {
+        display: block;
       }
 
-      .invoice-table tbody td {
-        color: #104173;
-        font-size: 1.2rem;
-        font-weight: 500;
+      body {
+        font-family: "Source Sans Pro", sans-serif;
+        font-weight: 300;
+        font-size: 12px;
+        margin: 0;
+        padding: 0;
+      }
+      body a {
+        text-decoration: none;
+        color: inherit;
+      }
+      body a:hover {
+        color: inherit;
+        opacity: 0.7;
+      }
+      body .container {
+        min-width: 500px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      body .clearfix:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+      body .left {
+        float: left;
+      }
+      body .right {
+        float: right;
+      }
+      body .helper {
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+      }
+      body .no-break {
+        page-break-inside: avoid;
       }
 
-      .contact-section .contact-details {
+      header {
+        margin-top: 20px;
+        margin-bottom: 50px;
+      }
+      header figure {
+        float: left;
+        width: 60px;
+        height: 60px;
+        margin-right: 10px;
+        background-color: #8bc34a;
+        border-radius: 50%;
+        text-align: center;
+      }
+      header figure img {
+        max-width: 100%;
+        height: auto;
+      }
+      header .company-address {
+        float: left;
+        max-width: 150px;
+        line-height: 1.7em;
+      }
+      header .company-address .title {
+        color: #8bc34a;
+        font-weight: 400;
+        font-size: 1.5em;
+        text-transform: uppercase;
+      }
+      header .company-contact {
+        float: right;
+        height: 60px;
+        padding: 0 10px;
+        background-color: #8bc34a;
+        color: white;
+      }
+      header .company-contact span {
+        display: inline-block;
+        vertical-align: middle;
+      }
+      header .company-contact .circle {
+        width: 20px;
+        height: 20px;
+        background-color: white;
+        border-radius: 50%;
+        text-align: center;
+      }
+      header .company-contact .circle img {
+        vertical-align: middle;
+      }
+      header .company-contact .phone {
+        height: 100%;
+        margin-right: 20px;
+      }
+      header .company-contact .email {
+        height: 100%;
+        min-width: 100px;
+        text-align: right;
+      }
+
+      section .details {
+        margin-bottom: 55px;
+      }
+      section .details .client {
+        width: 50%;
+        line-height: 20px;
+      }
+      section .details .client .name {
+        color: #8bc34a;
+      }
+      section .details .data {
+        width: 50%;
+        text-align: right;
+      }
+      section .details .title {
+        margin-bottom: 15px;
+        color: #8bc34a;
+        font-size: 3em;
+        font-weight: 400;
+        text-transform: uppercase;
+      }
+      section table {
         width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        font-size: 0.9166em;
+      }
+      section table .qty,
+      section table .unit,
+      section table .total {
+        width: 15%;
+      }
+      section table .desc {
+        width: 55%;
+      }
+      section table thead {
+        display: table-header-group;
+        vertical-align: middle;
+        border-color: inherit;
+      }
+      section table thead th {
+        padding: 5px 10px;
+        background: #8bc34a;
+        border-bottom: 5px solid #ffffff;
+        border-right: 4px solid #ffffff;
+        text-align: right;
+        color: white;
+        font-weight: 400;
+        text-transform: uppercase;
+      }
+      section table thead th:last-child {
+        border-right: none;
+      }
+      section table thead .desc {
+        text-align: left;
+      }
+      section table thead .qty {
+        text-align: center;
+      }
+      section table tbody td {
+        padding: 10px;
+        background: #e8f3db;
+        color: #777777;
+        text-align: right;
+        border-bottom: 5px solid #ffffff;
+        border-right: 4px solid #e8f3db;
+      }
+      section table tbody td:last-child {
+        border-right: none;
+      }
+      section table tbody h3 {
+        margin-bottom: 5px;
+        color: #8bc34a;
+        font-weight: 600;
+      }
+      section table tbody .desc {
+        text-align: left;
+      }
+      section table tbody .qty {
+        text-align: center;
+      }
+      section table.grand-total {
+        margin-bottom: 45px;
+      }
+      section table.grand-total td {
+        padding: 5px 10px;
+        border: none;
+        color: #777777;
+        text-align: right;
+      }
+      section table.grand-total .desc {
+        background-color: transparent;
+      }
+      section table.grand-total tr:last-child td {
+        font-weight: 600;
+        color: #8bc34a;
+        font-size: 1.18181818181818em;
       }
 
-      .invoice-clmn {
-        text-align: end;
+      footer {
+        margin-bottom: 20px;
+      }
+      footer .thanks {
+        margin-bottom: 40px;
+        color: #8bc34a;
+        font-size: 1.16666666666667em;
+        font-weight: 600;
+      }
+      footer .notice {
+        margin-bottom: 25px;
+      }
+      footer .end {
+        padding-top: 5px;
+        border-top: 2px solid #8bc34a;
+        text-align: center;
+      }
+
+      header .company-contact .circle img {
+        max-width: 100%;
+        height: auto;
       }
     </style>
   </head>
+
   <body>
-    <table class="header">
-      <tr>
-        <td>
-          <table class="logo-section">
+    <header class="clearfix">
+      <div class="container">
+        <figure>
+          <img class="logo" src="..\assets\images\Dubkii_en.png" alt="company logo" />
+        </figure>
+        <div class="company-address">
+          <h2 class="title">Dubkii India Culture Center</h2>
+          <p>
+            106 A, Arjun Nagar,<br />
+            Kanpur 208024, Uttar Pradesh, India
+          </p>
+        </div>
+        <div class="company-contact">
+          <div class="phone left">
+            <span class="circle"
+              ><img src="..\assets\images\phone.png" alt="" /><span class="helper"></span
+            ></span>
+            <a href="tel:+91 9695708861">+91 9695708861</a>
+            <span class="helper"></span>
+          </div>
+          <div class="email right">
+            <span class="circle"
+              ><img src="..\assets\images\email.png" alt="" /><span class="helper"></span
+            ></span>
+            <a href="mailto:company@example.com">dubkiiindia@gmail.com</a>
+            <span class="helper"></span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section>
+      <div class="container">
+        <div class="details clearfix">
+          <div class="client left">
+            <p>INVOICE TO:</p>
+            <p class="name">{{name}}</p>
+            <p>{{address}}</p>
+            <a href="">{{email}}</a>
+          </div>
+          <div class="data right">
+            <div class="title">{{order_id}}</div>
+            <div class="date">Date of Invoice: {{invoice_issue_date}}<br /></div>
+          </div>
+        </div>
+
+        <table border="0" cellspacing="0" cellpadding="0">
+          <thead>
             <tr>
-              <td>
-                <img src="{{logo_image_path}}" alt="Dubkii Logo" srcset="" class="dubkii-logo" />
-              </td>
-              <td>
-                <div class="sender-details">
-                  <h2>Dubkii India Culture Center</h2>
-                  <p>106 A, Arjun Nagar, Kanpur 208024 Uttar Pradesh, India</p>
-                </div>
-              </td>
+              <th class="desc">Description</th>
+              <th class="total">Total</th>
             </tr>
-          </table>
-        </td>
-        <td class="contact-section">
-          <table class="contact-details">
+          </thead>
+          <tbody>
             <tr>
-              <td>
-                <table>
-                  <tr>
-                    <td>
-                      <div class="image-container">
-                        <img
-                          src="{{email_image_path}}"
-                          alt="email img"
-                          srcset=""
-                          class="email-img"
-                        />
-                      </div>
-                    </td>
-                    <td><span>dubkiiindia@gmail.com</span></td>
-                  </tr>
-                </table>
+              <td class="desc">
+                <h3>{{invoice_issue_date}}</h3>
               </td>
-              <td>
-                <table>
-                  <tr>
-                    <td>
-                      <div class="image-container">
-                        <img
-                          src="{{phone_image_path}}"
-                          alt="phone img"
-                          srcset=""
-                          class="phone-img"
-                        />
-                      </div>
-                    </td>
-                    <td><span>+91 9695708861</span></td>
-                  </tr>
-                </table>
-              </td>
+              <td class="total">${{course_price}}</td>
             </tr>
+            <tr>
+              <td class="desc">
+                <h3>Discount Amount</h3>
+              </td>
+              <td class="total">${{discount_amount}}</td>
+            </tr>
+            <tr>
+              <td class="desc">
+                <h3>Registration Fee</h3>
+              </td>
+              <td class="total">${{registration_fee}}</td>
+            </tr>
+            <tr>
+              <td class="desc">
+                <h3>Accommodation Fee</h3>
+              </td>
+              <td class="total">${{accommodation_fee}}</td>
+            </tr>
+            <tr>
+              <td class="desc">
+                <h3>Transportation</h3>
+              </td>
+              <td class="total">${{transportation_fee}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="no-break">
+          <table class="grand-total">
+            <tbody>
+              <tr>
+                <td class="desc"></td>
+                <td class="unit" colspan="2">GRAND TOTAL:</td>
+                <td class="total">${{total_amount}}</td>
+              </tr>
+            </tbody>
           </table>
-        </td>
-      </tr>
-    </table>
-    <div class="invoice-section">
-      <h1>Invoice</h1>
-      <p>
-        Your order id is <span class="order-highlight">{{order_id}}</span>, We are looking forward
-        to having you with us.
-      </p>
-      <table class="details-section">
-        <tbody>
-          <tr>
-            <td class="recipient-details">
-              <p>INVOICE TO:</p>
-              <p>{{name}}</p>
-              <p>{{email}}</p>
-              <p>{{contact}}</p>
-              <p>{{address}}</p>
-            </td>
-            <td class="invoice-clmn">
-              <p>Invoice Issued on: {{invoice_issue_date}}</p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table class="invoice-table">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{course_name}}</td>
-            <td>${{course_price}}</td>
-          </tr>
-          <tr>
-            <td>Registration Fee</td>
-            <td>${{registration_fee}}</td>
-          </tr>
-          <tr>
-            <td>Accommodation Fee</td>
-            <td>${{accommodation_fee}}</td>
-          </tr>
-          <tr>
-            <td>Transportation Fee</td>
-            <td>${{transportation_fee}}</td>
-          </tr>
-          <tr>
-            <td>Discount Amount</td>
-            <td>${{discount_amount}}</td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="1" class="empty-clmn"></td>
-            <td class="total-row">Total: ${{total_amount}}</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <div class="thanks">Thank you!</div>
+        <div class="end">
+          Invoice was created on a computer and is valid without the signature and seal.
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
