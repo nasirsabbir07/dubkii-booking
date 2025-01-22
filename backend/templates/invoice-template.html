@@ -369,43 +369,121 @@
         border-top: 2px solid #8bc34a;
         text-align: center;
       }
-
-      header .company-contact .circle img {
-        max-width: 100%;
-        height: auto;
-      }
     </style>
   </head>
 
   <body>
     <header class="clearfix">
       <div class="container">
-        <figure>
-          <img class="logo" src="{{logo_image_path}}" alt="company logo" />
-        </figure>
-        <div class="company-address">
-          <h2 class="title">Dubkii India Culture Center</h2>
-          <p>
-            106 A, Arjun Nagar,<br />
-            Kanpur 208024, Uttar Pradesh, India
-          </p>
-        </div>
-        <div class="company-contact">
-          <div class="phone left">
-            <span class="circle"
-              ><img src="{{phone_image_path}}" alt="phone icon" /><span class="helper"></span
-            ></span>
-            <a href="tel:+91 9695708861">+91 9695708861</a>
-            <span class="helper"></span>
-          </div>
-          <div class="email right">
-            <span class="circle"
-              ><img src="{{email_image_path}}" alt="email icon" /><span class="helper"></span
-            ></span>
-            <a href="mailto:company@example.com">dubkiiindia@gmail.com</a>
-            <span class="helper"></span>
-          </div>
-        </div>
+        <table style="width: 100%; table-layout: fixed; border-spacing: 0">
+          <tr>
+            <!-- Logo Section -->
+            <td style="width: 50%; text-align: left; vertical-align: middle">
+              <!-- Logo Figure -->
+              <figure style="margin: 0; margin-right: 10px; display: inline-block">
+                <div
+                  style="
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    background-color: #8bc34a;
+                    display: inline-block;
+                  "
+                >
+                  <img
+                    src="{{logo_image_path}}"
+                    alt="company logo"
+                    style="max-width: 100%; height: auto"
+                  />
+                </div>
+              </figure>
+              <!-- Company Name Section -->
+              <div
+                style="
+                  text-align: left;
+                  line-height: 1.7em;
+                  display: inline-block;
+                  vertical-align: middle;
+                "
+              >
+                <h2 style="color: #8bc34a; font-size: 1.5em; margin: 0">
+                  Dubkii India Culture Center
+                </h2>
+                <p style="margin: 0">
+                  106 A, Arjun Nagar,<br />
+                  Kanpur 208024, Uttar Pradesh, India
+                </p>
+              </div>
+            </td>
+
+            <!-- Contact Section in Same Row -->
+            <td
+              style="
+                width: 50%;
+                text-align: right;
+                vertical-align: middle;
+                background-color: #8bc34a;
+              "
+            >
+              <table style="width: 100%; table-layout: auto; margin: 0 10px; border-spacing: 0">
+                <tr>
+                  <!-- Phone and Email in Same Row -->
+                  <td
+                    style="
+                      text-align: left;
+                      color: white;
+                      vertical-align: middle;
+                      padding-right: 20px;
+                    "
+                  >
+                    <div style="display: inline-block; vertical-align: middle; margin-right: 10px">
+                      <div
+                        style="
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 50%;
+                          background-color: white;
+                          display: inline-block;
+                          vertical-align: middle;
+                        "
+                      >
+                        <img
+                          src="{{phone_image_path}}"
+                          alt="phone icon"
+                          style="width: 12px; height: auto; vertical-align: middle"
+                        />
+                      </div>
+                      <span style="margin-left: 10px; vertical-align: middle">+91 9695708861</span>
+                    </div>
+                  </td>
+                  <td style="text-align: left; color: white; vertical-align: middle">
+                    <div style="display: inline-block; vertical-align: middle">
+                      <div
+                        style="
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 50%;
+                          background-color: white;
+                          display: inline-block;
+                          vertical-align: middle;
+                        "
+                      >
+                        <img
+                          src="{{email_image_path}}"
+                          alt="email icon"
+                          style="width: 12px; height: auto; vertical-align: middle"
+                        />
+                      </div>
+                      <span style="margin-left: 10px; vertical-align: middle"
+                        >dubkiiindia@gmail.com</span
+                      >
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
       </div>
     </header>
 
